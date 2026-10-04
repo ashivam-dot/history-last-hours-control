@@ -10,6 +10,10 @@ on:
         description: Resume one held pre-release episode after inspecting its issue
         required: false
         type: string
+      approved_qa_run_id:
+        description: Reuse a prior private passing QA artifact for the exact same packet
+        required: false
+        type: string
 
 concurrency:
   group: history-unattended-control
@@ -177,6 +181,7 @@ jobs:
     permissions:
       contents: write
       issues: write
+      actions: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -191,6 +196,7 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - run: uv sync --frozen --python 3.12 --no-dev
       - name: Install and verify full-media decoders
+        if: inputs.approved_qa_run_id == ''
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
@@ -215,6 +221,7 @@ jobs:
           name: private-draft-${{ github.run_id }}
           path: private/review-packet
       - name: Independently inspect sources, rights, full video, and audio
+        if: inputs.approved_qa_run_id == ''
         env:
           EPISODE: ${{ needs.discover.outputs.episode }}
           SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
@@ -226,6 +233,40 @@ jobs:
             --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
             --packet private/review-packet \
             --report private/qa_report.json --approval private/approval.json
+      - name: Download prior private passing QA for the same exact packet
+        if: inputs.approved_qa_run_id != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: private-qa-pass-${{ inputs.approved_qa_run_id }}
+          run-id: ${{ inputs.approved_qa_run_id }}
+          github-token: ${{ github.token }}
+          path: private/prior-qa
+      - name: Reverify prior QA against the current exact private packet
+        if: inputs.approved_qa_run_id != ''
+        env:
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: |
+          umask 077
+          uv run --frozen --no-dev python - <<'PY'
+          import os
+          from pathlib import Path
+          from control.intake import validated_packet
+          from control.qa import verified_qa_report
+          from control.release import policy, read_object
+
+          config = policy(Path('policy.json'))
+          packet = Path('private/review-packet')
+          subject, _ = validated_packet(Path('source'), os.environ['SOURCE_COMMIT'],
+                                        os.environ['EPISODE'], config, packet)
+          prior = Path('private/prior-qa')
+          report = read_object((prior / 'qa_report.json').read_bytes(), 'prior private QA report')
+          approval = read_object((prior / 'approval.json').read_bytes(), 'prior private QA approval')
+          verified_qa_report(report, approval, subject, config, packet)
+          Path('private/qa_report.json').write_bytes((prior / 'qa_report.json').read_bytes())
+          Path('private/approval.json').write_bytes((prior / 'approval.json').read_bytes())
+          print('Prior private QA binds the exact current packet')
+          PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

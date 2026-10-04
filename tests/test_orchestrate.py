@@ -288,3 +288,23 @@ def test_workflow_separates_credentials_and_gates_release():
         script = steps[mutation]["run"]
         assert script.index(f"live-policy --operation {stage}") < script.index(f"control {command}")
         assert "env -u GITHUB_TOKEN uv run" in script
+
+
+def test_schedule_is_bounded_and_disabled_without_repository_variable():
+    path = Path(__file__).resolve().parents[1] / ".github/workflows/unattended-control.yml"
+    workflow = yaml.safe_load(path.read_text())
+    triggers = workflow.get("on", workflow.get(True))
+    entries = triggers["schedule"]
+    assert len(entries) == 1
+    minute, hours, day, month, weekday = entries[0]["cron"].split()
+    assert minute == "30" and (day, month, weekday) == ("*", "*", "*")
+    assert hours.split(",") == ["4", "10", "16", "22"]
+    discover = workflow["jobs"]["discover"]
+    assert "vars.HISTORY_CONTROL_AUTOMATION == '1'" in discover["if"]
+    assert "github.event_name == 'workflow_dispatch'" in discover["if"]
+    steps = discover["steps"]
+    preflight = next(index for index, step in enumerate(steps) if step.get("id") == "preflight")
+    install = next(index for index, step in enumerate(steps)
+                   if "uv sync" in step.get("run", ""))
+    assert preflight < install
+    assert steps[install]["if"] == "steps.preflight.outputs.skip != 'true'"

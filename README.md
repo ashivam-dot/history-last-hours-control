@@ -15,11 +15,13 @@ reviewed, signed, scheduled, or published a real episode.
   Cloudinary cloud with a temporary test asset, or release one
   certified video to **YouTube only**.
   The signing and publishing jobs fail closed under the disabled policy.
-- `unattended-control.yml` runs on a cloud schedule and can be dispatched to
-  resume a held pre-release receipt. Its tracked policy gates are all off, so
-  a scheduled run can only discover and claim a producer draft. It cannot
-  read the private render, sign, or publish until those switches are reviewed
-  and enabled in the control repository.
+- `unattended-control.yml` has four daily cloud slots after the Modal studio
+  cycles. Scheduled jobs start only when the repository variable
+  `HISTORY_CONTROL_AUTOMATION` is `1`; with it unset, they use no runner minutes.
+  Manual dispatch can resume a held pre-release receipt. Its tracked policy
+  gates are all off, so a permitted scheduled run can only discover and claim
+  a producer draft. It cannot read the private render, sign, or publish until
+  those switches are reviewed and enabled in the control repository.
 - The Ed25519 private key exists only as the `HISTORY_REVIEW_SIGNING_KEY`
   secret in this repository's `history-review-signing` environment. The public
   half is [`reviewer.pub`](reviewer.pub); its SHA-256 fingerprint is pinned in

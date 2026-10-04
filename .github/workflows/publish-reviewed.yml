@@ -9,6 +9,9 @@ on:
       episode:
         description: Reviewed episode
         required: true
+      intake_run_id:
+        description: Control intake Actions run containing the signed private packet
+        required: true
       review_json:
         description: Complete signed independent_review.json
         required: true
@@ -18,6 +21,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: history-control-publisher
@@ -36,9 +40,18 @@ jobs:
         env:
           SOURCE_COMMIT: ${{ inputs.source_commit }}
           EPISODE: ${{ inputs.episode }}
+          INTAKE_RUN_ID: ${{ inputs.intake_run_id }}
         run: |
           [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
           [[ "$EPISODE" =~ ^ep[0-9]{3,}$ ]]
+          [[ "$INTAKE_RUN_ID" =~ ^[0-9]+$ ]]
+      - name: Retrieve exact signed private intake packet
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: private-history-draft-intake-${{ inputs.episode }}-${{ inputs.intake_run_id }}
+          path: private/review-packet
+          run-id: ${{ inputs.intake_run_id }}
+          github-token: ${{ github.token }}
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: ashivam-dot/creature-receipts
@@ -58,7 +71,8 @@ jobs:
         env:
           REVIEW_JSON: ${{ inputs.review_json }}
         run: |
-          mkdir -m 700 private
+          mkdir -p private
+          chmod 700 private
           uv run --frozen --no-dev python -c 'import os,pathlib; pathlib.Path("private/independent_review.json").write_text(os.environ["REVIEW_JSON"], encoding="utf-8")'
       - name: Exact-media release (policy remains disabled)
         env:
@@ -68,8 +82,9 @@ jobs:
           EPISODE: ${{ inputs.episode }}
           DUE_AT_UTC: ${{ inputs.due_at_utc }}
         run: |
-          uv run --frozen --no-dev python -m control publish \
+          uv run --frozen --no-dev python -m control publish-draft \
             --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
+            --packet private/review-packet \
             --review private/independent_review.json --public-key reviewer.pub \
             --due-at-utc "$DUE_AT_UTC" --output private/publisher-receipt.json
       - name: Keep private receipt for one day

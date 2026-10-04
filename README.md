@@ -3,12 +3,14 @@
 Private owner-controlled repository: `ashivam-dot/history-last-hours-control`.
 The producer is `ashivam-dot/creature-receipts`. Producer automation has no
 write access or deploy key here. The tracked [`policy.json`](policy.json) has
-`signing_enabled: false` and `publishing_enabled: false`. Nothing here has
+`intake_enabled: false`, `signing_enabled: false`, and
+`publishing_enabled: false`. Nothing here has
 reviewed, signed, scheduled, or published a real episode.
 
 ## Current cloud state
 
-- Five **manual-only** Actions workflows prepare a review packet, sign a
+- Six **manual-only** Actions workflows prepare a review packet, intake a
+  private draft, sign a
   reviewed candidate, check the pinned Buffer destination, probe the pinned
   Cloudinary cloud with a temporary test asset, or release one
   certified video to **YouTube only**.
@@ -18,24 +20,26 @@ reviewed, signed, scheduled, or published a real episode.
   half is [`reviewer.pub`](reviewer.pub); its SHA-256 fingerprint is pinned in
   the control policy. The private key was generated in memory and was never
   written to the producer repository or a local file.
-- The `history-publisher` environment holds the existing History Buffer key
-  and the `mw0oh0v8` Cloudinary credential for connection checks while release
-  remains disabled. The Buffer key also remains in producer executors; it has
-  not been rotated. The policy pins the exact History Buffer organization and
-  YouTube channel IDs, checked against the current live Buffer API and the
-  ep054 public readback. Buffer still shows the
-  channel's older display name, “Creature Receipts”; the channel ID is the
-  History destination.
+- The `history-publisher` environment holds the rotated control Buffer key
+  and the `mw0oh0v8` Cloudinary credential while release remains disabled.
+  A direct producer GitHub secret inventory now shows no Buffer, Cloudinary,
+  or Google keys, and the local producer `.env` has none of those keys. The
+  previous Buffer key returns HTTP 401 after the cutover. Remaining Modal
+  credentials and other executors have not yet been fully audited. The policy
+  pins the exact History Buffer organization and YouTube channel IDs, checked
+  against the current live Buffer API and the ep054 public readback. Buffer
+  still shows the channel's older display name, “Creature Receipts”; the
+  channel ID is the History destination.
 - Manual run `37181688369` generated a 1,546 byte MP4, uploaded it under
   `history-last-hours/test/` in `mw0oh0v8`, verified the delivered bytes and
   SHA-256, and received Cloudinary's successful destroy response with cache
   invalidation requested. No Buffer key was mounted for that test.
 - GitHub's current private-repository plan rejects branch protection and
-  required environment reviewers. Both environments have no approval rules.
+  required environment reviewers. The control environments have no approval rules.
   The separate private repository, owner-only collaborator list, no deploy
-  keys, and manual workflows limit producer access, but they do not provide
-  an enforced owner approval before a signer job. Keep signing disabled until
-  a protected approval method or equivalent independent service is available.
+  keys, and staged workflows limit producer access. The automated QA job and
+  separate signer job are the intended release gate; their live behavior still
+  needs verification before signing can be enabled.
 
 ## Exact candidate gate
 
@@ -56,7 +60,88 @@ from the producer repository. It contains the full packet `subject`,
 or uncertain check means hold. Code can verify the attestation and exact
 bytes; it cannot prove that a person actually completed this review.
 
-`python -m control sign` re-downloads the hosted MP4 and recomputes every
+## Private draft intake (staged)
+
+`intake-private-draft.yml` takes one exact producer `main` commit and episode.
+It checks the committed `draft.json`, spec, manifest, research, rights, and
+clean producer review without importing producer code. It requires the draft's
+Modal locator to be exactly `creature-receipts-outbox/drafts/<episode>-<sha>.mp4`,
+then reads that private MP4 from the History Modal workspace and checks every
+byte against the draft and manifest SHA-256 values. Before opening the volume,
+it verifies the Modal token belongs to the pinned `aksha-shivam18` workspace.
+
+The tracked `intake_enabled` switch is also `false`; the workflow holds before
+Modal or Cloudinary access until it is separately reviewed and enabled.
+The control process then uploads those bytes with `overwrite=false` to the pinned
+`mw0oh0v8` Cloudinary cloud as an **authenticated** video under
+`history-last-hours/drafts/`. It re-downloads the asset through Cloudinary's
+signed asset-download API and checks every byte. The pre-QA asset's URL cannot
+be used for anonymous delivery, even though its hash appears in the public
+producer repository. An ambiguous upload response is reconciled by looking up
+the exact authenticated public ID and comparing all asset bytes before reuse.
+A later approved release makes a separate public copy bound to this exact
+authenticated asset.
+
+The workflow writes a new, private, 14-day Actions artifact for each run. It
+contains the exact MP4, committed evidence files, `draft.json`, a version 2
+`subject.json` binding the producer commit and authenticated media, and a
+control-owned `control_hold.json`. It never accepts a producer `hold.json` or
+publisher credential. It has not been run on a real draft. A read-only local
+Modal SDK check confirmed that the pinned outbox volume can be opened; it is
+currently empty.
+
+The manual independent QA workflow takes only the intake run ID, exact source
+commit, and episode. It downloads the private artifact, compares every evidence
+file and draft byte with the pinned producer commit, and checks the MP4 hash and
+authenticated control URL. It fetches the cited source pages and requires exact
+quotes for every claim from two independent live sites. It checks rights pages
+for the claimed licenses. It decodes the entire MP4 with FFmpeg, checks duration,
+shape, loudness, and peak, samples every second, transcribes the full mixed audio,
+and obtains a structured claim, visual, and quality verdict from a separate
+vision model. Every check must pass before it writes `approval.json`; a hold
+writes a private `qa_report.json` with its stage and reason instead. The signer
+revalidates the packet and signs the exact version 2 subject with a distinct
+Ed25519 message context. The manual publisher
+downloads the same artifact, repeats those checks, verifies the version 2
+signature, reads the authenticated Cloudinary asset by its signed asset-download
+API, and compares it byte for byte with the packet. It checks the pinned Buffer
+organization, YouTube channel, post history, and queue before making a public
+copy, then verifies that copy and rechecks the destination before scheduling.
+The producer `hold.json` and producer public Cloudinary URL are not used on
+this path.
+
+The QA job uses its own `history-independent-qa` environment, which has no
+signing key. It sends the passing report and generated approval through a
+private, one-day artifact to a separate `history-review-signing` job. The signer
+rechecks the packet and QA result before using its key. The QA job supports a separately provisioned
+`HISTORY_QA_GEMINI_API_KEY` as its primary audio and vision reviewer, or
+`HISTORY_QA_OPENAI_API_KEY` as a reviewed alternative. The provider and exact
+model name are pinned together in tracked `policy.json` to Gemini 3.8 Flash.
+Gemini calls use the documented
+[generateContent API](https://ai.google.dev/api/generate-content) with inline
+audio and frames and a JSON schema. Quota and capacity responses receive only
+three bounded retries before a hold. The OpenAI path uses documented
+[Responses image input](https://platform.openai.com/docs/guides/images),
+[structured output](https://platform.openai.com/docs/guides/structured-outputs),
+and [audio transcription](https://platform.openai.com/docs/guides/speech-to-text)
+APIs. The separate control QA key is provisioned; this model's access and the
+full QA path have not yet been exercised on a real draft.
+Automated evidence matching and model judgments can miss factual or rights
+problems. Signing and publishing remain disabled until this gate passes a real
+private draft and its failure cases are checked.
+
+`HISTORY_INTAKE_MODAL_TOKEN_ID` and `HISTORY_INTAKE_MODAL_TOKEN_SECRET` are
+configured in the existing control `history-publisher` environment. The intake
+job references only those tokens and that environment's
+existing `HISTORY_PUBLISHER_CLOUDINARY_URL`; it never injects the Buffer key.
+The Modal token must access the History workspace and the Cloudinary credential
+must belong to `mw0oh0v8`. A read-only probe resolved the Modal token to the
+pinned `aksha-shivam18` workspace and found the outbox volume. The
+intake switch must be enabled in a reviewed control commit while signing and
+publishing remain off. The signing and publishing switches need separate live
+QA, signer, and publisher checks before use.
+
+The legacy `python -m control sign` re-downloads the hosted MP4 and recomputes every
 binding before producing `independent_review.json`. Its Ed25519 message and
 schema match History's existing dormant verifier. It receives only the
 signing key, not a Buffer credential. A direct integration check showed that
@@ -91,24 +176,25 @@ concurrent executors and ambiguous failures remain deployment risks.
 
 ## Work still required before activation
 
-1. Enforce reviewer approval using a supported GitHub plan or independent
-   service. The current private plan cannot require a reviewer for the
-   signing environment.
-2. Pin `reviewer.pub` in a reviewed History producer commit at
-   `kit/independent-review.pub`. Align History's dormant policy to YouTube
+1. Run a controlled ep063 intake from one exact producer commit, inspect the
+   authenticated Cloudinary bytes and private packet, then run independent
+   automated QA against that packet. Confirm both a passing report and clear
+   holds for changed media, missing live source quotes, and failed model or
+   media checks. Keep signing and publishing disabled during this trial.
+2. After the private QA trial passes, enable signing in a separately reviewed
+   control commit while publishing stays off. Test the signer job with the
+   passing QA artifact and pin `reviewer.pub` in a reviewed History producer
+   commit at `kit/independent-review.pub`. Align History's dormant policy to YouTube
    only while retaining `enabled: false`, then test the source-to-control
    handoff and signed review delivery.
-3. Issue a **new, rotated Buffer credential** available only to the control
-   publisher environment. Remove and revoke producer access to the old
-   `BUFFER_API_KEY` in GitHub Actions, Modal, local `.env` copies, and other
-   executors. The producer currently uses it for monitoring and legacy
-   scheduling, so migrate those jobs first. Producer access to the old key
-   means true credential isolation has **not** been achieved. The manual
+3. Finish auditing producer Modal credentials and any other executors for
+   surviving Buffer or Cloudinary access. The old Buffer key has already been
+   rotated and returns HTTP 401; the direct producer GitHub secret inventory
+   and local `.env` no longer contain Buffer, Cloudinary, or Google keys. The
+   manual
    `check-publisher-connection.yml` workflow uses the control environment
    secret `HISTORY_PUBLISHER_BUFFER_API_KEY` for read-only exact organization
    and YouTube channel verification while both release switches stay off.
-   Buffer's current plan permits only one Personal API key, so issuing a new
-   key requires a coordinated cutover after old-key consumers are retired.
 4. Verify the staged `HISTORY_PUBLISHER_CLOUDINARY_URL` credential for the
    pinned `mw0oh0v8` cloud in the `history-publisher` environment. This cloud
    is distinct from History's
@@ -132,14 +218,16 @@ concurrent executors and ambiguous failures remain deployment risks.
    `check-publisher-media.yml` workflow creates a tiny MP4 under
    `history-last-hours/test/`, verifies its delivered bytes, and deletes it.
    It does not mount a Buffer key or enable either release switch.
-5. Verify the actual Buffer create and readback contract in a reviewed
-   dry-run/staged integration, establish durable receipt transfer to History,
-   and prevent producer-owned code from publishing independently. Keep the
-   producer `status/scheduling_hold.json` and both release switches off until
-   those checks pass.
+5. Verify the actual Buffer create and readback contract in a controlled
+   integration, establish durable receipt transfer to History, and prevent
+   producer-owned code from publishing independently. Add the unattended
+   trigger only after the QA, signer, private-to-public media, and Buffer path
+   pass. Keep the producer `status/scheduling_hold.json` and both release
+   switches off until those checks pass.
 
 The local control code and cloud workflow installation do not activate any
-release. No producer secret has been deleted or rotated.
+release. This branch does not change credentials; the prior cutover rotated
+the old Buffer key.
 
 ## Verification
 

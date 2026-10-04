@@ -1,0 +1,81 @@
+name: Intake one private History draft (staged)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Exact 40-character producer main commit containing draft.json
+        required: true
+      episode:
+        description: Draft epNNN candidate
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: history-control-intake-${{ inputs.episode }}
+  cancel-in-progress: false
+
+jobs:
+  intake:
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate immutable source input and dormant policy
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          EPISODE: ${{ inputs.episode }}
+        run: |
+          [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$EPISODE" =~ ^ep[0-9]{3,}$ ]]
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path("policy.json").read_text())
+          assert config["intake_enabled"] is True
+          assert config["signing_enabled"] is False
+          assert config["publishing_enabled"] is False
+          PY
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ inputs.source_commit }}
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - name: Confirm exact producer main ancestry without executing producer code
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          test "$(git -C source rev-parse HEAD)" = "$SOURCE_COMMIT"
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          git -C source fetch --no-tags origin main
+          git -C source merge-base --is-ancestor "$SOURCE_COMMIT" FETCH_HEAD
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install locked control code only
+        run: uv sync --frozen --python 3.12 --no-dev
+      - name: Read exact Modal draft, host on control cloud, and bind review packet
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_SECRET }}
+          HISTORY_INTAKE_CLOUDINARY_URL: ${{ secrets.HISTORY_PUBLISHER_CLOUDINARY_URL }}
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          EPISODE: ${{ inputs.episode }}
+        run: |
+          umask 077
+          mkdir -m 700 private
+          uv run --frozen --no-dev python -m control intake \
+            --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
+            --output private/review-packet
+      - name: Keep immutable private packet for independent QA
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-history-draft-intake-${{ inputs.episode }}-${{ github.run_id }}
+          path: private/review-packet/
+          retention-days: 14
+          if-no-files-found: error

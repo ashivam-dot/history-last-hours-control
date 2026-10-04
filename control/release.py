@@ -21,6 +21,7 @@ FILES = ("topic.json", "short.yaml", "script.json", "research.json", "visuals.js
          "review.json", "work/manifest.json")
 CHECKS = ("claim_sources", "visual_identity_rights", "full_video_audio")
 CONTEXT = b"history-last-hours-independent-review-v1\0"
+CONTEXT_V2 = b"history-last-hours-private-draft-review-v2\0"
 EPISODE = re.compile(r"ep(\d{3,})\Z")
 SHA = re.compile(r"[0-9a-f]{64}\Z")
 COMMIT = re.compile(r"[0-9a-f]{40}\Z")
@@ -69,14 +70,16 @@ def utc(value: str, label: str) -> datetime:
 
 def policy(path: Path) -> dict:
     config = read_object(path.read_bytes(), "control policy")
-    require(set(config) == {"version", "signing_enabled", "publishing_enabled", "source_remote",
+    require(set(config) == {"version", "signing_enabled", "publishing_enabled", "intake_enabled", "source_remote",
                             "min_episode_id", "started_after_utc", "media_url_prefix",
                             "publisher_media_url_prefix",
-                            "reviewer_key_sha256", "buffer_organization_id", "youtube_channel_id"},
+                            "reviewer_key_sha256", "buffer_organization_id", "youtube_channel_id",
+                            "qa_model", "qa_provider"},
             "control policy has missing or unexpected fields")
     require(type(config["version"]) is int and config["version"] == 1 and
             type(config["signing_enabled"]) is bool and
-            type(config["publishing_enabled"]) is bool, "control policy has invalid switches")
+            type(config["publishing_enabled"]) is bool and
+            type(config["intake_enabled"]) is bool, "control policy has invalid switches")
     floor = EPISODE.fullmatch(str(config["min_episode_id"]))
     require(bool(floor) and int(floor.group(1)) >= 63, "control policy permits legacy episodes")
     require(utc(config["started_after_utc"], "control cutoff") >= datetime(2026, 10, 4, 5, tzinfo=timezone.utc),
@@ -95,8 +98,13 @@ def policy(path: Path) -> dict:
     require(config["reviewer_key_sha256"] == "" or bool(SHA.fullmatch(str(config["reviewer_key_sha256"]))),
             "control policy reviewer fingerprint is invalid")
     require(isinstance(config["youtube_channel_id"], str) and
-            isinstance(config["buffer_organization_id"], str),
-            "control policy Buffer organization or YouTube destination is invalid")
+            isinstance(config["buffer_organization_id"], str) and
+            config["qa_provider"] in ("", "gemini", "openai") and
+            isinstance(config["qa_model"], str) and
+            (not config["qa_model"] or bool(re.fullmatch(r"[A-Za-z0-9_.-]+", config["qa_model"]))),
+            "control policy Buffer destination or QA model is invalid")
+    require(bool(config["qa_provider"]) == bool(config["qa_model"]),
+            "control policy QA provider and model must be pinned together")
     return config
 
 
@@ -282,6 +290,10 @@ def approval_subject(approval: dict, subject: dict) -> None:
 def sign(approval: dict, subject: dict, private_raw_b64: str, config: dict) -> dict:
     require(config["signing_enabled"] is True, "independent signing is disabled")
     approval_subject(approval, subject)
+    version = 2 if subject.get("version") == 2 else 1
+    require(version == 1 or (subject.get("source_commit") and
+                            subject.get("media_delivery_type") == "authenticated"),
+            "private review subject is incomplete")
     try:
         key_raw = base64.b64decode(private_raw_b64, validate=True)
         require(len(key_raw) == 32, "Ed25519 signing key is invalid")
@@ -292,17 +304,20 @@ def sign(approval: dict, subject: dict, private_raw_b64: str, config: dict) -> d
     fingerprint = digest(public)
     require(config["reviewer_key_sha256"] == fingerprint,
             "signing key differs from pinned reviewer")
-    review = {"version": 1, "subject": subject, "reviewer_key_sha256": fingerprint,
+    review = {"version": version, "subject": subject, "reviewer_key_sha256": fingerprint,
               "reviewed_at_utc": approval["reviewed_at_utc"], "decision": "approved",
               "checks": approval["checks"]}
-    review["signature"] = base64.b64encode(key.sign(CONTEXT + canonical(review))).decode("ascii")
+    context = CONTEXT_V2 if version == 2 else CONTEXT
+    review["signature"] = base64.b64encode(key.sign(context + canonical(review))).decode("ascii")
     return review
 
 
 def verify(review: dict, subject: dict, public_raw_b64: str, config: dict) -> None:
     require(set(review) == {"version", "subject", "reviewer_key_sha256", "reviewed_at_utc",
                             "decision", "checks", "signature"} and type(review.get("version")) is int and
-            review["version"] == 1, "signed review schema is invalid")
+            review["version"] in (1, 2) and
+            review["version"] == (2 if subject.get("version") == 2 else 1),
+            "signed review schema is invalid")
     approval_subject({name: review[name] for name in ("subject", "decision", "checks", "reviewed_at_utc")}, subject)
     try:
         public = base64.b64decode(public_raw_b64, validate=True)
@@ -311,7 +326,8 @@ def verify(review: dict, subject: dict, public_raw_b64: str, config: dict) -> No
                 "trusted reviewer fingerprint differs")
         signature = base64.b64decode(review["signature"], validate=True)
         unsigned = {name: value for name, value in review.items() if name != "signature"}
-        Ed25519PublicKey.from_public_bytes(public).verify(signature, CONTEXT + canonical(unsigned))
+        context = CONTEXT_V2 if review["version"] == 2 else CONTEXT
+        Ed25519PublicKey.from_public_bytes(public).verify(signature, context + canonical(unsigned))
     except (ValueError, TypeError, InvalidSignature) as exc:
         raise Hold("independent review signature is invalid") from exc
 

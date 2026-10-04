@@ -1,0 +1,51 @@
+# Inert design outline: deliberately outside .github/workflows.
+# Review and publish jobs must live in a private, separately protected control repo.
+# No workflow is installed or scheduled by this file.
+name: History independent review and release (draft)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        required: true
+        description: Exact 40-character producer commit
+      episode:
+        required: true
+        description: New epNNN candidate
+
+permissions:
+  contents: read
+
+concurrency:
+  group: history-control-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    steps:
+      # Checkout this control commit with persist-credentials: false.
+      # Checkout ashivam-dot/creature-receipts at source_commit read-only.
+      # Run `python -m control prepare`; upload a private, short-lived packet.
+      # Do not execute or install code from the source checkout.
+      - run: echo 'Inert draft only; no actions installed'
+
+  sign:
+    needs: prepare
+    environment: history-review-signing
+    runs-on: ubuntu-24.04
+    steps:
+      # A protected reviewer creates approval.json after full video, sources,
+      # rights, and audio inspection. Recheck source commit and hosted bytes.
+      # Inject only HISTORY_REVIEW_SIGNING_KEY; no Buffer credential here.
+      - run: echo 'Inert draft only; no signing key injected'
+
+  publisher_preflight:
+    needs: sign
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    steps:
+      # Recheck review signature and hosted bytes at the exact source commit.
+      # Future reviewed publisher code may access only a rotated publisher key.
+      # Current code has no Buffer mutation or publisher secret injection.
+      - run: echo 'Inert draft only; publishing remains disabled'

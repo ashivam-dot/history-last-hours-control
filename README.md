@@ -58,10 +58,11 @@ the existing producer verifier accepts a synthetic review signed here.
 
 `python -m control publish` is a real but dormant YouTube scheduling path.
 Before Buffer access, it rechecks the signed review, source commit, and hosted
-producer video bytes. It uploads the exact reviewed MP4 to a separately pinned
-Cloudinary account using the control-only `HISTORY_PUBLISHER_CLOUDINARY_URL`
+producer video bytes. It uploads the exact reviewed MP4 to the separately pinned
+`mw0oh0v8` Cloudinary cloud using the control-only `HISTORY_PUBLISHER_CLOUDINARY_URL`
 environment secret, then downloads the control copy and verifies its SHA-256.
-The upload uses a content-addressed public ID and `overwrite=false`. The
+The upload uses a content-addressed `history-last-hours/` public ID and
+`overwrite=false`. The
 current single-request upload accepts MP4s up to 95 MiB; larger videos hold.
 The publisher verifies the pinned Buffer organization and YouTube channel
 service/status, builds title/text/credits from the signed Git blobs,
@@ -94,20 +95,26 @@ concurrent executors and ambiguous failures remain deployment risks.
    executors. The producer currently uses it for monitoring and legacy
    scheduling, so migrate those jobs first. Producer access to the old key
    means true credential isolation has **not** been achieved.
-4. Create a separate control-owned Cloudinary account, pin its exact
-   `https://res.cloudinary.com/<cloud>/video/upload/` prefix in
-   `publisher_media_url_prefix`, and put its API environment URL only in the
-   `history-publisher` environment as `HISTORY_PUBLISHER_CLOUDINARY_URL`.
-   Verify that producer automation has no key or account access to it. The
-   current policy prefix is empty, so the publisher holds even if its switch
-   were enabled. Cloudinary [supports folder roles for API keys on all
-   plans](https://cloudinary.com/documentation/permissions_assign_roles_api),
-   but a [Master Admin key can use every Upload API
-   endpoint](https://cloudinary.com/documentation/product_environment_settings).
-   The current producer key's role has not been verified. A shared account
-   would require revoking or narrowing every producer key and
-   proving folder restrictions with live Upload API tests. That isolation has
-   not been established.
+4. Provision a control-only Cloudinary credential for the pinned `mw0oh0v8`
+   cloud in the `history-publisher` environment as
+   `HISTORY_PUBLISHER_CLOUDINARY_URL`. This cloud is distinct from History's
+   producer cloud `uj4a07e7` and is already used by the trusted Mool control
+   repository. The `history-last-hours/` public ID path keeps the two channels'
+   assets separate by name, but it does not restrict a broad API key. Remove
+   Mool producer access to `mw0oh0v8` through its old Modal workspace before
+   treating this as producer-isolated. Prefer a dedicated History key limited
+   to this folder; [folder roles can be assigned to API keys on all
+   plans](https://cloudinary.com/documentation/permissions_assign_roles_api).
+   Verify Upload API enforcement and audit all remaining broad keys. A
+   [Master Admin key can use every Upload API
+   endpoint](https://cloudinary.com/documentation/product_environment_settings),
+   so a broad Mool control key would still be able to change History assets.
+   If channel-to-channel compromise isolation is required, use a separate
+   Cloudinary account instead. The latest Mool control monitor snapshot
+   (2026-10-04, run `37180808602`) reported 0.47 of 25 monthly credits used;
+   [Cloudinary pricing](https://cloudinary.com/pricing) counts storage,
+   bandwidth, and transformations against that shared quota. Monitor capacity
+   before activation and as either channel grows.
 5. Verify the actual Buffer create and readback contract in a reviewed
    dry-run/staged integration, establish durable receipt transfer to History,
    and prevent producer-owned code from publishing independently. Keep the

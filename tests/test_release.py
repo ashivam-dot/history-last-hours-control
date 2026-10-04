@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from control.release import (Hold, FILES, candidate, digest, policy, publisher_preflight,
                              sign, verify)
-from control.publisher import CloudinaryClient, publish_reviewed
+from control.publisher import CloudinaryClient, PUBLISHER_PUBLIC_ID_PREFIX, publish_reviewed
 
 
 def git(repo, *args):
@@ -183,7 +183,7 @@ def test_future_publisher_gate_rechecks_video_signature_and_destination(fixture,
     config = {**config, "signing_enabled": True, "publishing_enabled": True,
               "reviewer_key_sha256": digest(public_raw), "buffer_organization_id": "history-org",
               "youtube_channel_id": "history-yt",
-              "publisher_media_url_prefix": "https://res.cloudinary.com/independent-history/video/upload/"}
+              "publisher_media_url_prefix": "https://res.cloudinary.com/mw0oh0v8/video/upload/"}
     approval = {"subject": subject, "decision": "approved", "checks": {name: True for name in
                 ("claim_sources", "visual_identity_rights", "full_video_audio")},
                 "reviewed_at_utc": datetime.now(timezone.utc).isoformat()}
@@ -244,7 +244,7 @@ class FakeMedia:
     def upload_exact(self, video, episode, media_sha256):
         assert digest(video) == media_sha256
         self.uploads.append((episode, media_sha256))
-        return self.url, f"history-control/{episode}-{media_sha256}"
+        return self.url, f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{media_sha256}"
 
 
 def approved_publisher(fixture):
@@ -257,7 +257,7 @@ def approved_publisher(fixture):
     config = {**config, "signing_enabled": True, "publishing_enabled": True,
               "reviewer_key_sha256": digest(public_raw), "buffer_organization_id": "history-org",
               "youtube_channel_id": "history-yt",
-              "publisher_media_url_prefix": "https://res.cloudinary.com/independent-history/video/upload/"}
+              "publisher_media_url_prefix": "https://res.cloudinary.com/mw0oh0v8/video/upload/"}
     approval = {"subject": subject, "decision": "approved", "checks": {name: True for name in
                 ("claim_sources", "visual_identity_rights", "full_video_audio")},
                 "reviewed_at_utc": datetime.now(timezone.utc).isoformat()}
@@ -269,7 +269,7 @@ def test_control_publisher_schedules_exact_youtube_media_and_reconciles_without_
     source, commit, video, subject, config, review, public = approved_publisher(fixture)
     monkeypatch.setattr("control.release.fetch_video", lambda *_: video)
     monkeypatch.setattr("control.publisher.fetch_video", lambda *_: video)
-    copy_url = config["publisher_media_url_prefix"] + "history-control/ep063-" + digest(video) + ".mp4"
+    copy_url = config["publisher_media_url_prefix"] + PUBLISHER_PUBLIC_ID_PREFIX + "ep063-" + digest(video) + ".mp4"
     api = FakeBuffer(copy_url)
     media = FakeMedia(copy_url)
     due = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0).isoformat()
@@ -288,12 +288,13 @@ def test_control_publisher_schedules_exact_youtube_media_and_reconciles_without_
 
 
 @pytest.mark.parametrize("failure", ["wrong_channel", "duplicate", "changed_media",
-                                          "changed_control_copy", "missing_token", "missing_cloudinary"])
+                                          "changed_control_copy", "wrong_namespace",
+                                          "missing_token", "missing_cloudinary"])
 def test_control_publisher_holds_before_buffer_create(fixture, monkeypatch, failure):
     source, commit, video, subject, config, review, public = approved_publisher(fixture)
     monkeypatch.setattr("control.release.fetch_video", lambda *_: video)
     monkeypatch.setattr("control.publisher.fetch_video", lambda *_: video)
-    copy_url = config["publisher_media_url_prefix"] + "history-control/ep063-" + digest(video) + ".mp4"
+    copy_url = config["publisher_media_url_prefix"] + PUBLISHER_PUBLIC_ID_PREFIX + "ep063-" + digest(video) + ".mp4"
     api = FakeBuffer(copy_url)
     media = FakeMedia(copy_url)
     if failure == "wrong_channel":
@@ -310,6 +311,8 @@ def test_control_publisher_holds_before_buffer_create(fixture, monkeypatch, fail
     elif failure == "changed_control_copy":
         monkeypatch.setattr("control.publisher.fetch_video", lambda url, *_:
                             video + b"changed" if url.startswith(config["publisher_media_url_prefix"]) else video)
+    elif failure == "wrong_namespace":
+        media.url = config["publisher_media_url_prefix"] + "mool-katha/ep063-" + digest(video) + ".mp4"
     due = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0).isoformat()
     with pytest.raises(Hold):
         publish_reviewed(source, commit, "ep063", review, public, config,
@@ -320,11 +323,11 @@ def test_control_publisher_holds_before_buffer_create(fixture, monkeypatch, fail
 
 
 def test_control_cloudinary_upload_is_content_addressed_and_never_overwrites(monkeypatch):
-    prefix = "https://res.cloudinary.com/independent-history/video/upload/"
-    client = CloudinaryClient("cloudinary://only-key:only-secret@independent-history", prefix)
+    prefix = "https://res.cloudinary.com/mw0oh0v8/video/upload/"
+    client = CloudinaryClient("cloudinary://only-key:only-secret@mw0oh0v8", prefix)
     video = b"\x00\x00\x00\x18ftypisom" + b"video test bytes"
     video_hash = digest(video)
-    public_id = f"history-control/ep063-{video_hash}"
+    public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}ep063-{video_hash}"
     calls = []
 
     class Response:

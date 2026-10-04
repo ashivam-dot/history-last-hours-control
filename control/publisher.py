@@ -21,6 +21,7 @@ QUEUE_LIMIT = 10
 MIN_LEAD = timedelta(minutes=30)
 MAX_HORIZON = timedelta(days=30)
 MAX_CLOUDINARY_UPLOAD = 95 * 1024 * 1024
+PUBLISHER_PUBLIC_ID_PREFIX = "history-last-hours/"
 
 CHANNELS_QUERY = """query Channels($input: ChannelsInput!) {
   channels(input: $input) { id name service isDisconnected isLocked isQueuePaused }
@@ -124,7 +125,7 @@ class BufferClient:
 
 
 class CloudinaryClient:
-    """Upload to a separate account that producer automation cannot write or delete."""
+    """Upload to the pinned cloud distinct from History's producer cloud."""
 
     def __init__(self, cloudinary_url: str, publisher_prefix: str):
         parsed = urlparse(cloudinary_url)
@@ -144,7 +145,7 @@ class CloudinaryClient:
         require(len(video) >= 12 and video[4:8] == b"ftyp" and
                 len(video) <= MAX_CLOUDINARY_UPLOAD and digest(video) == media_sha256,
                 "control upload needs the exact bounded MP4")
-        public_id = f"history-control/{episode}-{media_sha256}"
+        public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{media_sha256}"
         params = {"public_id": public_id, "overwrite": "false", "timestamp": int(time.time())}
         payload = "&".join(f"{key}={value}" for key, value in sorted(params.items()))
         signature = hashlib.sha1((payload + self._secret).encode()).hexdigest()
@@ -318,7 +319,8 @@ def publish_reviewed(repo, commit: str, episode: str, review: dict,
     media_client = media_client or CloudinaryClient(cloudinary_url, config["publisher_media_url_prefix"])
     media_url, media_public_id = media_client.upload_exact(
         source_video, episode, plan["subject"]["media_sha256"])
-    require(media_url.startswith(config["publisher_media_url_prefix"]) and
+    require(media_public_id == f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{plan['subject']['media_sha256']}" and
+            media_url == f"{config['publisher_media_url_prefix']}{media_public_id}.mp4" and
             media_url != plan["subject"]["media_url"] and
             digest(fetch_video(media_url, {"media_url_prefix": config["publisher_media_url_prefix"]})) ==
             plan["subject"]["media_sha256"],

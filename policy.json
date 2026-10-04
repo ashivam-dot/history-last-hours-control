@@ -6,7 +6,7 @@
   "min_episode_id": "ep063",
   "started_after_utc": "2026-10-04T05:00:00+00:00",
   "media_url_prefix": "https://res.cloudinary.com/uj4a07e7/video/upload/",
-  "publisher_media_url_prefix": "",
+  "publisher_media_url_prefix": "https://res.cloudinary.com/mw0oh0v8/video/upload/",
   "reviewer_key_sha256": "addacbb4908dc8bda614ce5b301aa8fdb41f726283001030652e97ab5cb89a1e",
   "buffer_organization_id": "6abcb387e55b7b29c811a139",
   "youtube_channel_id": "6abcba6dea19ca0bde30177e"

@@ -25,6 +25,7 @@ jobs:
           config = json.loads(Path('policy.json').read_text())
           assert config['signing_enabled'] is False
           assert config['publishing_enabled'] is False
+          assert config['intake_enabled'] is False
           assert 'instagram_channel_id' not in config
           PY
           uv run --frozen python -m pytest -q tests

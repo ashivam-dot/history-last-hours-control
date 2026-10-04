@@ -11,7 +11,9 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from control.release import (Hold, FILES, candidate, digest, policy, publisher_preflight,
                              sign, verify)
-from control.publisher import CloudinaryClient, PUBLISHER_PUBLIC_ID_PREFIX, publish_reviewed
+from control.publisher import (CloudinaryClient, PUBLISHER_PUBLIC_ID_PREFIX,
+                               publish_draft_reviewed, publish_reviewed)
+from control.intake import committed_draft, intake_draft, validated_packet
 
 
 def git(repo, *args):
@@ -386,3 +388,253 @@ def test_temporary_media_probe_deletes_only_its_own_test_asset(monkeypatch):
     with pytest.raises(Hold, match="only an isolated test asset"):
         client.destroy_probe("mool-katha/ep003")
     assert len(calls) == 2
+
+
+def test_control_cloudinary_private_draft_upload_and_authenticated_readback(monkeypatch):
+    prefix = "https://res.cloudinary.com/mw0oh0v8/video/upload/"
+    client = CloudinaryClient("cloudinary://only-key:only-secret@mw0oh0v8", prefix)
+    video = b"\x00\x00\x00\x18ftypisom" + b"private draft"
+    media_hash = digest(video)
+    public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}drafts/ep063-{media_hash}"
+    private_url = f"https://res.cloudinary.com/mw0oh0v8/video/authenticated/v123/{public_id}.mp4"
+    calls = []
+
+    class UploadResponse:
+        status_code = 200
+
+        def json(self):
+            return {"public_id": public_id, "resource_type": "video", "type": "authenticated",
+                    "bytes": len(video), "asset_id": "asset-12345678", "secure_url": private_url}
+
+    class DownloadResponse:
+        status_code = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return None
+
+        def iter_content(self, *_):
+            yield video
+
+    def post(url, **kwargs):
+        calls.append((url, kwargs))
+        return UploadResponse() if url.endswith("/video/upload") else DownloadResponse()
+
+    monkeypatch.setattr("control.publisher.requests.post", post)
+    assert client.upload_private_draft(video, "ep063", media_hash) == (
+        private_url, public_id, "asset-12345678")
+    assert client.download_private_asset("asset-12345678") == video
+    assert calls[0][1]["data"]["type"] == "authenticated"
+    assert calls[0][1]["data"]["overwrite"] == "false"
+    assert calls[1][0].endswith("/asset/download")
+    assert calls[1][1]["data"]["asset_id"] == "asset-12345678"
+
+
+def test_control_cloudinary_rejects_public_pre_qa_draft_url(monkeypatch):
+    prefix = "https://res.cloudinary.com/mw0oh0v8/video/upload/"
+    client = CloudinaryClient("cloudinary://only-key:only-secret@mw0oh0v8", prefix)
+    video = b"\x00\x00\x00\x18ftypisom" + b"private draft"
+    media_hash = digest(video)
+    public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}drafts/ep063-{media_hash}"
+
+    class Response:
+        status_code = 200
+
+        def json(self):
+            return {"public_id": public_id, "resource_type": "video", "type": "upload",
+                    "bytes": len(video), "asset_id": "asset-12345678",
+                    "secure_url": prefix + public_id + ".mp4"}
+
+    monkeypatch.setattr("control.publisher.requests.post", lambda *args, **kwargs: Response())
+    with pytest.raises(Hold, match="identity, type, or size"):
+        client.upload_private_draft(video, "ep063", media_hash)
+
+
+def draft_fixture(fixture):
+    source, _, episode, _, config = fixture
+    config = {**config, "intake_enabled": True}
+    video = b"\x00\x00\x00\x18ftypisom" + b"one exact private draft render"
+    media_hash = digest(video)
+    manifest_path = episode / "work" / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["video_sha256"] = media_hash
+    manifest_path.write_text(json.dumps(manifest))
+    review_path = episode / "review.json"
+    review = json.loads(review_path.read_text())
+    review["rounds"][0]["media_sha256"] = media_hash
+    review_path.write_text(json.dumps(review))
+    (episode / "hold.json").unlink()
+    draft = {"id": "ep063", "title": "The final voyage", "series": "History",
+             "scores": {"hook": 4}, "anniversary": None, "media_sha256": media_hash,
+             "spec_sha256": digest((episode / "short.yaml").read_bytes()),
+             "manifest_sha256": digest(manifest_path.read_bytes()),
+             "modal_volume": "creature-receipts-outbox",
+             "modal_path": f"drafts/ep063-{media_hash}.mp4"}
+    (episode / "draft.json").write_text(json.dumps(draft))
+    git(source, "add", "-A")
+    git(source, "commit", "-m", "private draft handoff")
+    return source, git(source, "rev-parse", "HEAD"), episode, video, draft, config
+
+
+def test_private_draft_intake_disabled_before_modal_or_media(fixture, tmp_path):
+    source, commit, _, _, config = fixture
+    with pytest.raises(Hold, match="intake is disabled"):
+        intake_draft(source, commit, "ep063", config, "", tmp_path / "packet",
+                     lambda _: pytest.fail("Modal read under disabled policy"))
+
+
+class FakePrivateMedia:
+    def __init__(self, url, video):
+        self.url = url
+        self.video = video
+        self.uploads = []
+        self.downloads = []
+
+    def upload_private_draft(self, video, episode, media_sha256):
+        assert digest(video) == media_sha256
+        self.uploads.append((episode, media_sha256))
+        return self.url, f"{PUBLISHER_PUBLIC_ID_PREFIX}drafts/{episode}-{media_sha256}", "asset-12345678"
+
+    def download_private_asset(self, asset_id):
+        self.downloads.append(asset_id)
+        return self.video
+
+    def upload_exact(self, video, episode, media_sha256):
+        assert video == self.video and digest(video) == media_sha256
+        self.uploads.append((episode, media_sha256))
+        public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{media_sha256}"
+        return self.public_url, public_id
+
+
+def test_control_intake_binds_private_draft_source_and_exact_control_copy(fixture, tmp_path):
+    source, commit, _, video, draft, config = draft_fixture(fixture)
+    source_binding = committed_draft(source, commit, "ep063", config)
+    assert source_binding["draft"] == draft
+    private_prefix = config["publisher_media_url_prefix"].replace("/video/upload/", "/video/authenticated/")
+    copy_url = private_prefix + "v123/" + PUBLISHER_PUBLIC_ID_PREFIX + "drafts/ep063-" + digest(video) + ".mp4"
+    media = FakePrivateMedia(copy_url, video)
+    output = tmp_path / "packet"
+    packet = intake_draft(source, commit, "ep063", config, "test-cloudinary", output,
+                          lambda path: video if path == draft["modal_path"] else pytest.fail("wrong Modal path"), media)
+    subject = packet["subject"]
+    assert subject["version"] == 2
+    assert subject["source_commit"] == commit
+    assert subject["draft_sha256"] == digest((output / "draft.json").read_bytes())
+    assert subject["media_url"] == copy_url
+    assert subject["media_delivery_type"] == "authenticated"
+    assert subject["media_asset_id"] == "asset-12345678"
+    assert (output / "ep063.mp4").read_bytes() == video
+    assert (output / "evidence" / "work" / "manifest.json").is_file()
+    hold = json.loads((output / "control_hold.json").read_text())
+    assert hold["state"] == "held_for_independent_review"
+    assert hold["media_sha256"] == digest(video)
+    assert hold["source_commit"] == commit
+    assert media.uploads == [("ep063", digest(video))]
+    assert media.downloads == ["asset-12345678"]
+    with pytest.raises(Hold, match="already exists"):
+        intake_draft(source, commit, "ep063", config, "test-cloudinary", output,
+                     lambda _: pytest.fail("duplicate Modal read"), media)
+
+
+@pytest.mark.parametrize("failure", ["changed_private_video", "wrong_modal_path",
+                                          "stale_manifest", "producer_hold"])
+def test_control_intake_rejects_unbound_or_hosted_draft_before_upload(fixture, tmp_path, failure):
+    source, commit, episode, video, draft, config = draft_fixture(fixture)
+    if failure == "wrong_modal_path":
+        draft["modal_path"] = "../mool-katha/ep003.mp4"
+        (episode / "draft.json").write_text(json.dumps(draft))
+    elif failure == "stale_manifest":
+        draft["manifest_sha256"] = "0" * 64
+        (episode / "draft.json").write_text(json.dumps(draft))
+    elif failure == "producer_hold":
+        (episode / "hold.json").write_text("{}")
+    if failure != "changed_private_video":
+        git(source, "add", "-A")
+        git(source, "commit", "-m", "invalid draft handoff")
+        commit = git(source, "rev-parse", "HEAD")
+    media = FakePrivateMedia("https://res.cloudinary.com/mw0oh0v8/video/authenticated/never-uploaded.mp4", video)
+    with pytest.raises(Hold):
+        intake_draft(source, commit, "ep063", config, "test-cloudinary", tmp_path / "packet",
+                     lambda _: video + b"changed" if failure == "changed_private_video" else
+                     pytest.fail("Modal read before source validation"), media)
+    assert media.uploads == []
+
+
+def test_v2_packet_signing_and_publisher_handoff(fixture, tmp_path, monkeypatch):
+    source, commit, _, video, draft, config = draft_fixture(fixture)
+    private_prefix = config["publisher_media_url_prefix"].replace("/video/upload/", "/video/authenticated/")
+    private_url = (private_prefix + "v123/" + PUBLISHER_PUBLIC_ID_PREFIX +
+                   "drafts/ep063-" + digest(video) + ".mp4")
+    packet_dir = tmp_path / "packet"
+    intake_draft(source, commit, "ep063", config, "test-cloudinary", packet_dir,
+                 lambda path: video, FakePrivateMedia(private_url, video))
+    subject, packet_video = validated_packet(source, commit, "ep063", config, packet_dir)
+    assert packet_video == video and subject["version"] == 2
+    private = Ed25519PrivateKey.generate()
+    private_raw = private.private_bytes(serialization.Encoding.Raw, serialization.PrivateFormat.Raw,
+                                        serialization.NoEncryption())
+    public_raw = private.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    config = {**config, "signing_enabled": True, "publishing_enabled": True,
+              "reviewer_key_sha256": digest(public_raw), "buffer_organization_id": "history-org",
+              "youtube_channel_id": "history-yt"}
+    approval = {"subject": subject, "decision": "approved",
+                "checks": {name: True for name in
+                           ("claim_sources", "visual_identity_rights", "full_video_audio")},
+                "reviewed_at_utc": datetime.now(timezone.utc).isoformat()}
+    public_b64 = base64.b64encode(public_raw).decode()
+    review = sign(approval, subject, base64.b64encode(private_raw).decode(), config)
+    assert review["version"] == 2
+    verify(review, subject, public_b64, config)
+    with pytest.raises(Hold, match="schema"):
+        verify({**review, "version": 1}, subject, public_b64, config)
+    public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}ep063-{digest(video)}"
+    public_url = config["publisher_media_url_prefix"] + public_id + ".mp4"
+    media = FakePrivateMedia(private_url, video)
+    media.public_url = public_url
+    api = FakeBuffer(public_url)
+    monkeypatch.setattr("control.publisher.fetch_video", lambda url, _: video)
+    due = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0).isoformat()
+    receipt = publish_draft_reviewed(source, commit, "ep063", packet_dir, review, public_b64,
+                                     config, "test-token", "test-cloudinary", due, api, media)
+    assert receipt["control_media_url"] == public_url
+    assert media.downloads == [subject["media_asset_id"]]
+    assert media.uploads == [("ep063", digest(video))]
+    assert len(api.created) == 1
+    assert api.created[0]["assets"] == [{"video": {"url": public_url}}]
+    media.video = video + b"changed"
+    with pytest.raises(Hold, match="authenticated control asset"):
+        publish_draft_reviewed(source, commit, "ep063", packet_dir, review, public_b64,
+                               config, "test-token", "test-cloudinary", due, api, media)
+    assert len(media.uploads) == 1 and len(api.created) == 1
+    (packet_dir / "ep063.mp4").write_bytes(video + b"changed")
+    with pytest.raises(Hold, match="private review video"):
+        publish_draft_reviewed(source, commit, "ep063", packet_dir, review, public_b64,
+                               config, "test-token", "test-cloudinary", due, api, media)
+    assert len(api.created) == 1
+
+
+def test_v2_packet_rejects_public_media_before_signing(fixture, tmp_path):
+    source, commit, _, video, _, config = draft_fixture(fixture)
+    private_prefix = config["publisher_media_url_prefix"].replace("/video/upload/", "/video/authenticated/")
+    private_url = (private_prefix + "v123/" + PUBLISHER_PUBLIC_ID_PREFIX +
+                   "drafts/ep063-" + digest(video) + ".mp4")
+    packet_dir = tmp_path / "packet"
+    intake_draft(source, commit, "ep063", config, "test-cloudinary", packet_dir,
+                 lambda _: video, FakePrivateMedia(private_url, video))
+    subject_path = packet_dir / "subject.json"
+    hold_path = packet_dir / "control_hold.json"
+    index_path = packet_dir / "packet.json"
+    subject = json.loads(subject_path.read_text())
+    hold = json.loads(hold_path.read_text())
+    index = json.loads(index_path.read_text())
+    public_url = config["publisher_media_url_prefix"] + subject["media_public_id"] + ".mp4"
+    subject["media_url"] = hold["media_url"] = public_url
+    index["subject"] = subject
+    index["control_hold"] = hold
+    subject_path.write_text(json.dumps(subject))
+    hold_path.write_text(json.dumps(hold))
+    index_path.write_text(json.dumps(index))
+    with pytest.raises(Hold, match="public or unpinned"):
+        validated_packet(source, commit, "ep063", config, packet_dir)

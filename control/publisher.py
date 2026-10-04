@@ -14,7 +14,8 @@ from urllib.parse import unquote, urlparse
 import requests
 import yaml
 
-from .release import Hold, _blob, digest, episode_root, fetch_video, publisher_preflight, read_object, require, utc
+from .release import (Hold, _blob, digest, episode_root, fetch_video, publisher_preflight,
+                      read_object, require, utc, verify)
 
 BUFFER_API = "https://api.buffer.com"
 QUEUE_LIMIT = 10
@@ -183,6 +184,60 @@ class CloudinaryClient:
     def upload_exact(self, video: bytes, episode: str, media_sha256: str) -> tuple[str, str]:
         return self._upload(video, f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{media_sha256}",
                             media_sha256, allow_existing=True)
+
+    def upload_private_draft(self, video: bytes, episode: str,
+                             media_sha256: str) -> tuple[str, str, str]:
+        """Keep a pre-QA draft authenticated even when its hash is public in Git."""
+        require(len(video) >= 12 and video[4:8] == b"ftyp" and
+                len(video) <= MAX_CLOUDINARY_UPLOAD and digest(video) == media_sha256,
+                "private draft upload needs the exact bounded MP4")
+        public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}drafts/{episode}-{media_sha256}"
+        params = {"public_id": public_id, "overwrite": "false", "type": "authenticated",
+                  "timestamp": int(time.time())}
+        try:
+            response = requests.post(
+                f"https://api.cloudinary.com/v1_1/{self._cloud}/video/upload",
+                data=self._signed(params),
+                files={"file": (f"{episode}.mp4", video, "video/mp4")},
+                timeout=(15, 600),
+            )
+        except requests.RequestException as exc:
+            raise Hold("private draft upload response is uncertain; inspect control cloud") from exc
+        require(response.status_code in (200, 201),
+                "private draft upload failed; inspect control cloud before retrying")
+        try:
+            result = response.json()
+        except ValueError as exc:
+            raise Hold("private draft upload response is invalid") from exc
+        private_prefix = f"https://res.cloudinary.com/{self._cloud}/video/authenticated/"
+        require(isinstance(result, dict) and result.get("public_id") == public_id and
+                result.get("resource_type") == "video" and result.get("type") == "authenticated" and
+                result.get("bytes") == len(video) and isinstance(result.get("asset_id"), str) and
+                bool(result["asset_id"]) and isinstance(result.get("secure_url"), str) and
+                bool(re.fullmatch(re.escape(private_prefix) + r"(?:v[0-9]+/)?" +
+                                  re.escape(public_id) + r"\.mp4", result["secure_url"])),
+                "private draft upload identity, type, or size differs")
+        return result["secure_url"], public_id, result["asset_id"]
+
+    def download_private_asset(self, asset_id: str) -> bytes:
+        """Re-read authenticated media through Cloudinary's signed download API."""
+        require(isinstance(asset_id, str) and bool(re.fullmatch(r"[A-Za-z0-9_-]{8,128}", asset_id)),
+                "private draft asset ID is malformed")
+        params = {"asset_id": asset_id, "timestamp": int(time.time())}
+        try:
+            with requests.post(f"https://api.cloudinary.com/v1_1/{self._cloud}/asset/download",
+                               data=self._signed(params), stream=True, timeout=(15, 120)) as response:
+                require(response.status_code == 200, "private draft download is unavailable")
+                chunks: list[bytes] = []
+                count = 0
+                for chunk in response.iter_content(1 << 20):
+                    count += len(chunk)
+                    require(count <= MAX_CLOUDINARY_UPLOAD,
+                            "private draft download exceeds bounded size")
+                    chunks.append(chunk)
+                return b"".join(chunks)
+        except requests.RequestException as exc:
+            raise Hold("private draft download response is uncertain") from exc
 
     def upload_probe(self, video: bytes, public_id: str, media_sha256: str) -> tuple[str, str]:
         require(bool(PROBE_PUBLIC_ID.fullmatch(public_id)) and public_id.endswith(media_sha256),
@@ -357,6 +412,52 @@ def publish_reviewed(repo, commit: str, episode: str, review: dict,
             digest(fetch_video(media_url, {"media_url_prefix": config["publisher_media_url_prefix"]})) ==
             plan["subject"]["media_sha256"],
             "control-owned hosted media differs from signed video")
+    return _schedule_exact(repo, commit, episode, plan["subject"], config, buffer_token,
+                           due, media_url, media_public_id, api)
+
+
+def publish_draft_reviewed(repo, commit: str, episode: str, packet_dir, review: dict,
+                           public_raw_b64: str, config: dict, buffer_token: str,
+                           cloudinary_url: str, due_at_utc: str,
+                           api: BufferClient | None = None,
+                           media_client: CloudinaryClient | None = None) -> dict:
+    """Release an approved v2 packet from its exact authenticated control asset."""
+    from .intake import validated_packet
+
+    require(config["publishing_enabled"] is True, "control publisher is disabled")
+    require(bool(config["buffer_organization_id"]) and bool(config["youtube_channel_id"]),
+            "pinned Buffer destination is missing")
+    require(bool(config["publisher_media_url_prefix"]) and
+            config["publisher_media_url_prefix"] != config["media_url_prefix"],
+            "independent publisher media account is missing")
+    subject, packet_video = validated_packet(repo, commit, episode, config, packet_dir)
+    verify(review, subject, public_raw_b64, config)
+    require(review["version"] == 2, "private draft requires a version 2 approval")
+    require(bool(buffer_token), "control publisher credential is missing")
+    require(bool(cloudinary_url), "independent control media credential is missing")
+    due = utc(due_at_utc, "release due time")
+    now = datetime.now(timezone.utc)
+    require(now + MIN_LEAD < due <= now + MAX_HORIZON,
+            "release due time is outside the safe scheduling window")
+    media_client = media_client or CloudinaryClient(cloudinary_url, config["publisher_media_url_prefix"])
+    private_video = media_client.download_private_asset(subject["media_asset_id"])
+    require(private_video == packet_video and digest(private_video) == subject["media_sha256"],
+            "authenticated control asset differs from signed draft")
+    media_url, media_public_id = media_client.upload_exact(
+        private_video, episode, subject["media_sha256"])
+    require(media_public_id == f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{subject['media_sha256']}" and
+            media_url == f"{config['publisher_media_url_prefix']}{media_public_id}.mp4" and
+            media_url != subject["media_url"] and
+            digest(fetch_video(media_url, {"media_url_prefix": config["publisher_media_url_prefix"]})) ==
+            subject["media_sha256"],
+            "approved public copy differs from authenticated draft")
+    return _schedule_exact(repo, commit, episode, subject, config, buffer_token,
+                           due, media_url, media_public_id, api)
+
+
+def _schedule_exact(repo, commit: str, episode: str, subject: dict, config: dict,
+                    buffer_token: str, due: datetime, media_url: str,
+                    media_public_id: str, api: BufferClient | None) -> dict:
     api = api or BufferClient(buffer_token)
     org = config["buffer_organization_id"]
     api.organization(org)
@@ -373,11 +474,11 @@ def publish_reviewed(repo, commit: str, episode: str, review: dict,
                 "YouTube Buffer queue is full")
     if not youtube_existing:
         require(digest(fetch_video(media_url, {"media_url_prefix": config["publisher_media_url_prefix"]})) ==
-                plan["subject"]["media_sha256"],
+                subject["media_sha256"],
                 "control-owned media changed before Buffer mutation")
     youtube = _create_or_reconcile(api, config["youtube_channel_id"],
                                    copy["youtube"], {"youtube": metadata["youtube"]},
                                    media_url, due, youtube_posts)
-    return {"episode": episode, "media_sha256": plan["subject"]["media_sha256"],
+    return {"episode": episode, "media_sha256": subject["media_sha256"],
             "source_commit": commit, "control_media_url": media_url,
             "control_media_public_id": media_public_id, "youtube": youtube}

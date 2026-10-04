@@ -3,12 +3,14 @@
 Private owner-controlled repository: `ashivam-dot/history-last-hours-control`.
 The producer is `ashivam-dot/creature-receipts`. Producer automation has no
 write access or deploy key here. The tracked [`policy.json`](policy.json) has
-`signing_enabled: false` and `publishing_enabled: false`. Nothing here has
+`intake_enabled: false`, `signing_enabled: false`, and
+`publishing_enabled: false`. Nothing here has
 reviewed, signed, scheduled, or published a real episode.
 
 ## Current cloud state
 
-- Five **manual-only** Actions workflows prepare a review packet, sign a
+- Six **manual-only** Actions workflows prepare a review packet, intake a
+  private draft, sign a
   reviewed candidate, check the pinned Buffer destination, probe the pinned
   Cloudinary cloud with a temporary test asset, or release one
   certified video to **YouTube only**.
@@ -56,7 +58,55 @@ from the producer repository. It contains the full packet `subject`,
 or uncertain check means hold. Code can verify the attestation and exact
 bytes; it cannot prove that a person actually completed this review.
 
-`python -m control sign` re-downloads the hosted MP4 and recomputes every
+## Private draft intake (staged)
+
+`intake-private-draft.yml` takes one exact producer `main` commit and episode.
+It checks the committed `draft.json`, spec, manifest, research, rights, and
+clean producer review without importing producer code. It requires the draft's
+Modal locator to be exactly `creature-receipts-outbox/drafts/<episode>-<sha>.mp4`,
+then reads that private MP4 from the History Modal workspace and checks every
+byte against the draft and manifest SHA-256 values.
+
+The tracked `intake_enabled` switch is also `false`; the workflow holds before
+Modal or Cloudinary access until it is separately reviewed and enabled.
+The control process then uploads those bytes with `overwrite=false` to the pinned
+`mw0oh0v8` Cloudinary cloud as an **authenticated** video under
+`history-last-hours/drafts/`. It re-downloads the asset through Cloudinary's
+signed asset-download API and checks every byte. The pre-QA asset's URL cannot
+be used for anonymous delivery, even though its hash appears in the public
+producer repository. A later approved release will need a separate public
+copy bound to this exact authenticated asset.
+
+The workflow writes a new, private, 14-day Actions artifact for each run. It
+contains the exact MP4, committed evidence files, `draft.json`, a version 2
+`subject.json` binding the producer commit and authenticated media, and a
+control-owned `control_hold.json`. It never accepts a producer `hold.json` or
+publisher credential. It has not been run on a real draft. A read-only local
+Modal SDK check confirmed that the pinned outbox volume can be opened; it is
+currently empty.
+
+The manual signing workflow takes the intake run ID, exact source commit,
+episode, and an independently authored `approval_json`. It downloads the private
+artifact, compares every evidence file and draft byte with the pinned producer
+commit, checks the MP4 hash and authenticated control URL, then signs the exact
+version 2 subject with a distinct Ed25519 message context. The manual publisher
+downloads the same artifact, repeats those checks, verifies the version 2
+signature, reads the authenticated Cloudinary asset by its signed asset-download
+API, and compares it byte for byte with the packet. Only then does it make and
+verify a public control copy for YouTube scheduling. The producer `hold.json`
+and producer public Cloudinary URL are not used on this path.
+
+Before a live intake run, create a `history-intake` environment holding only
+`HISTORY_INTAKE_MODAL_TOKEN_ID`, `HISTORY_INTAKE_MODAL_TOKEN_SECRET`, and
+`HISTORY_INTAKE_CLOUDINARY_URL`. The Modal token must access the History
+workspace, and the Cloudinary credential must belong to `mw0oh0v8`. The
+intake switch must be enabled in a reviewed control commit while signing and
+publishing remain off. The signing and publishing switches need separate review
+and an enforceable independent approval method before use. The manual signing
+workflow cannot prove that a reviewer actually watched the full video or checked
+all sources and rights.
+
+The legacy `python -m control sign` re-downloads the hosted MP4 and recomputes every
 binding before producing `independent_review.json`. Its Ed25519 message and
 schema match History's existing dormant verifier. It receives only the
 signing key, not a Buffer credential. A direct integration check showed that

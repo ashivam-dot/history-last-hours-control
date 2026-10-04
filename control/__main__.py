@@ -9,7 +9,8 @@ import sys
 from pathlib import Path
 
 from .release import Hold, _blob, candidate, episode_root, fetch_video, policy, publisher_preflight, read_object, sign
-from .publisher import publish_reviewed
+from .publisher import publish_draft_reviewed, publish_reviewed
+from .intake import intake_draft, validated_packet
 
 HERE = Path(__file__).resolve().parents[1]
 
@@ -23,20 +24,23 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Independent History release control")
     parser.add_argument("--policy", type=Path, default=HERE / "policy.json")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "sign", "publisher-preflight", "publish"):
+    for name in ("prepare", "intake", "sign", "sign-draft", "publisher-preflight",
+                 "publish", "publish-draft"):
         command = commands.add_parser(name)
         command.add_argument("--source", type=Path, required=True)
         command.add_argument("--commit", required=True)
         command.add_argument("--episode", required=True)
-        if name == "prepare":
+        if name in ("prepare", "intake"):
             command.add_argument("--output", type=Path, required=True)
-        if name == "sign":
+        if name in ("sign", "sign-draft"):
             command.add_argument("--approval", type=Path, required=True)
             command.add_argument("--output", type=Path, required=True)
+        if name in ("sign-draft", "publish-draft"):
+            command.add_argument("--packet", type=Path, required=True)
         if name == "publisher-preflight":
             command.add_argument("--review", type=Path, required=True)
             command.add_argument("--public-key", type=Path, required=True)
-        if name == "publish":
+        if name in ("publish", "publish-draft"):
             command.add_argument("--review", type=Path, required=True)
             command.add_argument("--public-key", type=Path, required=True)
             command.add_argument("--due-at-utc", required=True)
@@ -53,14 +57,22 @@ def main(argv: list[str] | None = None) -> int:
             write_new(args.output / f"{args.episode}.mp4", video)
             write_new(args.output / "subject.json", (json.dumps(subject, indent=2, ensure_ascii=False) + "\n").encode())
             print(f"Prepared exact media and review subject in {args.output}")
-        elif args.command == "sign":
+        elif args.command == "intake":
+            intake_draft(args.source, args.commit, args.episode, config,
+                         os.environ.get("HISTORY_INTAKE_CLOUDINARY_URL", ""), args.output)
+            print(f"Prepared control-owned draft review packet in {args.output}")
+        elif args.command in ("sign", "sign-draft"):
             if config["signing_enabled"] is not True:
                 raise Hold("independent signing is disabled")
             approval = read_object(args.approval.read_bytes(), "independent approval")
-            hold = read_object(_blob(args.source, args.commit,
-                                     episode_root(args.commit, args.episode) + "hold.json"), "committed hold")
-            subject = candidate(args.source, args.commit, args.episode,
-                                fetch_video(hold.get("media_url", ""), config), config)
+            if args.command == "sign-draft":
+                subject, _ = validated_packet(args.source, args.commit, args.episode,
+                                              config, args.packet)
+            else:
+                hold = read_object(_blob(args.source, args.commit,
+                                         episode_root(args.commit, args.episode) + "hold.json"), "committed hold")
+                subject = candidate(args.source, args.commit, args.episode,
+                                    fetch_video(hold.get("media_url", ""), config), config)
             result = sign(approval, subject, os.environ.get("HISTORY_REVIEW_SIGNING_KEY", ""), config)
             write_new(args.output, (json.dumps(result, indent=2, ensure_ascii=False) + "\n").encode())
             print(f"Signed exact candidate review in {args.output}")
@@ -71,8 +83,10 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(plan, sort_keys=True))
         else:
             review = read_object(args.review.read_bytes(), "signed review")
-            receipt = publish_reviewed(
-                args.source, args.commit, args.episode, review,
+            publisher = publish_draft_reviewed if args.command == "publish-draft" else publish_reviewed
+            before = (args.packet,) if args.command == "publish-draft" else ()
+            receipt = publisher(
+                args.source, args.commit, args.episode, *before, review,
                 args.public_key.read_text(encoding="ascii").strip(), config,
                 os.environ.get("HISTORY_PUBLISHER_BUFFER_API_KEY", ""),
                 os.environ.get("HISTORY_PUBLISHER_CLOUDINARY_URL", ""), args.due_at_utc)

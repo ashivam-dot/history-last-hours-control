@@ -1,0 +1,43 @@
+name: Check History publisher connection (read only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install locked control code
+        run: uv sync --frozen --python 3.12 --no-dev
+      - name: Verify exact Buffer destination without mutation
+        env:
+          HISTORY_PUBLISHER_BUFFER_API_KEY: ${{ secrets.HISTORY_PUBLISHER_BUFFER_API_KEY }}
+        run: |
+          uv run --frozen --no-dev python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          from control.publisher import BufferClient, _channel
+          from control.release import policy, require
+
+          config = policy(Path("policy.json"))
+          require(config["signing_enabled"] is False and config["publishing_enabled"] is False,
+                  "release switches must remain disabled for connection check")
+          client = BufferClient(os.environ.get("HISTORY_PUBLISHER_BUFFER_API_KEY", ""))
+          organization = config["buffer_organization_id"]
+          channel = config["youtube_channel_id"]
+          client.organization(organization)
+          _channel(client.channels(organization), channel, "youtube")
+          print(json.dumps({"status": "ready", "buffer_organization_id": organization,
+                            "youtube_channel_id": channel}))
+          PY

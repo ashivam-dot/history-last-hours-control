@@ -8,8 +8,9 @@ reviewed, signed, scheduled, or published a real episode.
 
 ## Current cloud state
 
-- Three **manual-only** Actions workflows prepare a review packet, sign a
-  reviewed candidate, or release one certified video to **YouTube only**.
+- Four **manual-only** Actions workflows prepare a review packet, sign a
+  reviewed candidate, check the pinned Buffer destination, or release one
+  certified video to **YouTube only**.
   The signing and publishing jobs fail closed under the disabled policy.
 - The Ed25519 private key exists only as the `HISTORY_REVIEW_SIGNING_KEY`
   secret in this repository's `history-review-signing` environment. The public
@@ -94,7 +95,12 @@ concurrent executors and ambiguous failures remain deployment risks.
    `BUFFER_API_KEY` in GitHub Actions, Modal, local `.env` copies, and other
    executors. The producer currently uses it for monitoring and legacy
    scheduling, so migrate those jobs first. Producer access to the old key
-   means true credential isolation has **not** been achieved.
+   means true credential isolation has **not** been achieved. The manual
+   `check-publisher-connection.yml` workflow uses the control environment
+   secret `HISTORY_PUBLISHER_BUFFER_API_KEY` for read-only exact organization
+   and YouTube channel verification while both release switches stay off.
+   Buffer's current plan permits only one Personal API key, so issuing a new
+   key requires a coordinated cutover after old-key consumers are retired.
 4. Provision a control-only Cloudinary credential for the pinned `mw0oh0v8`
    cloud in the `history-publisher` environment as
    `HISTORY_PUBLISHER_CLOUDINARY_URL`. This cloud is distinct from History's

@@ -25,11 +25,13 @@ jobs:
           uv run --frozen --no-dev python - <<'PY'
           import json
           import os
+          import re
+          import requests
           from pathlib import Path
 
           from control.monitor import read_public_video, video_id_from_buffer
           from control.publisher import BufferClient, _channel
-          from control.release import policy, require, utc
+          from control.release import Hold, policy, require, utc
 
           config = policy(Path("policy.json"))
           require(config["signing_enabled"] is False and config["publishing_enabled"] is False,
@@ -50,7 +52,33 @@ jobs:
           utc(detail.get("sentAt"), "Buffer sent time")
           video_id = video_id_from_buffer(detail.get("externalLink"))
           print(json.dumps({"sample_public_video_id": video_id}))
-          public = read_public_video(video_id)
+          try:
+              public = read_public_video(video_id)
+          except Hold:
+              endpoints = {
+                  "mobile": f"https://m.youtube.com/watch?v={video_id}",
+                  "embed": f"https://www.youtube.com/embed/{video_id}",
+                  "nocookie": f"https://www.youtube-nocookie.com/embed/{video_id}",
+                  "shorts": f"https://www.youtube.com/shorts/{video_id}",
+                  "oembed": f"https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D{video_id}&format=json",
+              }
+              for label, url in endpoints.items():
+                  try:
+                      response = requests.get(url, allow_redirects=False, timeout=(10, 30),
+                                              headers={"User-Agent": "Mozilla/5.0"})
+                      body = response.text[:5_000_000]
+                      marker = re.search(r"\bytInitialPlayerResponse\s*=\s*", body)
+                      player = {}
+                      if marker:
+                          player, _ = json.JSONDecoder().raw_decode(body[marker.end():])
+                      print(json.dumps({"endpoint": label, "status": response.status_code,
+                                        "bytes": len(response.content), "has_player": bool(marker),
+                                        "player_status": (player.get("playabilityStatus") or {}).get("status"),
+                                        "has_details": isinstance(player.get("videoDetails"), dict),
+                                        "has_microformat": isinstance(player.get("microformat"), dict)}))
+                  except Exception as exc:
+                      print(json.dumps({"endpoint": label, "error_type": type(exc).__name__}))
+              raise
           require(public.get("playability") == "OK" and public.get("video_id") == video_id and
                   public.get("channel_id") == config["youtube_public_channel_id"] and
                   public.get("external_channel_id") == config["youtube_public_channel_id"] and

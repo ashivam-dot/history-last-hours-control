@@ -380,11 +380,13 @@ name = "history-last-hours-control"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "certifi" },
     { name = "cryptography" },
     { name = "modal" },
     { name = "pypdf" },
     { name = "pyyaml" },
     { name = "requests" },
+    { name = "urllib3" },
 ]
 
 [package.dev-dependencies]
@@ -394,11 +396,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "certifi", specifier = "==2026.7.22" },
     { name = "cryptography", specifier = "==49.0.0" },
     { name = "modal", specifier = "==1.5.5" },
     { name = "pypdf", specifier = "==6.19.0" },
     { name = "pyyaml", specifier = "==6.0.3" },
     { name = "requests", specifier = "==2.32.5" },
+    { name = "urllib3", specifier = "==2.8.0" },
 ]
 
 [package.metadata.requires-dev]

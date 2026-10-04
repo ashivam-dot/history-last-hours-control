@@ -16,9 +16,11 @@ import time
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlsplit
 
+import certifi
 import requests
+import urllib3
 import yaml
 from pypdf import PdfReader
 
@@ -65,7 +67,7 @@ def _site(host: str) -> str:
 
 def fetch_public_document(url: str) -> str:
     """Fetch bounded public HTTPS text without following producer-controlled redirects."""
-    parsed = urlparse(url)
+    parsed = urlsplit(url)
     try:
         host, port = parsed.hostname, parsed.port
     except ValueError as exc:
@@ -80,26 +82,55 @@ def fetch_public_document(url: str) -> str:
     else:
         raise Hold("independent evidence cannot use an IP literal")
     try:
-        addresses = socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)
+        host_ascii = host.encode("idna").decode("ascii")
+        addresses = socket.getaddrinfo(host_ascii, 443, type=socket.SOCK_STREAM)
     except OSError as exc:
         raise Hold("independent evidence host is unavailable") from exc
+    except UnicodeError as exc:
+        raise Hold("independent evidence host is malformed") from exc
     require(bool(addresses) and all(ipaddress.ip_address(item[4][0]).is_global for item in addresses),
             "independent evidence host is not publicly routable")
-    try:
-        with requests.get(url, headers={"User-Agent": "HistoryControlIndependentQA/1.0",
-                                        "Accept": "text/html,application/pdf,text/plain"},
-                          allow_redirects=False, stream=True, timeout=(15, 35)) as response:
-            require(response.status_code == 200, "independent evidence page is unavailable or redirected")
+    # Connect directly to a vetted address, while retaining the original hostname
+    # for both TLS certificate verification/SNI and the HTTP Host header.
+    vetted = sorted({item[4][0] for item in addresses},
+                    key=lambda address: (ipaddress.ip_address(address).version != 4, address))
+    target = parsed.path or "/"
+    if parsed.query:
+        target += "?" + parsed.query
+    body: bytearray | None = None
+    content_type = ""
+    for address in vetted:
+        pool = urllib3.HTTPSConnectionPool(address, port=443, server_hostname=host_ascii,
+                                           assert_hostname=host_ascii, cert_reqs="CERT_REQUIRED",
+                                           ca_certs=certifi.where(), maxsize=1)
+        response = None
+        try:
+            response = pool.urlopen(
+                "GET", target,
+                headers={"Host": host_ascii, "User-Agent": "HistoryControlIndependentQA/1.0",
+                         "Accept": "text/html,application/pdf,text/plain"},
+                redirect=False, retries=False, preload_content=False,
+                timeout=urllib3.Timeout(connect=15, read=35),
+            )
+            require(response.status == 200,
+                    "independent evidence page is unavailable or redirected")
             content_type = response.headers.get("Content-Type", "").split(";", 1)[0].lower()
             require(content_type in {"text/html", "application/xhtml+xml", "text/plain", "application/pdf"},
                     "independent evidence is not a readable document")
             body = bytearray()
-            for chunk in response.iter_content(1 << 16):
+            for chunk in response.stream(1 << 16, decode_content=True):
                 body.extend(chunk)
                 require(len(body) <= MAX_PAGE_BYTES, "independent evidence page is oversized")
             require(bool(body), "independent evidence page is empty")
-    except requests.RequestException as exc:
-        raise Hold("independent evidence fetch failed") from exc
+            break
+        except urllib3.exceptions.HTTPError:
+            # Another vetted address may be reachable. Never re-resolve the name.
+            continue
+        finally:
+            if response is not None:
+                response.release_conn()
+            pool.close()
+    require(body is not None, "independent evidence fetch failed at vetted public addresses")
     if content_type == "application/pdf":
         try:
             pdf = PdfReader(io.BytesIO(body), strict=True)

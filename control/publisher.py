@@ -471,16 +471,42 @@ def publish_draft_reviewed(repo, commit: str, episode: str, packet_dir, review: 
     private_video = media_client.download_private_asset(subject["media_asset_id"])
     require(private_video == packet_video and digest(private_video) == subject["media_sha256"],
             "authenticated control asset differs from signed draft")
+    expected_public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{subject['media_sha256']}"
+    expected_public_url = f"{config['publisher_media_url_prefix']}{expected_public_id}.mp4"
+    api = _preflight_before_public_copy(repo, commit, episode, config, buffer_token,
+                                        due, expected_public_url, api)
     media_url, media_public_id = media_client.upload_exact(
         private_video, episode, subject["media_sha256"])
-    require(media_public_id == f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{subject['media_sha256']}" and
-            media_url == f"{config['publisher_media_url_prefix']}{media_public_id}.mp4" and
+    require(media_public_id == expected_public_id and media_url == expected_public_url and
             media_url != subject["media_url"] and
             digest(fetch_video(media_url, {"media_url_prefix": config["publisher_media_url_prefix"]})) ==
             subject["media_sha256"],
             "approved public copy differs from authenticated draft")
     return _schedule_exact(repo, commit, episode, subject, config, buffer_token,
                            due, media_url, media_public_id, api)
+
+
+def _preflight_before_public_copy(repo, commit: str, episode: str, config: dict,
+                                  buffer_token: str, due: datetime, expected_url: str,
+                                  api: BufferClient | None) -> BufferClient:
+    """Read exact destination, history, and queue before exposing approved media."""
+    api = api or BufferClient(buffer_token)
+    organization = config["buffer_organization_id"]
+    channel = config["youtube_channel_id"]
+    api.organization(organization)
+    _channel(api.channels(organization), channel, "youtube")
+    copy, _ = copy_and_metadata(repo, commit, episode)
+    posts = api.posts(organization, channel)
+    existing = _matching(posts, copy["youtube"], expected_url, api)
+    if existing:
+        require(utc(existing.get("dueAt"), "existing YouTube due time") == due,
+                "existing YouTube post has a different due time")
+    else:
+        queued = [post for post in posts if post.get("status") not in ("sent", "error", "draft")]
+        require(len(queued) < QUEUE_LIMIT, "YouTube Buffer queue is full")
+        require(all(post.get("dueAt") != due.isoformat() for post in queued),
+                "requested Buffer slot is already occupied")
+    return api
 
 
 def _schedule_exact(repo, commit: str, episode: str, subject: dict, config: dict,

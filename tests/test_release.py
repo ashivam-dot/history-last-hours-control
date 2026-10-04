@@ -15,7 +15,8 @@ from control.release import (Hold, FILES, candidate, digest, policy, publisher_p
 from control.publisher import (CloudinaryClient, PUBLISHER_PUBLIC_ID_PREFIX,
                                publish_draft_reviewed, publish_reviewed)
 from control.intake import committed_draft, intake_draft, read_private_video, validated_packet
-from control.qa import (GeminiQA, OpenAIQA, fetch_public_document, inspect_media, qa_draft, verified_qa_report,
+from control.qa import (MAX_PAGE_BYTES, GeminiQA, OpenAIQA, fetch_public_document, inspect_media,
+                        qa_draft, verified_qa_report,
                         verify_sources, verify_visual_rights)
 
 
@@ -668,6 +669,36 @@ def test_v2_packet_signing_and_publisher_handoff(fixture, tmp_path, monkeypatch)
     assert media.uploads == [("ep063", digest(video))]
     assert len(api.created) == 1
     assert api.created[0]["assets"] == [{"video": {"url": public_url}}]
+    for failure in ("wrong_org", "wrong_channel", "full_queue", "occupied_slot",
+                    "existing_wrong_media"):
+        before_copy = FakePrivateMedia(private_url, video)
+        before_copy.public_url = public_url
+        bad_api = FakeBuffer(public_url)
+        if failure == "wrong_org":
+            def missing_org(_):
+                raise Hold("pinned organization unavailable")
+
+            bad_api.organization = missing_org
+        elif failure == "wrong_channel":
+            bad_api.services = ("instagram",)
+        elif failure == "full_queue":
+            bad_api.by_channel["history-yt"] = [
+                {"id": str(index), "status": "scheduled", "text": f"unrelated-{index}",
+                 "dueAt": "2026-10-07T00:00:00+00:00"} for index in range(10)]
+        elif failure == "occupied_slot":
+            bad_api.by_channel["history-yt"] = [
+                {"id": "occupied", "status": "scheduled", "text": "unrelated", "dueAt": due}]
+        else:
+            copy_text = __import__("control.publisher", fromlist=["copy_and_metadata"]).copy_and_metadata(
+                source, commit, "ep063")[0]["youtube"]
+            bad_api.by_channel["history-yt"] = [
+                {"id": "old", "status": "scheduled", "text": copy_text, "dueAt": due}]
+            bad_api.by_id["old"] = {**bad_api.by_channel["history-yt"][0],
+                                    "assets": [{"source": "https://wrong.example/video.mp4"}]}
+        with pytest.raises(Hold):
+            publish_draft_reviewed(source, commit, "ep063", packet_dir, review, public_b64,
+                                   config, "test-token", "test-cloudinary", due, bad_api, before_copy)
+        assert before_copy.uploads == [] and bad_api.created == []
     media.video = video + b"changed"
     with pytest.raises(Hold, match="authenticated control asset"):
         publish_draft_reviewed(source, commit, "ep063", packet_dir, review, public_b64,
@@ -813,7 +844,7 @@ def test_independent_claim_quotes_require_distinct_live_sites():
 
 
 def test_independent_evidence_fetch_rejects_private_addresses_before_request(monkeypatch):
-    monkeypatch.setattr("control.qa.requests.get", lambda *args, **kwargs:
+    monkeypatch.setattr("control.qa.urllib3.HTTPSConnectionPool", lambda *args, **kwargs:
                         pytest.fail("private network request attempted"))
     with pytest.raises(Hold, match="IP literal"):
         fetch_public_document("https://127.0.0.1/private")
@@ -821,6 +852,106 @@ def test_independent_evidence_fetch_rejects_private_addresses_before_request(mon
                         lambda *args, **kwargs: [(None, None, None, None, ("10.0.0.1", 443))])
     with pytest.raises(Hold, match="publicly routable"):
         fetch_public_document("https://archive.example.org/page")
+
+
+def test_independent_evidence_https_socket_is_pinned_to_vetted_ip(monkeypatch):
+    calls = []
+    document = ("<html><body>Verified public history archive account with a long independent "
+                "description of the voyage and a dated primary record. " * 4 + "</body></html>").encode()
+
+    class Response:
+        status = 200
+        headers = {"Content-Type": "text/html; charset=utf-8"}
+
+        def stream(self, size, decode_content):
+            assert size == 1 << 16 and decode_content is True
+            yield document
+
+        def release_conn(self):
+            calls.append("released")
+
+    class Pool:
+        def __init__(self, ip, **kwargs):
+            calls.append((ip, kwargs))
+
+        def urlopen(self, method, target, **kwargs):
+            calls.append((method, target, kwargs))
+            return Response()
+
+        def close(self):
+            calls.append("closed")
+
+    monkeypatch.setattr("control.qa.socket.getaddrinfo",
+                        lambda *args, **kwargs: [(None, None, None, None, ("93.184.215.14", 443))])
+    monkeypatch.setattr("control.qa.urllib3.HTTPSConnectionPool", Pool)
+    monkeypatch.setattr("control.qa.requests.get", lambda *args, **kwargs:
+                        pytest.fail("unvetted DNS re-resolution attempted"))
+    text = fetch_public_document("https://archive.example.org/history/voyage?q=ship")
+    assert "Verified public history archive" in text
+    assert calls[0][0] == "93.184.215.14"
+    assert calls[0][1]["server_hostname"] == calls[0][1]["assert_hostname"] == "archive.example.org"
+    assert calls[0][1]["cert_reqs"] == "CERT_REQUIRED"
+    assert calls[1][0:2] == ("GET", "/history/voyage?q=ship")
+    assert calls[1][2]["headers"]["Host"] == "archive.example.org"
+    assert calls[1][2]["redirect"] is False
+    assert calls[-2:] == ["released", "closed"]
+
+
+def test_independent_evidence_does_not_follow_redirect_from_vetted_ip(monkeypatch):
+    class Response:
+        status = 302
+        headers = {"Location": "https://127.0.0.1/private"}
+
+        def release_conn(self):
+            pass
+
+    class Pool:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def urlopen(self, method, target, **kwargs):
+            assert kwargs["redirect"] is False
+            return Response()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr("control.qa.socket.getaddrinfo",
+                        lambda *args, **kwargs: [(None, None, None, None, ("93.184.215.14", 443))])
+    monkeypatch.setattr("control.qa.urllib3.HTTPSConnectionPool", Pool)
+    with pytest.raises(Hold, match="unavailable or redirected"):
+        fetch_public_document("https://archive.example.org/page")
+
+
+def test_independent_evidence_caps_decoded_response_from_pinned_socket(monkeypatch):
+    closed = []
+
+    class Response:
+        status = 200
+        headers = {"Content-Type": "text/plain"}
+
+        def stream(self, size, decode_content):
+            yield b"x" * (MAX_PAGE_BYTES + 1)
+
+        def release_conn(self):
+            closed.append("released")
+
+    class Pool:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def urlopen(self, *args, **kwargs):
+            return Response()
+
+        def close(self):
+            closed.append("closed")
+
+    monkeypatch.setattr("control.qa.socket.getaddrinfo",
+                        lambda *args, **kwargs: [(None, None, None, None, ("93.184.215.14", 443))])
+    monkeypatch.setattr("control.qa.urllib3.HTTPSConnectionPool", Pool)
+    with pytest.raises(Hold, match="oversized"):
+        fetch_public_document("https://archive.example.org/page")
+    assert closed == ["released", "closed"]
 
 
 def test_multimodal_review_sends_full_frame_set_with_strict_json(monkeypatch, tmp_path):

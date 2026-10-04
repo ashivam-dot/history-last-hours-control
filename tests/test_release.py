@@ -16,7 +16,8 @@ from control.publisher import (CloudinaryClient, PUBLISHER_PUBLIC_ID_PREFIX, _cr
                                publish_draft_reviewed, publish_reviewed)
 from control.intake import committed_draft, intake_draft, read_private_video, validated_packet
 from control import orchestrate as orch
-from control.qa import (MAX_PAGE_BYTES, GeminiQA, OpenAIQA, fetch_public_document, inspect_media,
+from control.qa import (MAX_PAGE_BYTES, GeminiQA, GeminiTransientHold, OpenAIQA,
+                        fetch_public_document, inspect_media,
                         qa_draft, verified_qa_report,
                         verify_sources, verify_visual_rights)
 
@@ -958,7 +959,8 @@ def test_v2_packet_rejects_public_media_before_signing(fixture, tmp_path):
         validated_packet(source, commit, "ep063", config, packet_dir)
 
 
-def test_automated_qa_approves_only_exact_live_sources_and_complete_media(fixture, tmp_path):
+def test_automated_qa_approves_only_exact_live_sources_and_complete_media(fixture, tmp_path,
+                                                                            monkeypatch):
     source, _, episode, video, _, config = draft_fixture(fixture)
     research_path = episode / "research.json"
     research = json.loads(research_path.read_text())
@@ -1021,6 +1023,25 @@ def test_automated_qa_approves_only_exact_live_sources_and_complete_media(fixtur
     with pytest.raises(Hold, match="does not bind"):
         verified_qa_report({**report, "qa_model": "other-model"}, approval,
                            approval["subject"], config, packet_dir)
+
+    class TransientQA(FakeQA):
+        def assess(self, claims, visuals, script, transcript, media):
+            raise GeminiTransientHold(
+                "independent Gemini QA quota or capacity exhausted after bounded retries")
+
+    monkeypatch.setenv("GITHUB_RUN_ID", "300")
+    monkeypatch.setenv("GITHUB_RUN_ATTEMPT", "1")
+    with pytest.raises(GeminiTransientHold):
+        qa_draft(source, commit, "ep063", packet_dir, config,
+                 tmp_path / "transient-report.json", tmp_path / "transient-approval.json",
+                 TransientQA(), fetcher, inspector)
+    transient = json.loads((tmp_path / "transient-report.json").read_text())
+    assert transient["failure_code"] == "gemini_transient"
+    assert transient["actions_run_key"] == "300/1"
+    assert transient["draft_sha256"] == approval["subject"]["draft_sha256"]
+    assert transient["media_sha256"] == approval["subject"]["media_sha256"]
+    assert not (tmp_path / "transient-approval.json").exists()
+
     documents["https://archive.example/story"] = "Changed archive page. " + "Context " * 30
     with pytest.raises(Hold, match="two independent live sites"):
         qa_draft(source, commit, "ep063", packet_dir, config,
@@ -1251,7 +1272,7 @@ def test_gemini_quota_exhaustion_holds_after_bounded_retries(monkeypatch):
 
     monkeypatch.setattr("control.qa.requests.post", post)
     api = GeminiQA("test-key", "test-vision-model", delays.append)
-    with pytest.raises(Hold, match="quota or capacity exhausted"):
+    with pytest.raises(GeminiTransientHold, match="quota or capacity exhausted"):
         api._call([{"text": "review"}])
     assert len(calls) == 4 and delays == [5, 15, 30]
 

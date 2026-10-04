@@ -36,6 +36,10 @@ _PEAK = re.compile(r"Peak:\s+(-?[\d.]+) dBFS")
 _SKIP = {"script", "style", "noscript", "svg"}
 
 
+class GeminiTransientHold(Hold):
+    """The pinned Gemini model returned only retryable quota/capacity states."""
+
+
 class _HTMLText(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -389,7 +393,8 @@ class GeminiQA:
                 raise Hold("independent Gemini QA request is unavailable") from exc
             if response.status_code in (429, 503):
                 if attempt == 3:
-                    raise Hold("independent Gemini QA quota or capacity exhausted after bounded retries")
+                    raise GeminiTransientHold(
+                        "independent Gemini QA quota or capacity exhausted after bounded retries")
                 self.sleeper((5, 15, 30)[attempt])
                 continue
             require(response.status_code == 200,
@@ -484,11 +489,17 @@ def qa_draft(repo: Path, commit: str, episode: str, packet_dir: Path, config: di
     report = {"version": 1, "episode": episode, "source_commit": commit,
               "reviewed_at_utc": datetime.now(timezone.utc).isoformat(),
               "status": "held", "stage": "packet", "reason": "review incomplete"}
+    run_key = (f"{os.environ.get('GITHUB_RUN_ID', '')}/"
+               f"{os.environ.get('GITHUB_RUN_ATTEMPT', '')}")
+    if re.fullmatch(r"[0-9]+/[0-9]+", run_key):
+        report["actions_run_key"] = run_key
     require(not report_path.exists() and not approval_path.exists(), "QA output already exists")
     report_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     try:
         subject, video = validated_packet(repo, commit, episode, config, packet_dir)
         report["subject_sha256"] = digest(canonical(subject))
+        report["draft_sha256"] = subject["draft_sha256"]
+        report["media_sha256"] = subject["media_sha256"]
         root = packet_dir / "evidence"
         research = read_object((root / "research.json").read_bytes(), "review research")
         manifest = read_object((root / "work" / "manifest.json").read_bytes(), "review manifest")
@@ -538,6 +549,8 @@ def qa_draft(repo: Path, commit: str, episode: str, packet_dir: Path, config: di
         return report
     except Hold as exc:
         report["reason"] = str(exc)
+        report["failure_code"] = ("gemini_transient" if isinstance(exc, GeminiTransientHold)
+                                  else "review_hold")
         raise
     except Exception as exc:
         report["reason"] = "independent QA encountered an internal error"

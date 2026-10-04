@@ -170,6 +170,7 @@ jobs:
     timeout-minutes: 50
     permissions:
       contents: write
+      issues: write
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -394,6 +395,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
+      actions: read
       contents: write
       issues: write
     steps:
@@ -402,6 +404,12 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - run: uv sync --frozen --python 3.12 --no-dev
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        if: always() && needs.qa.result == 'failure'
+        continue-on-error: true
+        with:
+          name: private-qa-report-${{ github.run_id }}
+          path: private/qa-failure
       - name: Hold candidate and open or update private failure issue
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -415,7 +423,9 @@ jobs:
           for stage in discover intake qa sign publish; do
             key="${stage^^}_RESULT"
             if [ "${!key}" = failure ]; then
-              uv run --frozen --no-dev python -m control.orchestrate fail --episode "$EPISODE" --stage "$stage"
+              uv run --frozen --no-dev python -m control.orchestrate fail \
+                --episode "$EPISODE" --stage "$stage" \
+                --qa-report private/qa-failure/qa_report.json
               break
             fi
           done

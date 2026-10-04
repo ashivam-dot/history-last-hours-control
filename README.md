@@ -146,7 +146,13 @@ model name are pinned together in tracked `policy.json` to Gemini 3.8 Flash.
 Gemini calls use the documented
 [generateContent API](https://ai.google.dev/api/generate-content) with inline
 audio and frames and a JSON schema. Quota and capacity responses receive only
-three bounded retries before a hold. The OpenAI path uses documented
+three bounded request retries before a hold. For unattended QA, a trusted
+report that identifies only Gemini 429/503 exhaustion and binds the exact
+episode, source commit, draft hash, media hash, provider, and model schedules
+another complete QA run after a 12-hour cooldown. At most three complete QA
+runs are permitted; the third operational failure holds the receipt. Missing
+reports, source/media failures, and negative factual or visual verdicts remain
+held without automatic retry. The OpenAI path uses documented
 [Responses image input](https://platform.openai.com/docs/guides/images),
 [structured output](https://platform.openai.com/docs/guides/structured-outputs),
 and [audio transcription](https://platform.openai.com/docs/guides/speech-to-text)
@@ -209,7 +215,9 @@ control-owned media SHA-256, and compares the public YouTube watch page's video
 ID, channel ID, title, description, and visibility with the approved source
 commit. Only then does it advance the private receipt to `published`; failures
 leave it scheduled and open or update a private delivery issue. This monitor
-has not yet observed a real scheduled release.
+has not yet observed a real scheduled release. Read-only run `37192202771`
+verified the sent-post GraphQL fields and the public Shorts player on an
+existing channel video from an Actions runner.
 
 ## Work still required before activation
 

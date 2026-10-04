@@ -78,6 +78,8 @@ class MemoryState:
     def __init__(self, receipts=()):
         self.items = {item["episode"]: item for item in receipts}
         self.alerts = []
+        self.qa_retry_alerts = []
+        self.qa_retry_resolved = []
 
     def ensure_branch(self):
         pass
@@ -94,6 +96,12 @@ class MemoryState:
     def alert(self, episode, stage, reason):
         self.alerts.append((episode, stage, reason))
 
+    def alert_qa_retry(self, episode, attempts, after_utc):
+        self.qa_retry_alerts.append((episode, attempts, after_utc))
+
+    def resolve_qa_retry(self, episode):
+        self.qa_retry_resolved.append(episode)
+
 
 def _receipt(phase="claimed", commit="a" * 40):
     return {"version": 1, "episode": "ep063", "source_commit": commit,
@@ -103,6 +111,17 @@ def _receipt(phase="claimed", commit="a" * 40):
 
 def _source():
     return {"draft_sha256": "b" * 64, "draft": {"media_sha256": "c" * 64}}
+
+
+def _qa_transient_report(config, **changes):
+    return {"version": 1, "episode": "ep063", "source_commit": "a" * 40,
+            "draft_sha256": "b" * 64, "media_sha256": "c" * 64,
+            "subject_sha256": "d" * 64, "status": "held",
+            "stage": "independent_multimodal_review",
+            "reason": "independent Gemini QA quota or capacity exhausted after bounded retries",
+            "actions_run_key": "100/1",
+            "failure_code": "gemini_transient", "qa_provider": config["qa_provider"],
+            "qa_model": config["qa_model"], **changes}
 
 
 def test_changed_draft_holds_claim_and_opens_private_alert(monkeypatch, tmp_path, config):
@@ -173,6 +192,86 @@ def test_failure_holds_receipt_and_alerts_even_when_policy_is_invalid(monkeypatc
     held = state.receipt("ep063")
     assert held["phase"] == "held" and held["resume_phase"] == "qa_approved"
     assert state.alerts == [("ep063", "sign", "Actions job failed; inspect the linked run and private artifacts")]
+
+
+def test_transient_gemini_failure_retries_exact_receipt_then_holds_after_cap(
+        monkeypatch, tmp_path, config):
+    state = MemoryState([_receipt("intake_verified")])
+    monkeypatch.setattr(orch, "GitHubState", lambda *args: state)
+    monkeypatch.setattr(orch, "policy", lambda path: config)
+    monkeypatch.setenv("GITHUB_RUN_ATTEMPT", "1")
+    report = tmp_path / "qa_report.json"
+    report.write_text(json.dumps(_qa_transient_report(config)))
+    args = SimpleNamespace(command="fail", episode="ep063", stage="qa",
+                           policy=Path("unused"), qa_report=report)
+    monkeypatch.setenv("GITHUB_RUN_ID", "100")
+    orch.run(args)
+    first = state.receipt("ep063")
+    assert first["phase"] == "intake_verified"
+    assert first["qa_operational_attempts"] == 1
+    assert timedelta(hours=11, minutes=59) < (
+        datetime.fromisoformat(first["qa_retry_after_utc"]) - datetime.now(timezone.utc)
+    ) <= timedelta(hours=12)
+    assert state.qa_retry_alerts[-1][:2] == ("ep063", 1)
+    assert state.alerts == []
+    orch.run(args)
+    assert state.receipt("ep063")["qa_operational_attempts"] == 1
+
+    monkeypatch.setattr(orch, "draft_candidates",
+                        lambda repo, config: iter([("ep063", "a" * 40)]))
+    monkeypatch.setattr(orch, "producer_unreleased", lambda *args: None)
+    monkeypatch.setattr(orch, "exact_draft", lambda *args: _source())
+    assert orch.discover(SimpleNamespace(source=tmp_path, resume_episode=""), config, state) == {}
+    state.put({**first, "qa_retry_after_utc": "2026-10-01T00:00:00+00:00"})
+    assert orch.discover(SimpleNamespace(source=tmp_path, resume_episode=""), config, state)["episode"] == "ep063"
+
+    monkeypatch.setenv("GITHUB_RUN_ID", "101")
+    report.write_text(json.dumps(_qa_transient_report(config, actions_run_key="101/1")))
+    orch.run(args)
+    assert state.receipt("ep063")["qa_operational_attempts"] == 2
+    monkeypatch.setenv("GITHUB_RUN_ID", "102")
+    report.write_text(json.dumps(_qa_transient_report(config, actions_run_key="102/1")))
+    orch.run(args)
+    final = state.receipt("ep063")
+    assert final["phase"] == "held" and final["qa_operational_attempts"] == 3
+    assert final["resume_phase"] == "intake_verified"
+    assert "qa_retry_after_utc" not in final
+    assert state.alerts[-1][:2] == ("ep063", "qa")
+    assert state.qa_retry_resolved == ["ep063"]
+
+
+@pytest.mark.parametrize("change", [
+    {"failure_code": "review_hold"}, {"media_sha256": "0" * 64},
+    {"source_commit": "0" * 40}, {"qa_model": "unreviewed-model"},
+    {"actions_run_key": "older-run/1"},
+    {"stage": "independent_sources"},
+])
+def test_editorial_or_unbound_qa_failure_never_auto_retries(monkeypatch, tmp_path, config, change):
+    state = MemoryState([_receipt("intake_verified")])
+    monkeypatch.setattr(orch, "GitHubState", lambda *args: state)
+    monkeypatch.setattr(orch, "policy", lambda path: config)
+    monkeypatch.setenv("GITHUB_RUN_ID", "200")
+    monkeypatch.setenv("GITHUB_RUN_ATTEMPT", "1")
+    report = tmp_path / "qa_report.json"
+    report.write_text(json.dumps({**_qa_transient_report(config, actions_run_key="200/1"), **change}))
+    orch.run(SimpleNamespace(command="fail", episode="ep063", stage="qa",
+                             policy=Path("unused"), qa_report=report))
+    assert state.receipt("ep063")["phase"] == "held"
+    assert state.qa_retry_alerts == []
+    assert state.alerts[-1][:2] == ("ep063", "qa")
+
+
+def test_passing_qa_removes_retry_wait_and_resolves_issue(monkeypatch, config):
+    old = {**_receipt("intake_verified"), "qa_operational_attempts": 1,
+           "qa_retry_after_utc": "2026-10-05T00:00:00+00:00"}
+    state = MemoryState([old])
+    monkeypatch.setattr(orch, "GitHubState", lambda *args: state)
+    monkeypatch.setattr(orch, "policy", lambda path: config)
+    orch.run(SimpleNamespace(command="advance", episode="ep063", commit="a" * 40,
+                             phase="qa_approved", policy=Path("unused")))
+    assert state.receipt("ep063")["phase"] == "qa_approved"
+    assert "qa_retry_after_utc" not in state.receipt("ep063")
+    assert state.qa_retry_resolved == ["ep063"]
 
 
 def test_release_reservation_is_durable_and_blocks_automatic_retry(monkeypatch, tmp_path, config):
@@ -313,6 +412,26 @@ def test_delivery_issue_is_separate_and_closes_after_verification(monkeypatch):
     assert calls[-1][2]["json"] == {"state": "closed"}
 
 
+def test_qa_retry_issue_names_cooldown_and_closes_after_success(monkeypatch):
+    state = orch.GitHubState("test-token", "owner/control", "a" * 40)
+    calls = []
+    existing = []
+
+    def request(method, path, **kwargs):
+        calls.append((method, path, kwargs))
+        return existing if method == "GET" else {}
+
+    monkeypatch.setattr(state, "request", request)
+    state.alert_qa_retry("ep063", 1, "2026-10-05T00:00:00+00:00")
+    assert calls[-1][0:2] == ("POST", "/issues")
+    assert calls[-1][2]["json"]["title"] == "[qa-retry] ep063 pending"
+    assert "2026-10-05T00:00:00+00:00" in calls[-1][2]["json"]["body"]
+    existing.append({"number": 10, "title": "[qa-retry] ep063 pending"})
+    state.resolve_qa_retry("ep063")
+    assert calls[-1][0:2] == ("PATCH", "/issues/10")
+    assert calls[-1][2]["json"] == {"state": "closed"}
+
+
 @pytest.mark.parametrize("operation", ["sign", "publish"])
 def test_inflight_run_holds_when_main_policy_switch_is_turned_off(monkeypatch, config, operation):
     state = orch.GitHubState("test-token", "owner/control", "a" * 40)
@@ -334,6 +453,7 @@ def test_workflow_separates_credentials_and_gates_release():
     jobs = workflow["jobs"]
     assert jobs["intake"]["environment"] == jobs["publish"]["environment"] == "history-publisher"
     assert jobs["qa"]["environment"] == "history-independent-qa"
+    assert jobs["qa"]["permissions"]["issues"] == "write"
     assert jobs["sign"]["environment"] == "history-review-signing"
     assert "signing_enabled == 'true'" in jobs["sign"]["if"]
     assert "publishing_enabled == 'true'" in jobs["publish"]["if"]
@@ -349,6 +469,10 @@ def test_workflow_separates_credentials_and_gates_release():
     assert "HISTORY_PUBLISHER_BUFFER_API_KEY" not in qa_text + sign_text
     assert "HISTORY_REVIEW_SIGNING_KEY" not in qa_text
     assert "HISTORY_QA_GEMINI_API_KEY" not in sign_text
+    alert_text = json.dumps(jobs["alert"])
+    assert jobs["alert"]["permissions"]["actions"] == "read"
+    assert "private-qa-report-${{ github.run_id }}" in alert_text
+    assert "--qa-report private/qa-failure/qa_report.json" in alert_text
     for stage, command in (("sign", "sign-qa-draft"), ("publish", "publish-draft")):
         steps = jobs[stage]["steps"]
         mutation = next(index for index, step in enumerate(steps) if command in step.get("run", ""))

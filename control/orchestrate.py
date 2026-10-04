@@ -36,6 +36,9 @@ SWITCHES = {
 SOURCE_PATH = re.compile(r"content/episodes/(ep[0-9]{3,})/draft\.json\Z")
 FORBIDDEN_PRODUCER_RECORDS = ("hold.json", "publish.json", "release_certificate.json",
                               "independent_review.json")
+QA_RETRY_COOLDOWN = timedelta(hours=12)
+MAX_OPERATIONAL_QA_ATTEMPTS = 3
+QA_RETRY_STAGES = ("full_audio_transcription", "independent_multimodal_review")
 
 
 def _git(repo: Path, *args: str) -> str:
@@ -130,6 +133,55 @@ def advance(receipt: dict, phase: str) -> dict:
         return receipt
     require(NEXT[current] == phase, "receipt phase transition is out of order")
     return {**receipt, "phase": phase, "updated_at_utc": datetime.now(timezone.utc).isoformat()}
+
+
+def qa_retry_waiting(receipt: dict, now: datetime) -> bool:
+    after = receipt.get("qa_retry_after_utc")
+    if after is None:
+        return False
+    attempts = receipt.get("qa_operational_attempts")
+    require(receipt.get("phase") == "intake_verified" and type(attempts) is int and
+            0 < attempts < MAX_OPERATIONAL_QA_ATTEMPTS,
+            "private QA retry receipt is malformed")
+    return now < utc(after, "QA retry time")
+
+
+def qa_retry_update(receipt: dict, report: dict, config: dict,
+                    now: datetime, run_key: str) -> dict | None:
+    """Schedule only a trusted same-media Gemini 429/503 hold for bounded retries."""
+    if not (receipt.get("phase") == "intake_verified" and
+            type(report.get("version")) is int and report["version"] == 1 and
+            report.get("status") == "held" and report.get("failure_code") == "gemini_transient" and
+            report.get("stage") in QA_RETRY_STAGES and
+            report.get("episode") == receipt.get("episode") and
+            report.get("source_commit") == receipt.get("source_commit") and
+            report.get("draft_sha256") == receipt.get("draft_sha256") and
+            report.get("media_sha256") == receipt.get("media_sha256") and
+            report.get("actions_run_key") == run_key and
+            bool(SHA.fullmatch(str(report.get("subject_sha256")))) and
+            report.get("qa_provider") == config.get("qa_provider") == "gemini" and
+            report.get("qa_model") == config.get("qa_model") and
+            isinstance(report.get("reason"), str) and
+            report["reason"].startswith("independent Gemini QA quota or capacity exhausted") and
+            bool(re.fullmatch(r"[0-9]+/[0-9]+", run_key))):
+        return None
+    attempts = receipt.get("qa_operational_attempts", 0)
+    if type(attempts) is not int or not 0 <= attempts < MAX_OPERATIONAL_QA_ATTEMPTS:
+        return None
+    if receipt.get("qa_last_failure_run") == run_key:
+        return receipt
+    attempts += 1
+    updated = {**receipt, "qa_operational_attempts": attempts,
+               "qa_last_failure_run": run_key,
+               "qa_last_failure_reason": report["reason"][:500],
+               "updated_at_utc": now.isoformat()}
+    if attempts < MAX_OPERATIONAL_QA_ATTEMPTS:
+        updated["qa_retry_after_utc"] = (now + QA_RETRY_COOLDOWN).isoformat()
+    else:
+        updated.pop("qa_retry_after_utc", None)
+        updated.update({"phase": "held", "resume_phase": "intake_verified",
+                        "held_reason": "independent Gemini QA remained unavailable after three bounded attempts"})
+    return updated
 
 
 def next_due(receipts: list[dict], now: datetime) -> str:
@@ -285,6 +337,22 @@ class GitHubState:
         body = f"Reason: {reason[:500]}\nRun: {self._run_url()}\n"
         self._upsert_issue(title, body)
 
+    def alert_qa_retry(self, episode: str, attempts: int, after_utc: str) -> None:
+        require(bool(EPISODE.fullmatch(episode)) and
+                type(attempts) is int and 0 < attempts < MAX_OPERATIONAL_QA_ATTEMPTS,
+                "QA retry alert is malformed")
+        title = f"[qa-retry] {episode} pending"
+        body = (f"Pinned Gemini quota/capacity hold: attempt {attempts} of "
+                f"{MAX_OPERATIONAL_QA_ATTEMPTS}.\nNext eligible run: {after_utc}\n"
+                f"Run: {self._run_url()}\n")
+        self._upsert_issue(title, body)
+
+    def resolve_qa_retry(self, episode: str) -> None:
+        require(bool(EPISODE.fullmatch(episode)), "QA retry resolution episode is malformed")
+        issue = self._open_issue(f"[qa-retry] {episode} pending")
+        if issue:
+            self.request("PATCH", f"/issues/{issue['number']}", json={"state": "closed"})
+
     def resolve_delivery(self, episode: str) -> None:
         require(bool(EPISODE.fullmatch(episode)), "delivery resolution episode is malformed")
         issue = self._open_issue(f"[delivery] {episode} unverified")
@@ -357,6 +425,8 @@ def discover(args, config: dict, state: GitHubState) -> dict:
             state.put(held)
             state.alert(episode, "discovery", held["held_reason"])
             raise Hold(held["held_reason"])
+        if old and qa_retry_waiting(old, datetime.now(timezone.utc)):
+            continue
         if resume:
             old = {k: v for k, v in old.items() if k not in ("held_reason", "resume_phase")}
             old["phase"] = receipts[episode]["resume_phase"]
@@ -390,11 +460,39 @@ def run(args) -> dict | None:
         reason = "Actions job failed; inspect the linked run and private artifacts"
         if args.episode:
             receipt = state.receipt(args.episode)
+            report_path = getattr(args, "qa_report", None)
+            report = None
+            if args.stage == "qa" and receipt and isinstance(report_path, Path):
+                try:
+                    if report_path.is_file() and report_path.stat().st_size <= 5 * 1024 * 1024:
+                        report = read_object(report_path.read_bytes(), "private QA failure report")
+                        config = policy(args.policy)
+                except (Hold, OSError):
+                    report = None
+            if report is not None:
+                run_key = (f"{os.environ.get('GITHUB_RUN_ID', '')}/"
+                           f"{os.environ.get('GITHUB_RUN_ATTEMPT', '')}")
+                retry = qa_retry_update(receipt, report, config,
+                                        datetime.now(timezone.utc), run_key)
+                if retry is not None:
+                    if retry != receipt:
+                        state.put(retry)
+                    if retry["phase"] == "intake_verified":
+                        state.alert_qa_retry(args.episode, retry["qa_operational_attempts"],
+                                             retry["qa_retry_after_utc"])
+                    else:
+                        state.alert(args.episode, "qa", retry["held_reason"])
+                        try:
+                            state.resolve_qa_retry(args.episode)
+                        except Hold as exc:
+                            print(f"Warning: {exc}", file=sys.stderr)
+                    return None
             if receipt and receipt["phase"] not in ("scheduled", "published"):
                 if receipt["phase"] != "held":
                     receipt = {**receipt, "resume_phase": receipt["phase"], "phase": "held",
                                "held_reason": reason,
                                "updated_at_utc": datetime.now(timezone.utc).isoformat()}
+                    receipt.pop("qa_retry_after_utc", None)
                     state.put(receipt)
         state.alert(args.episode or None, args.stage, reason)
         return None
@@ -418,7 +516,14 @@ def run(args) -> dict | None:
         require(enabled(config, operation), f"{operation} policy is disabled")
         updated = advance(receipt, args.phase)
         if updated != receipt:
+            if args.phase == "qa_approved":
+                updated.pop("qa_retry_after_utc", None)
             state.put(updated)
+            if args.phase == "qa_approved" and receipt.get("qa_operational_attempts"):
+                try:
+                    state.resolve_qa_retry(args.episode)
+                except Hold as exc:
+                    print(f"Warning: {exc}", file=sys.stderr)
         return updated
     if args.command == "reserve":
         require(enabled(config, "publish"), "publishing policy is disabled")
@@ -485,6 +590,7 @@ def main(argv: list[str] | None = None) -> int:
     failure = commands.add_parser("fail")
     failure.add_argument("--episode", default="")
     failure.add_argument("--stage", required=True)
+    failure.add_argument("--qa-report", type=Path)
     args = parser.parse_args(argv)
     try:
         run(args)

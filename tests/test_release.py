@@ -12,9 +12,10 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from control.release import (Hold, FILES, candidate, digest, policy, publisher_preflight,
                              sign, verify)
-from control.publisher import (CloudinaryClient, PUBLISHER_PUBLIC_ID_PREFIX,
+from control.publisher import (CloudinaryClient, PUBLISHER_PUBLIC_ID_PREFIX, _create_or_reconcile,
                                publish_draft_reviewed, publish_reviewed)
 from control.intake import committed_draft, intake_draft, read_private_video, validated_packet
+from control import orchestrate as orch
 from control.qa import (MAX_PAGE_BYTES, GeminiQA, OpenAIQA, fetch_public_document, inspect_media,
                         qa_draft, verified_qa_report,
                         verify_sources, verify_visual_rights)
@@ -709,6 +710,94 @@ def test_v2_packet_signing_and_publisher_handoff(fixture, tmp_path, monkeypatch)
         publish_draft_reviewed(source, commit, "ep063", packet_dir, review, public_b64,
                                config, "test-token", "test-cloudinary", due, api, media)
     assert len(api.created) == 1
+
+
+@pytest.mark.parametrize("flip_at", ["before_public_copy", "before_buffer_create"])
+def test_live_policy_flip_blocks_draft_mutation_after_preflight(fixture, tmp_path, monkeypatch, flip_at):
+    source, commit, _, video, _, config = draft_fixture(fixture)
+    private_prefix = config["publisher_media_url_prefix"].replace("/video/upload/", "/video/authenticated/")
+    private_url = private_prefix + PUBLISHER_PUBLIC_ID_PREFIX + "drafts/ep063-" + digest(video) + ".mp4"
+    media = FakePrivateMedia(private_url, video)
+    packet_dir = tmp_path / "packet"
+    intake_draft(source, commit, "ep063", config, "test-cloudinary", packet_dir,
+                 lambda _: video, media)
+    subject, _ = validated_packet(source, commit, "ep063", config, packet_dir)
+    private = Ed25519PrivateKey.generate()
+    private_raw = private.private_bytes(serialization.Encoding.Raw, serialization.PrivateFormat.Raw,
+                                        serialization.NoEncryption())
+    public_raw = private.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    config = {**config, "signing_enabled": True, "publishing_enabled": True,
+              "reviewer_key_sha256": digest(public_raw), "buffer_organization_id": "history-org",
+              "youtube_channel_id": "history-yt"}
+    approval = {"subject": subject, "decision": "approved",
+                "checks": {name: True for name in ("claim_sources", "visual_identity_rights", "full_video_audio")},
+                "reviewed_at_utc": datetime.now(timezone.utc).isoformat()}
+    review = sign(approval, subject, base64.b64encode(private_raw).decode(), config)
+    public_url = config["publisher_media_url_prefix"] + PUBLISHER_PUBLIC_ID_PREFIX + "ep063-" + digest(video) + ".mp4"
+    media.public_url = public_url
+    api = FakeBuffer(public_url)
+    live = {"publishing_enabled": True}
+    post_reads = []
+    original_posts = api.posts
+
+    def posts(organization, channel):
+        post_reads.append(channel)
+        if len(post_reads) == (1 if flip_at == "before_public_copy" else 2):
+            live["publishing_enabled"] = False
+        return original_posts(organization, channel)
+
+    def check_live_policy(self, local, operation):
+        assert operation == "publish" and local is config
+        if not live["publishing_enabled"]:
+            raise Hold("main publishing switch was turned off")
+
+    api.posts = posts
+    monkeypatch.setattr(orch.GitHubState, "require_live_policy", check_live_policy)
+    monkeypatch.setattr("control.publisher.fetch_video", lambda url, _: video)
+    monkeypatch.setenv("HISTORY_UNATTENDED_LIVE_POLICY", "1")
+    monkeypatch.setenv("HISTORY_CONTROL_POLICY_TOKEN", "test-control-token")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "owner/control")
+    monkeypatch.setenv("GITHUB_SHA", "a" * 40)
+    due = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0).isoformat()
+    with pytest.raises(Hold, match="main publishing switch was turned off"):
+        publish_draft_reviewed(source, commit, "ep063", packet_dir, review,
+                               base64.b64encode(public_raw).decode(), config,
+                               "test-token", "test-cloudinary", due, api, media)
+    assert not api.created
+    assert len(media.uploads) == (1 if flip_at == "before_public_copy" else 2)
+
+
+def test_live_policy_is_checked_after_reconcile_and_before_buffer_create():
+    api = FakeBuffer("https://example.test/exact.mp4")
+    due = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0)
+
+    def switched_off():
+        raise Hold("main publishing switch was turned off")
+
+    with pytest.raises(Hold, match="switch was turned off"):
+        _create_or_reconcile(api, "history-yt", "exact text", {}, api.media_url, due, [],
+                             before_create=switched_off)
+    assert api.created == []
+
+
+def test_live_policy_is_checked_before_ed25519_signature(fixture, monkeypatch):
+    _, _, _, subject, config, _, _ = approved_publisher(fixture)
+    private = Ed25519PrivateKey.generate()
+    private_raw = private.private_bytes(serialization.Encoding.Raw, serialization.PrivateFormat.Raw,
+                                        serialization.NoEncryption())
+    public_raw = private.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    config = {**config, "intake_enabled": True, "reviewer_key_sha256": digest(public_raw)}
+    approval = {"subject": subject, "decision": "approved",
+                "checks": {name: True for name in ("claim_sources", "visual_identity_rights", "full_video_audio")},
+                "reviewed_at_utc": datetime.now(timezone.utc).isoformat()}
+    monkeypatch.setenv("HISTORY_UNATTENDED_LIVE_POLICY", "1")
+    monkeypatch.setenv("HISTORY_CONTROL_POLICY_TOKEN", "test-control-token")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "owner/control")
+    monkeypatch.setenv("GITHUB_SHA", "a" * 40)
+    monkeypatch.setattr(orch.GitHubState, "require_live_policy",
+                        lambda self, config, operation: (_ for _ in ()).throw(Hold("main signing switch off")))
+    with pytest.raises(Hold, match="main signing switch off"):
+        sign(approval, subject, base64.b64encode(private_raw).decode(), config)
 
 
 def test_v2_packet_rejects_public_media_before_signing(fixture, tmp_path):

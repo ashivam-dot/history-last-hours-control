@@ -285,9 +285,10 @@ def test_workflow_separates_credentials_and_gates_release():
     for stage, command in (("sign", "sign-qa-draft"), ("publish", "publish-draft")):
         steps = jobs[stage]["steps"]
         mutation = next(index for index, step in enumerate(steps) if command in step.get("run", ""))
-        script = steps[mutation]["run"]
-        assert script.index(f"live-policy --operation {stage}") < script.index(f"control {command}")
-        assert "env -u GITHUB_TOKEN uv run" in script
+        step = steps[mutation]
+        assert step["env"]["HISTORY_UNATTENDED_LIVE_POLICY"] == "1"
+        assert step["env"]["HISTORY_CONTROL_POLICY_TOKEN"] == "${{ github.token }}"
+        assert "GITHUB_TOKEN" not in step["env"]
 
 
 def test_schedule_is_bounded_and_disabled_without_repository_variable():

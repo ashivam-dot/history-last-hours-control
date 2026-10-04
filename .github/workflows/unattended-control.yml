@@ -281,15 +281,15 @@ jobs:
           path: private/qa-result
       - name: Reverify passing QA and sign exact draft
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          HISTORY_CONTROL_POLICY_TOKEN: ${{ github.token }}
+          HISTORY_UNATTENDED_LIVE_POLICY: '1'
           EPISODE: ${{ needs.discover.outputs.episode }}
           SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
           HISTORY_REVIEW_SIGNING_KEY: ${{ secrets.HISTORY_REVIEW_SIGNING_KEY }}
         run: |
           umask 077
-          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
-          env -u HISTORY_REVIEW_SIGNING_KEY uv run --frozen --no-dev python -m control.orchestrate live-policy --operation sign
-          env -u GITHUB_TOKEN uv run --frozen --no-dev python -m control sign-qa-draft \
+          env -u HISTORY_CONTROL_POLICY_TOKEN git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python -m control sign-qa-draft \
             --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
             --packet private/review-packet --qa-report private/qa-result/qa_report.json \
             --approval private/qa-result/approval.json --output private/independent_review.json
@@ -360,17 +360,17 @@ jobs:
         run: uv run --frozen --no-dev python -m control.orchestrate reserve --episode "$EPISODE" --commit "$SOURCE_COMMIT" --output reserved.json
       - name: Release approved exact media to pinned YouTube channel
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          HISTORY_CONTROL_POLICY_TOKEN: ${{ github.token }}
+          HISTORY_UNATTENDED_LIVE_POLICY: '1'
           EPISODE: ${{ needs.discover.outputs.episode }}
           SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
           HISTORY_PUBLISHER_BUFFER_API_KEY: ${{ secrets.HISTORY_PUBLISHER_BUFFER_API_KEY }}
           HISTORY_PUBLISHER_CLOUDINARY_URL: ${{ secrets.HISTORY_PUBLISHER_CLOUDINARY_URL }}
         run: |
           umask 077
-          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
-          DUE_AT_UTC="$(python3 -c 'import json; print(json.load(open("reserved.json"))["due_at_utc"])')"
-          env -u HISTORY_PUBLISHER_BUFFER_API_KEY -u HISTORY_PUBLISHER_CLOUDINARY_URL uv run --frozen --no-dev python -m control.orchestrate live-policy --operation publish
-          env -u GITHUB_TOKEN uv run --frozen --no-dev python -m control publish-draft \
+          env -u HISTORY_CONTROL_POLICY_TOKEN git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          DUE_AT_UTC="$(env -u HISTORY_CONTROL_POLICY_TOKEN python3 -c 'import json; print(json.load(open("reserved.json"))["due_at_utc"])')"
+          uv run --frozen --no-dev python -m control publish-draft \
             --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
             --packet private/review-packet --review private/independent_review.json \
             --public-key reviewer.pub --due-at-utc "$DUE_AT_UTC" \

@@ -85,9 +85,11 @@ group as the manual publisher. It reserves an unused 17:00 UTC slot more than
 two hours ahead before a Buffer mutation. A planned release never retries
 automatically after an uncertain outcome; it requires external Buffer post
 inspection. The dispatch resume path only accepts holds before release
-planning. Signing and publishing check the current control `main` policy
-immediately before their mutation. No local Mac or running workstation is
-required.
+planning. The trusted signer checks the current control `main` policy just
+before Ed25519 signing. The trusted publisher checks it before the public
+Cloudinary upload and again immediately before Buffer create. The scoped
+control token is mounted only for these trusted commands; no producer code is
+executed. No local Mac or running workstation is required.
 
 `intake-private-draft.yml` takes one exact producer `main` commit and episode.
 It checks the committed `draft.json`, spec, manifest, research, rights, and

@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 import hashlib
+import os
 import re
 import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote, urlparse
+from typing import Callable
 
 import requests
 import yaml
@@ -24,6 +26,12 @@ MAX_HORIZON = timedelta(days=30)
 MAX_CLOUDINARY_UPLOAD = 95 * 1024 * 1024
 PUBLISHER_PUBLIC_ID_PREFIX = "history-last-hours/"
 PROBE_PUBLIC_ID = re.compile(r"history-last-hours/test/probe-[0-9a-f]{32}-[0-9a-f]{64}")
+
+
+def _require_live_publish_policy(config: dict) -> None:
+    if os.environ.get("HISTORY_UNATTENDED_LIVE_POLICY") == "1":
+        from .orchestrate import require_mutation_policy
+        require_mutation_policy(config, "publish")
 
 CHANNELS_QUERY = """query Channels($input: ChannelsInput!) {
   channels(input: $input) { id name service isDisconnected isLocked isQueuePaused }
@@ -395,7 +403,8 @@ def _matching(posts: list[dict], text: str, media_url: str, api: BufferClient) -
 
 def _create_or_reconcile(api: BufferClient, channel: str, text: str,
                          metadata: dict, media_url: str, when: datetime,
-                         posts: list[dict]) -> dict:
+                         posts: list[dict],
+                         before_create: Callable[[], None] | None = None) -> dict:
     existing = _matching(posts, text, media_url, api)
     if existing:
         return {"id": existing["id"], "status": existing["status"],
@@ -407,6 +416,8 @@ def _create_or_reconcile(api: BufferClient, channel: str, text: str,
     payload = {"channelId": channel, "text": text, "schedulingType": "automatic",
                "mode": "customScheduled", "dueAt": when.isoformat(),
                "assets": [{"video": {"url": media_url}}], "metadata": metadata}
+    if before_create is not None:
+        before_create()
     post = api.create(payload)
     require(isinstance(post.get("id"), str) and bool(post["id"]) and
             post.get("status") == "scheduled" and
@@ -432,6 +443,7 @@ def publish_reviewed(repo, commit: str, episode: str, review: dict,
     require(digest(source_video) == plan["subject"]["media_sha256"],
             "producer hosted media changed before control copy")
     media_client = media_client or CloudinaryClient(cloudinary_url, config["publisher_media_url_prefix"])
+    _require_live_publish_policy(config)
     media_url, media_public_id = media_client.upload_exact(
         source_video, episode, plan["subject"]["media_sha256"])
     require(media_public_id == f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{plan['subject']['media_sha256']}" and
@@ -475,6 +487,7 @@ def publish_draft_reviewed(repo, commit: str, episode: str, packet_dir, review: 
     expected_public_url = f"{config['publisher_media_url_prefix']}{expected_public_id}.mp4"
     api = _preflight_before_public_copy(repo, commit, episode, config, buffer_token,
                                         due, expected_public_url, api)
+    _require_live_publish_policy(config)
     media_url, media_public_id = media_client.upload_exact(
         private_video, episode, subject["media_sha256"])
     require(media_public_id == expected_public_id and media_url == expected_public_url and
@@ -530,9 +543,11 @@ def _schedule_exact(repo, commit: str, episode: str, subject: dict, config: dict
         require(digest(fetch_video(media_url, {"media_url_prefix": config["publisher_media_url_prefix"]})) ==
                 subject["media_sha256"],
                 "control-owned media changed before Buffer mutation")
+    _require_live_publish_policy(config)
     youtube = _create_or_reconcile(api, config["youtube_channel_id"],
                                    copy["youtube"], {"youtube": metadata["youtube"]},
-                                   media_url, due, youtube_posts)
+                                   media_url, due, youtube_posts,
+                                   before_create=lambda: _require_live_publish_policy(config))
     return {"episode": episode, "media_sha256": subject["media_sha256"],
             "source_commit": commit, "control_media_url": media_url,
             "control_media_public_id": media_public_id, "youtube": youtube}

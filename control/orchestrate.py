@@ -109,6 +109,16 @@ def enabled(config: dict, operation: str) -> bool:
     return all(config[name] is True for name in SWITCHES[operation])
 
 
+def require_mutation_policy(config: dict, operation: str) -> None:
+    """Re-read private control main at a trusted unattended mutation boundary."""
+    require(operation in ("sign", "publish"), "live policy operation is invalid")
+    require(enabled(config, operation), f"{operation} policy is disabled in this run")
+    state = GitHubState(os.environ.get("HISTORY_CONTROL_POLICY_TOKEN", ""),
+                        os.environ.get("GITHUB_REPOSITORY", ""),
+                        os.environ.get("GITHUB_SHA", ""))
+    state.require_live_policy(config, operation)
+
+
 def advance(receipt: dict, phase: str) -> dict:
     require(phase in PHASES[1:], "receipt phase is invalid")
     current = receipt.get("phase")

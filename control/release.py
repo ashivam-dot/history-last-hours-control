@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import os
 import re
 import subprocess
 import urllib.request
@@ -308,6 +309,9 @@ def sign(approval: dict, subject: dict, private_raw_b64: str, config: dict) -> d
               "reviewed_at_utc": approval["reviewed_at_utc"], "decision": "approved",
               "checks": approval["checks"]}
     context = CONTEXT_V2 if version == 2 else CONTEXT
+    if os.environ.get("HISTORY_UNATTENDED_LIVE_POLICY") == "1":
+        from .orchestrate import require_mutation_policy
+        require_mutation_policy(config, "sign")
     review["signature"] = base64.b64encode(key.sign(context + canonical(review))).decode("ascii")
     return review
 

@@ -1,4 +1,4 @@
-name: Sign independently reviewed History candidate
+name: Independently QA and sign private History draft (staged)
 
 on:
   workflow_dispatch:
@@ -12,19 +12,16 @@ on:
       intake_run_id:
         description: Control intake Actions run containing the reviewed private packet
         required: true
-      approval_json:
-        description: Complete independent approval JSON from trusted reviewer
-        required: true
 
 permissions:
   contents: read
   actions: read
 
 jobs:
-  sign:
-    environment: history-review-signing
+  qa:
+    environment: history-independent-qa
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -60,28 +57,91 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install locked control only
         run: uv sync --frozen --python 3.12 --no-dev
-      - name: Save independent approval input
+      - name: Verify independent sources, rights, and full video/audio
         env:
-          APPROVAL_JSON: ${{ inputs.approval_json }}
+          HISTORY_QA_GEMINI_API_KEY: ${{ secrets.HISTORY_QA_GEMINI_API_KEY }}
+          HISTORY_QA_OPENAI_API_KEY: ${{ secrets.HISTORY_QA_OPENAI_API_KEY }}
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          EPISODE: ${{ inputs.episode }}
         run: |
-          mkdir -p private
-          chmod 700 private
-          uv run --frozen --no-dev python -c 'import os,pathlib; pathlib.Path("private/approval.json").write_text(os.environ["APPROVAL_JSON"], encoding="utf-8")'
-      - name: Sign after exact private packet recheck
+          umask 077
+          uv run --frozen --no-dev python -m control qa-draft \
+            --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
+            --packet private/review-packet \
+            --report private/qa_report.json --approval private/approval.json
+      - name: Keep private QA report, including holds
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-history-qa-report-${{ inputs.episode }}-${{ github.run_id }}
+          path: private/qa_report.json
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Hand passing QA report and approval to isolated signer
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-history-qa-pass-${{ inputs.episode }}-${{ github.run_id }}
+          path: |
+            private/qa_report.json
+            private/approval.json
+          retention-days: 1
+          if-no-files-found: error
+
+  sign:
+    needs: qa
+    environment: history-review-signing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Retrieve exact private intake packet
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: private-history-draft-intake-${{ inputs.episode }}-${{ inputs.intake_run_id }}
+          path: private/review-packet
+          run-id: ${{ inputs.intake_run_id }}
+          github-token: ${{ github.token }}
+      - name: Retrieve passing QA result from this run
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: private-history-qa-pass-${{ inputs.episode }}-${{ github.run_id }}
+          path: private/qa-result
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ inputs.source_commit }}
+          path: source
+          persist-credentials: false
+      - name: Confirm read-only source identity
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          test "$(git -C source rev-parse HEAD)" = "$SOURCE_COMMIT"
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install locked control only
+        run: uv sync --frozen --python 3.12 --no-dev
+      - name: Revalidate private QA result and sign exact subject
         env:
           HISTORY_REVIEW_SIGNING_KEY: ${{ secrets.HISTORY_REVIEW_SIGNING_KEY }}
           SOURCE_COMMIT: ${{ inputs.source_commit }}
           EPISODE: ${{ inputs.episode }}
         run: |
-          uv run --frozen --no-dev python -m control sign-draft \
+          umask 077
+          uv run --frozen --no-dev python -m control sign-qa-draft \
             --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
             --packet private/review-packet \
-            --approval private/approval.json --output private/independent_review.json
+            --qa-report private/qa-result/qa_report.json \
+            --approval private/qa-result/approval.json \
+            --output private/independent_review.json
       - name: Keep signed review private for one day
         if: success()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: private-history-signed-review
+          name: private-history-signed-review-${{ inputs.episode }}-${{ github.run_id }}
           path: private/independent_review.json
           retention-days: 1
           if-no-files-found: error

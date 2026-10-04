@@ -15,6 +15,7 @@ from .release import (COMMIT, EPISODE, FILES, SHA, Hold, _blob, _check_editorial
                       _git, digest, episode_root, read_object, require, utc)
 
 OUTBOX_VOLUME = "creature-receipts-outbox"
+OUTBOX_WORKSPACE = "aksha-shivam18"
 MAX_RETRY = 6
 
 
@@ -73,6 +74,9 @@ def read_private_video(path: str) -> bytes:
     try:
         import modal
 
+        workspace = modal.Workspace.from_context().hydrate()
+        require(workspace.name == OUTBOX_WORKSPACE,
+                "private draft Modal token belongs to a different workspace")
         volume = modal.Volume.from_name(OUTBOX_VOLUME, create_if_missing=False)
         chunks: list[bytes] = []
         count = 0

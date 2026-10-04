@@ -73,7 +73,8 @@ def policy(path: Path) -> dict:
     require(set(config) == {"version", "signing_enabled", "publishing_enabled", "intake_enabled", "source_remote",
                             "min_episode_id", "started_after_utc", "media_url_prefix",
                             "publisher_media_url_prefix",
-                            "reviewer_key_sha256", "buffer_organization_id", "youtube_channel_id"},
+                            "reviewer_key_sha256", "buffer_organization_id", "youtube_channel_id",
+                            "qa_model", "qa_provider"},
             "control policy has missing or unexpected fields")
     require(type(config["version"]) is int and config["version"] == 1 and
             type(config["signing_enabled"]) is bool and
@@ -97,8 +98,13 @@ def policy(path: Path) -> dict:
     require(config["reviewer_key_sha256"] == "" or bool(SHA.fullmatch(str(config["reviewer_key_sha256"]))),
             "control policy reviewer fingerprint is invalid")
     require(isinstance(config["youtube_channel_id"], str) and
-            isinstance(config["buffer_organization_id"], str),
-            "control policy Buffer organization or YouTube destination is invalid")
+            isinstance(config["buffer_organization_id"], str) and
+            config["qa_provider"] in ("", "gemini", "openai") and
+            isinstance(config["qa_model"], str) and
+            (not config["qa_model"] or bool(re.fullmatch(r"[A-Za-z0-9_.-]+", config["qa_model"]))),
+            "control policy Buffer destination or QA model is invalid")
+    require(bool(config["qa_provider"]) == bool(config["qa_model"]),
+            "control policy QA provider and model must be pinned together")
     return config
 
 

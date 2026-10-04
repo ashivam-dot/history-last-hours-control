@@ -65,7 +65,8 @@ It checks the committed `draft.json`, spec, manifest, research, rights, and
 clean producer review without importing producer code. It requires the draft's
 Modal locator to be exactly `creature-receipts-outbox/drafts/<episode>-<sha>.mp4`,
 then reads that private MP4 from the History Modal workspace and checks every
-byte against the draft and manifest SHA-256 values.
+byte against the draft and manifest SHA-256 values. Before opening the volume,
+it verifies the Modal token belongs to the pinned `aksha-shivam18` workspace.
 
 The tracked `intake_enabled` switch is also `false`; the workflow holds before
 Modal or Cloudinary access until it is separately reviewed and enabled.
@@ -74,8 +75,10 @@ The control process then uploads those bytes with `overwrite=false` to the pinne
 `history-last-hours/drafts/`. It re-downloads the asset through Cloudinary's
 signed asset-download API and checks every byte. The pre-QA asset's URL cannot
 be used for anonymous delivery, even though its hash appears in the public
-producer repository. A later approved release will need a separate public
-copy bound to this exact authenticated asset.
+producer repository. An ambiguous upload response is reconciled by looking up
+the exact authenticated public ID and comparing all asset bytes before reuse.
+A later approved release makes a separate public copy bound to this exact
+authenticated asset.
 
 The workflow writes a new, private, 14-day Actions artifact for each run. It
 contains the exact MP4, committed evidence files, `draft.json`, a version 2
@@ -85,26 +88,53 @@ publisher credential. It has not been run on a real draft. A read-only local
 Modal SDK check confirmed that the pinned outbox volume can be opened; it is
 currently empty.
 
-The manual signing workflow takes the intake run ID, exact source commit,
-episode, and an independently authored `approval_json`. It downloads the private
-artifact, compares every evidence file and draft byte with the pinned producer
-commit, checks the MP4 hash and authenticated control URL, then signs the exact
-version 2 subject with a distinct Ed25519 message context. The manual publisher
+The manual independent QA workflow takes only the intake run ID, exact source
+commit, and episode. It downloads the private artifact, compares every evidence
+file and draft byte with the pinned producer commit, and checks the MP4 hash and
+authenticated control URL. It fetches the cited source pages and requires exact
+quotes for every claim from two independent live sites. It checks rights pages
+for the claimed licenses. It decodes the entire MP4 with FFmpeg, checks duration,
+shape, loudness, and peak, samples every second, transcribes the full mixed audio,
+and obtains a structured claim, visual, and quality verdict from a separate
+vision model. Every check must pass before it writes `approval.json`; a hold
+writes a private `qa_report.json` with its stage and reason instead. The signer
+revalidates the packet and signs the exact version 2 subject with a distinct
+Ed25519 message context. The manual publisher
 downloads the same artifact, repeats those checks, verifies the version 2
 signature, reads the authenticated Cloudinary asset by its signed asset-download
 API, and compares it byte for byte with the packet. Only then does it make and
 verify a public control copy for YouTube scheduling. The producer `hold.json`
 and producer public Cloudinary URL are not used on this path.
 
-Before a live intake run, create a `history-intake` environment holding only
-`HISTORY_INTAKE_MODAL_TOKEN_ID`, `HISTORY_INTAKE_MODAL_TOKEN_SECRET`, and
-`HISTORY_INTAKE_CLOUDINARY_URL`. The Modal token must access the History
-workspace, and the Cloudinary credential must belong to `mw0oh0v8`. The
+The QA job uses its own `history-independent-qa` environment, which has no
+signing key. It sends the passing report and generated approval through a
+private, one-day artifact to a separate `history-review-signing` job. The signer
+rechecks the packet and QA result before using its key. The QA job supports a separately provisioned
+`HISTORY_QA_GEMINI_API_KEY` as its primary audio and vision reviewer, or
+`HISTORY_QA_OPENAI_API_KEY` as a reviewed alternative. The provider and exact
+model name are pinned together in tracked `policy.json` to Gemini 3.8 Flash.
+Gemini calls use the documented
+[generateContent API](https://ai.google.dev/api/generate-content) with inline
+audio and frames and a JSON schema. Quota and capacity responses receive only
+three bounded retries before a hold. The OpenAI path uses documented
+[Responses image input](https://platform.openai.com/docs/guides/images),
+[structured output](https://platform.openai.com/docs/guides/structured-outputs),
+and [audio transcription](https://platform.openai.com/docs/guides/speech-to-text)
+APIs. The separate control QA key is provisioned; this model's access and the
+full QA path have not yet been exercised on a real draft.
+Automated evidence matching and model judgments can miss factual or rights
+problems; signing and publishing remain disabled until this gate is independently
+validated on real drafts and an enforceable approval method is in place.
+
+Before a live intake run, configure `HISTORY_INTAKE_MODAL_TOKEN_ID` and
+`HISTORY_INTAKE_MODAL_TOKEN_SECRET` in the existing control `history-publisher`
+environment. The intake job references only those tokens and that environment's
+existing `HISTORY_PUBLISHER_CLOUDINARY_URL`; it never injects the Buffer key.
+The Modal token must access the History workspace and the Cloudinary credential
+must belong to `mw0oh0v8`. The
 intake switch must be enabled in a reviewed control commit while signing and
 publishing remain off. The signing and publishing switches need separate review
-and an enforceable independent approval method before use. The manual signing
-workflow cannot prove that a reviewer actually watched the full video or checked
-all sources and rights.
+and an enforceable independent approval method before use.
 
 The legacy `python -m control sign` re-downloads the hosted MP4 and recomputes every
 binding before producing `independent_review.json`. Its Ed25519 message and

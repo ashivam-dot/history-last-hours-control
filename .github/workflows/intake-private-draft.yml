@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   intake:
-    environment: history-intake
+    environment: history-publisher
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -63,7 +63,7 @@ jobs:
         env:
           MODAL_TOKEN_ID: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_SECRET }}
-          HISTORY_INTAKE_CLOUDINARY_URL: ${{ secrets.HISTORY_INTAKE_CLOUDINARY_URL }}
+          HISTORY_INTAKE_CLOUDINARY_URL: ${{ secrets.HISTORY_PUBLISHER_CLOUDINARY_URL }}
           SOURCE_COMMIT: ${{ inputs.source_commit }}
           EPISODE: ${{ inputs.episode }}
         run: |

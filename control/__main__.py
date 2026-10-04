@@ -11,6 +11,7 @@ from pathlib import Path
 from .release import Hold, _blob, candidate, episode_root, fetch_video, policy, publisher_preflight, read_object, sign
 from .publisher import publish_draft_reviewed, publish_reviewed
 from .intake import intake_draft, validated_packet
+from .qa import qa_draft, verified_qa_report
 
 HERE = Path(__file__).resolve().parents[1]
 
@@ -24,7 +25,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Independent History release control")
     parser.add_argument("--policy", type=Path, default=HERE / "policy.json")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "intake", "sign", "sign-draft", "publisher-preflight",
+    for name in ("prepare", "intake", "qa-draft", "sign", "sign-draft", "sign-qa-draft",
+                 "publisher-preflight",
                  "publish", "publish-draft"):
         command = commands.add_parser(name)
         command.add_argument("--source", type=Path, required=True)
@@ -32,11 +34,16 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("--episode", required=True)
         if name in ("prepare", "intake"):
             command.add_argument("--output", type=Path, required=True)
-        if name in ("sign", "sign-draft"):
+        if name in ("sign", "sign-draft", "sign-qa-draft"):
             command.add_argument("--approval", type=Path, required=True)
             command.add_argument("--output", type=Path, required=True)
-        if name in ("sign-draft", "publish-draft"):
+        if name in ("qa-draft", "sign-draft", "sign-qa-draft", "publish-draft"):
             command.add_argument("--packet", type=Path, required=True)
+        if name == "sign-qa-draft":
+            command.add_argument("--qa-report", type=Path, required=True)
+        if name == "qa-draft":
+            command.add_argument("--report", type=Path, required=True)
+            command.add_argument("--approval", type=Path, required=True)
         if name == "publisher-preflight":
             command.add_argument("--review", type=Path, required=True)
             command.add_argument("--public-key", type=Path, required=True)
@@ -61,13 +68,20 @@ def main(argv: list[str] | None = None) -> int:
             intake_draft(args.source, args.commit, args.episode, config,
                          os.environ.get("HISTORY_INTAKE_CLOUDINARY_URL", ""), args.output)
             print(f"Prepared control-owned draft review packet in {args.output}")
-        elif args.command in ("sign", "sign-draft"):
+        elif args.command == "qa-draft":
+            qa_draft(args.source, args.commit, args.episode, args.packet, config,
+                     args.report, args.approval)
+            print(f"Independent automated QA passed; private report in {args.report}")
+        elif args.command in ("sign", "sign-draft", "sign-qa-draft"):
             if config["signing_enabled"] is not True:
                 raise Hold("independent signing is disabled")
             approval = read_object(args.approval.read_bytes(), "independent approval")
-            if args.command == "sign-draft":
+            if args.command in ("sign-draft", "sign-qa-draft"):
                 subject, _ = validated_packet(args.source, args.commit, args.episode,
                                               config, args.packet)
+                if args.command == "sign-qa-draft":
+                    report = read_object(args.qa_report.read_bytes(), "private QA report")
+                    verified_qa_report(report, approval, subject, config, args.packet)
             else:
                 hold = read_object(_blob(args.source, args.commit,
                                          episode_root(args.commit, args.episode) + "hold.json"), "committed hold")

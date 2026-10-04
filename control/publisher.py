@@ -9,7 +9,7 @@ import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 import requests
 import yaml
@@ -202,22 +202,50 @@ class CloudinaryClient:
                 timeout=(15, 600),
             )
         except requests.RequestException as exc:
-            raise Hold("private draft upload response is uncertain; inspect control cloud") from exc
-        require(response.status_code in (200, 201),
-                "private draft upload failed; inspect control cloud before retrying")
+            return self._reconcile_private_draft(video, public_id)
+        if response.status_code not in (200, 201):
+            return self._reconcile_private_draft(video, public_id)
         try:
             result = response.json()
         except ValueError as exc:
             raise Hold("private draft upload response is invalid") from exc
+        self._require_private_identity(result, public_id, len(video))
+        return result["secure_url"], public_id, result["asset_id"]
+
+    def _require_private_identity(self, result: dict, public_id: str, size: int) -> None:
         private_prefix = f"https://res.cloudinary.com/{self._cloud}/video/authenticated/"
         require(isinstance(result, dict) and result.get("public_id") == public_id and
                 result.get("resource_type") == "video" and result.get("type") == "authenticated" and
-                result.get("bytes") == len(video) and isinstance(result.get("asset_id"), str) and
-                bool(result["asset_id"]) and isinstance(result.get("secure_url"), str) and
+                result.get("bytes") == size and isinstance(result.get("asset_id"), str) and
+                bool(re.fullmatch(r"[A-Za-z0-9_-]{8,128}", result["asset_id"])) and
+                isinstance(result.get("secure_url"), str) and
                 bool(re.fullmatch(re.escape(private_prefix) + r"(?:v[0-9]+/)?" +
                                   re.escape(public_id) + r"\.mp4", result["secure_url"])),
                 "private draft upload identity, type, or size differs")
-        return result["secure_url"], public_id, result["asset_id"]
+
+    def _reconcile_private_draft(self, video: bytes, public_id: str) -> tuple[str, str, str]:
+        """Recover only an exact authenticated asset after an ambiguous upload response."""
+        endpoint = (f"https://api.cloudinary.com/v1_1/{self._cloud}/resources/video/authenticated/" +
+                    quote(public_id, safe="/"))
+        for attempt in range(6):
+            try:
+                response = requests.get(endpoint, auth=(self._key, self._secret), timeout=(15, 60))
+            except requests.RequestException as exc:
+                raise Hold("private draft upload is uncertain; control asset lookup failed") from exc
+            if response.status_code == 404 and attempt < 5:
+                time.sleep(5)
+                continue
+            require(response.status_code == 200,
+                    "private draft upload is uncertain; exact authenticated asset is unavailable")
+            try:
+                result = response.json()
+            except ValueError as exc:
+                raise Hold("private draft asset lookup response is invalid") from exc
+            self._require_private_identity(result, public_id, len(video))
+            require(self.download_private_asset(result["asset_id"]) == video,
+                    "existing authenticated draft differs from exact private render")
+            return result["secure_url"], public_id, result["asset_id"]
+        raise Hold("private draft asset lookup exhausted")
 
     def download_private_asset(self, asset_id: str) -> bytes:
         """Re-read authenticated media through Cloudinary's signed download API."""

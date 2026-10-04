@@ -83,6 +83,16 @@ def test_exact_committed_candidate_matches_producer_subject(fixture):
     assert subject["id"] == "ep063"
 
 
+def test_hosted_candidate_accepts_producer_ist_start(fixture):
+    source, _, episode, video, config = fixture
+    topic_path = episode / "topic.json"
+    topic_path.write_text(json.dumps({"started_at": "2026-10-04T13:37:50+05:30"}))
+    git(source, "add", "-A")
+    git(source, "commit", "-m", "IST source time")
+    commit = git(source, "rev-parse", "HEAD")
+    assert candidate(source, commit, "ep063", video, config)["id"] == "ep063"
+
+
 @pytest.mark.parametrize("mutation", ["video", "hold", "review", "commit", "origin"])
 def test_changed_or_untrusted_candidate_holds(fixture, mutation):
     source, commit, episode, video, config = fixture
@@ -603,6 +613,28 @@ def test_control_intake_binds_private_draft_source_and_exact_control_copy(fixtur
     with pytest.raises(Hold, match="already exists"):
         intake_draft(source, commit, "ep063", config, "test-cloudinary", output,
                      lambda _: pytest.fail("duplicate Modal read"), media)
+
+
+@pytest.mark.parametrize("started_at,accepted", [
+    ("2026-10-04T13:37:50+05:30", True),
+    ("2026-10-04T05:00:00+00:00", True),
+    ("2026-10-04T10:29:59+05:30", False),
+    ("2026-10-04T13:37:50", False),
+])
+def test_draft_source_start_accepts_aware_ist_and_enforces_utc_cutoff(fixture, started_at, accepted):
+    source, _, episode, _, _, config = draft_fixture(fixture)
+    topic_path = episode / "topic.json"
+    topic = json.loads(topic_path.read_text())
+    topic["started_at"] = started_at
+    topic_path.write_text(json.dumps(topic))
+    git(source, "add", "-A")
+    git(source, "commit", "--allow-empty", "-m", "source time")
+    commit = git(source, "rev-parse", "HEAD")
+    if accepted:
+        assert committed_draft(source, commit, "ep063", config)["draft"]["id"] == "ep063"
+    else:
+        with pytest.raises(Hold, match="draft topic start|predates control cutoff"):
+            committed_draft(source, commit, "ep063", config)
 
 
 @pytest.mark.parametrize("failure", ["changed_private_video", "wrong_modal_path",

@@ -1,0 +1,83 @@
+name: Check History publisher media (temporary test asset)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: history-control-media-probe
+  cancel-in-progress: false
+
+jobs:
+  check:
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install locked control code
+        run: uv sync --frozen --python 3.12 --no-dev
+      - name: Generate tiny temporary MP4
+        run: |
+          command -v ffmpeg
+          ffmpeg -hide_banner -loglevel error -y -f lavfi \
+            -i color=c=black:s=16x16:r=1 -frames:v 1 \
+            -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
+            "$RUNNER_TEMP/history-media-probe.mp4"
+      - name: Verify exact upload, delivery, and deletion without Buffer
+        env:
+          HISTORY_PUBLISHER_CLOUDINARY_URL: ${{ secrets.HISTORY_PUBLISHER_CLOUDINARY_URL }}
+        run: |
+          uv run --frozen --no-dev python - <<'PY'
+          import json
+          import os
+          import time
+          import uuid
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          from control.publisher import CloudinaryClient, PUBLISHER_PUBLIC_ID_PREFIX
+          from control.release import Hold, digest, fetch_video, policy, require
+
+          config = policy(Path("policy.json"))
+          require(config["signing_enabled"] is False and config["publishing_enabled"] is False,
+                  "release switches must remain disabled for media probe")
+          prefix = config["publisher_media_url_prefix"]
+          require(prefix == "https://res.cloudinary.com/mw0oh0v8/video/upload/",
+                  "media probe cloud differs from pinned control cloud")
+          video = (Path(os.environ["RUNNER_TEMP"]) / "history-media-probe.mp4").read_bytes()
+          require(12 <= len(video) < 100_000 and video[4:8] == b"ftyp",
+                  "generated test MP4 is missing or too large")
+          media_sha256 = digest(video)
+          public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}test/probe-{uuid.uuid4().hex}-{media_sha256}"
+          client = CloudinaryClient(os.environ.get("HISTORY_PUBLISHER_CLOUDINARY_URL", ""), prefix)
+          attempted = False
+          try:
+              attempted = True
+              url, returned_id = client.upload_probe(video, public_id, media_sha256)
+              require(returned_id == public_id and url == prefix + public_id + ".mp4",
+                      "test media upload identity differs")
+              for attempt in range(12):
+                  try:
+                      delivered = fetch_video(url, {"media_url_prefix": prefix})
+                  except Hold:
+                      if attempt == 11:
+                          raise
+                      time.sleep(5)
+                      continue
+                  require(delivered == video and digest(delivered) == media_sha256,
+                          "test media delivery differs from uploaded bytes")
+                  break
+          finally:
+              if attempted:
+                  client.destroy_probe(public_id)
+          print(json.dumps({"status": "verified_and_deleted",
+                            "cloud_name": urlparse(prefix).path.split("/")[1],
+                            "public_id": public_id, "media_sha256": media_sha256,
+                            "bytes": len(video)}))
+          PY

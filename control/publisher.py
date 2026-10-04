@@ -22,6 +22,7 @@ MIN_LEAD = timedelta(minutes=30)
 MAX_HORIZON = timedelta(days=30)
 MAX_CLOUDINARY_UPLOAD = 95 * 1024 * 1024
 PUBLISHER_PUBLIC_ID_PREFIX = "history-last-hours/"
+PROBE_PUBLIC_ID = re.compile(r"history-last-hours/test/probe-[0-9a-f]{32}-[0-9a-f]{64}")
 
 CHANNELS_QUERY = """query Channels($input: ChannelsInput!) {
   channels(input: $input) { id name service isDisconnected isLocked isQueuePaused }
@@ -141,19 +142,22 @@ class CloudinaryClient:
         self._secret = unquote(parsed.password)
         self._prefix = publisher_prefix
 
-    def upload_exact(self, video: bytes, episode: str, media_sha256: str) -> tuple[str, str]:
+    def _signed(self, params: dict) -> dict:
+        payload = "&".join(f"{key}={value}" for key, value in sorted(params.items()))
+        return {**params, "signature": hashlib.sha1((payload + self._secret).encode()).hexdigest(),
+                "api_key": self._key}
+
+    def _upload(self, video: bytes, public_id: str, media_sha256: str,
+                *, allow_existing: bool) -> tuple[str, str]:
         require(len(video) >= 12 and video[4:8] == b"ftyp" and
                 len(video) <= MAX_CLOUDINARY_UPLOAD and digest(video) == media_sha256,
                 "control upload needs the exact bounded MP4")
-        public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{media_sha256}"
         params = {"public_id": public_id, "overwrite": "false", "timestamp": int(time.time())}
-        payload = "&".join(f"{key}={value}" for key, value in sorted(params.items()))
-        signature = hashlib.sha1((payload + self._secret).encode()).hexdigest()
         try:
             response = requests.post(
                 f"https://api.cloudinary.com/v1_1/{self._cloud}/video/upload",
-                data={**params, "signature": signature, "api_key": self._key},
-                files={"file": (f"{episode}.mp4", video, "video/mp4")},
+                data=self._signed(params),
+                files={"file": (public_id.rsplit("/", 1)[-1] + ".mp4", video, "video/mp4")},
                 timeout=(15, 600),
             )
         except requests.RequestException as exc:
@@ -166,14 +170,42 @@ class CloudinaryClient:
             require(isinstance(result, dict) and result.get("public_id") == public_id and
                     result.get("resource_type") == "video" and result.get("bytes") == len(video) and
                     isinstance(result.get("secure_url"), str) and
-                    result["secure_url"].startswith(self._prefix),
+                    result["secure_url"].startswith(self._prefix) and
+                    (allow_existing or result.get("existing") is not True),
                     "control media upload identity or size differs")
         else:
             # Existing immutable public_id is safe only when the caller re-downloads
             # its deterministic URL and verifies every byte below.
-            require(response.status_code == 409,
+            require(allow_existing and response.status_code == 409,
                     "control media upload failed; inspect account before retrying")
         return self._prefix + public_id + ".mp4", public_id
+
+    def upload_exact(self, video: bytes, episode: str, media_sha256: str) -> tuple[str, str]:
+        return self._upload(video, f"{PUBLISHER_PUBLIC_ID_PREFIX}{episode}-{media_sha256}",
+                            media_sha256, allow_existing=True)
+
+    def upload_probe(self, video: bytes, public_id: str, media_sha256: str) -> tuple[str, str]:
+        require(bool(PROBE_PUBLIC_ID.fullmatch(public_id)) and public_id.endswith(media_sha256),
+                "probe public ID must stay in the isolated test namespace")
+        return self._upload(video, public_id, media_sha256, allow_existing=False)
+
+    def destroy_probe(self, public_id: str) -> None:
+        require(bool(PROBE_PUBLIC_ID.fullmatch(public_id)),
+                "only an isolated test asset may be deleted")
+        params = {"public_id": public_id, "invalidate": "true", "timestamp": int(time.time())}
+        try:
+            response = requests.post(
+                f"https://api.cloudinary.com/v1_1/{self._cloud}/video/destroy",
+                data=self._signed(params), timeout=(15, 60),
+            )
+        except requests.RequestException as exc:
+            raise Hold("test media deletion response is uncertain; inspect account") from exc
+        try:
+            result = response.json()
+        except ValueError as exc:
+            raise Hold("test media deletion response is invalid") from exc
+        require(response.status_code == 200 and isinstance(result, dict) and result.get("result") == "ok",
+                "test media was not confirmed deleted; inspect account")
 
 
 def _spec_and_manifest(repo, commit: str, episode: str) -> tuple[dict, dict]:

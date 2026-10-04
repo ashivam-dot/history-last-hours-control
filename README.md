@@ -8,8 +8,9 @@ reviewed, signed, scheduled, or published a real episode.
 
 ## Current cloud state
 
-- Four **manual-only** Actions workflows prepare a review packet, sign a
-  reviewed candidate, check the pinned Buffer destination, or release one
+- Five **manual-only** Actions workflows prepare a review packet, sign a
+  reviewed candidate, check the pinned Buffer destination, probe the pinned
+  Cloudinary cloud with a temporary test asset, or release one
   certified video to **YouTube only**.
   The signing and publishing jobs fail closed under the disabled policy.
 - The Ed25519 private key exists only as the `HISTORY_REVIEW_SIGNING_KEY`
@@ -17,10 +18,12 @@ reviewed, signed, scheduled, or published a real episode.
   half is [`reviewer.pub`](reviewer.pub); its SHA-256 fingerprint is pinned in
   the control policy. The private key was generated in memory and was never
   written to the producer repository or a local file.
-- The `history-publisher` environment exists but has **no Buffer or Cloudinary
-  credential**. No publisher token was copied from the producer. The policy
-  pins the exact History Buffer organization and YouTube channel IDs, checked against the
-  current live Buffer API and the ep054 public readback. Buffer still shows the
+- The `history-publisher` environment holds the existing History Buffer key
+  and the `mw0oh0v8` Cloudinary credential for connection checks while release
+  remains disabled. The Buffer key also remains in producer executors; it has
+  not been rotated. The policy pins the exact History Buffer organization and
+  YouTube channel IDs, checked against the current live Buffer API and the
+  ep054 public readback. Buffer still shows the
   channel's older display name, “Creature Receipts”; the channel ID is the
   History destination.
 - GitHub's current private-repository plan rejects branch protection and
@@ -75,9 +78,9 @@ retries reconcile accepted posts rather than blindly creating another one.
 The manual workflow serializes publisher runs. The code has no Instagram
 destination, query, or mutation.
 
-The publisher has only synthetic and mocked API tests. It has never received
-its own media or Buffer credential, uploaded a real control copy, queried
-Buffer with its own credential, or sent a create mutation. Buffer's create API
+The publisher has only synthetic and mocked API tests. The control environment
+has passed a read-only Buffer connection check, but it has not uploaded a real
+episode copy or sent a create mutation. Buffer's create API
 has no client idempotency key, so external
 concurrent executors and ambiguous failures remain deployment risks.
 
@@ -101,9 +104,9 @@ concurrent executors and ambiguous failures remain deployment risks.
    and YouTube channel verification while both release switches stay off.
    Buffer's current plan permits only one Personal API key, so issuing a new
    key requires a coordinated cutover after old-key consumers are retired.
-4. Provision a control-only Cloudinary credential for the pinned `mw0oh0v8`
-   cloud in the `history-publisher` environment as
-   `HISTORY_PUBLISHER_CLOUDINARY_URL`. This cloud is distinct from History's
+4. Verify the staged `HISTORY_PUBLISHER_CLOUDINARY_URL` credential for the
+   pinned `mw0oh0v8` cloud in the `history-publisher` environment. This cloud
+   is distinct from History's
    producer cloud `uj4a07e7` and is already used by the trusted Mool control
    repository. The `history-last-hours/` public ID path keeps the two channels'
    assets separate by name, but it does not restrict a broad API key. Remove
@@ -120,7 +123,10 @@ concurrent executors and ambiguous failures remain deployment risks.
    (2026-10-04, run `37180808602`) reported 0.47 of 25 monthly credits used;
    [Cloudinary pricing](https://cloudinary.com/pricing) counts storage,
    bandwidth, and transformations against that shared quota. Monitor capacity
-   before activation and as either channel grows.
+   before activation and as either channel grows. The manual
+   `check-publisher-media.yml` workflow creates a tiny MP4 under
+   `history-last-hours/test/`, verifies its delivered bytes, and deletes it.
+   It does not mount a Buffer key or enable either release switch.
 5. Verify the actual Buffer create and readback contract in a reviewed
    dry-run/staged integration, establish durable receipt transfer to History,
    and prevent producer-owned code from publishing independently. Keep the

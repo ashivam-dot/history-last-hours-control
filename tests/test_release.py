@@ -349,3 +349,40 @@ def test_control_cloudinary_upload_is_content_addressed_and_never_overwrites(mon
     assert calls[0][2]["file"][1] == video
     with pytest.raises(Hold, match="account differs"):
         CloudinaryClient("cloudinary://key:secret@producer-account", prefix)
+
+
+def test_temporary_media_probe_deletes_only_its_own_test_asset(monkeypatch):
+    prefix = "https://res.cloudinary.com/mw0oh0v8/video/upload/"
+    client = CloudinaryClient("cloudinary://only-key:only-secret@mw0oh0v8", prefix)
+    video = b"\x00\x00\x00\x18ftypisom" + b"tiny test video"
+    media_hash = digest(video)
+    public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}test/probe-{'a' * 32}-{media_hash}"
+    calls = []
+
+    class Response:
+        status_code = 200
+
+        def __init__(self, body):
+            self.body = body
+
+        def json(self):
+            return self.body
+
+    def post(url, *, data, timeout, files=None):
+        calls.append((url, data, files))
+        if url.endswith("/video/upload"):
+            return Response({"public_id": public_id, "resource_type": "video",
+                             "bytes": len(video), "secure_url": prefix + public_id + ".mp4"})
+        return Response({"result": "ok"})
+
+    monkeypatch.setattr("control.publisher.requests.post", post)
+    url, returned_id = client.upload_probe(video, public_id, media_hash)
+    assert (url, returned_id) == (prefix + public_id + ".mp4", public_id)
+    client.destroy_probe(public_id)
+    assert [call[0].rsplit("/", 1)[-1] for call in calls] == ["upload", "destroy"]
+    assert calls[0][1]["overwrite"] == "false"
+    assert calls[1][1]["invalidate"] == "true"
+    assert calls[0][1]["public_id"] == calls[1][1]["public_id"] == public_id
+    with pytest.raises(Hold, match="only an isolated test asset"):
+        client.destroy_probe("mool-katha/ep003")
+    assert len(calls) == 2

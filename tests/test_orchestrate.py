@@ -80,6 +80,8 @@ class MemoryState:
         self.alerts = []
         self.qa_retry_alerts = []
         self.qa_retry_resolved = []
+        self.queue_alerts = 0
+        self.queue_resolutions = 0
 
     def ensure_branch(self):
         pass
@@ -101,6 +103,12 @@ class MemoryState:
 
     def resolve_qa_retry(self, episode):
         self.qa_retry_resolved.append(episode)
+
+    def alert_queue(self):
+        self.queue_alerts += 1
+
+    def resolve_queue(self):
+        self.queue_resolutions += 1
 
 
 def _receipt(phase="claimed", commit="a" * 40):
@@ -149,6 +157,37 @@ def test_disabled_policy_claims_only_and_blocks_later_phases(monkeypatch, tmp_pa
     assert state.receipt("ep063")["phase"] == "claimed"
     for action in orch.SWITCHES:
         assert not orch.enabled(config, action)
+
+
+def test_live_empty_queue_alerts_and_next_exact_draft_resolves_it(monkeypatch, tmp_path, config):
+    live = {**config, "intake_enabled": True, "signing_enabled": True,
+            "publishing_enabled": True}
+    state = MemoryState()
+    monkeypatch.setattr(orch, "draft_candidates", lambda repo, config: iter([]))
+    args = SimpleNamespace(source=tmp_path, resume_episode="")
+    assert orch.discover(args, config, state) == {}
+    assert state.queue_alerts == 0
+    assert orch.discover(args, live, state) == {}
+    assert state.queue_alerts == 1
+    monkeypatch.setattr(orch, "draft_candidates", lambda repo, config: iter([("ep063", "a" * 40)]))
+    monkeypatch.setattr(orch, "exact_draft", lambda *args: _source())
+    monkeypatch.setattr(orch, "producer_unreleased", lambda *args: None)
+    assert orch.discover(args, live, state)["episode"] == "ep063"
+    assert state.queue_resolutions == 1
+
+
+def test_live_qa_cooldown_does_not_claim_queue_exhaustion(monkeypatch, tmp_path, config):
+    live = {**config, "intake_enabled": True, "signing_enabled": True,
+            "publishing_enabled": True}
+    retry = {**_receipt("intake_verified"),
+             "qa_operational_attempts": 1,
+             "qa_retry_after_utc": (datetime.now(timezone.utc) + timedelta(hours=4)).isoformat()}
+    state = MemoryState([retry])
+    monkeypatch.setattr(orch, "draft_candidates", lambda repo, config: iter([("ep063", "a" * 40)]))
+    monkeypatch.setattr(orch, "exact_draft", lambda *args: _source())
+    monkeypatch.setattr(orch, "producer_unreleased", lambda *args: None)
+    assert orch.discover(SimpleNamespace(source=tmp_path, resume_episode=""), live, state) == {}
+    assert state.queue_alerts == 0
 
 
 def test_ordered_idempotent_transitions_and_fixed_due_reservation():
@@ -501,4 +540,5 @@ def test_schedule_is_bounded_and_disabled_without_repository_variable():
     install = next(index for index, step in enumerate(steps)
                    if "uv sync" in step.get("run", ""))
     assert preflight < install
+    assert "publishing_enabled" in steps[preflight]["run"]
     assert steps[install]["if"] == "steps.preflight.outputs.skip != 'true'"

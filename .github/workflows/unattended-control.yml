@@ -40,7 +40,7 @@ jobs:
           fetch-depth: 0
           path: source
           persist-credentials: false
-      - name: Skip dependency installation when there are no drafts or receipts
+      - name: Skip dependency installation only while release is disabled and there is no work
         id: preflight
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -51,7 +51,13 @@ jobs:
           from pathlib import Path
           if os.environ.get('RESUME_EPISODE'):
               raise SystemExit(0)
-          floor = int(json.loads(Path('policy.json').read_text())['min_episode_id'][2:])
+          config = json.loads(Path('policy.json').read_text())
+          # A live empty queue must reach discover(), which opens a durable
+          # owner issue. Only the dormant path may skip that dependency cost.
+          if all(config.get(name) is True for name in
+                 ('intake_enabled', 'signing_enabled', 'publishing_enabled')):
+              raise SystemExit(0)
+          floor = int(config['min_episode_id'][2:])
           paths = subprocess.check_output([
               'git', '-C', 'source', 'ls-tree', '-r', '--name-only', 'HEAD', '--', 'content/episodes'
           ], text=True).splitlines()

@@ -39,6 +39,7 @@ FORBIDDEN_PRODUCER_RECORDS = ("hold.json", "publish.json", "release_certificate.
 QA_RETRY_COOLDOWN = timedelta(hours=12)
 MAX_OPERATIONAL_QA_ATTEMPTS = 3
 QA_RETRY_STAGES = ("full_audio_transcription", "independent_multimodal_review")
+QUEUE_ISSUE_TITLE = "[queue] History has no eligible draft"
 
 
 def _git(repo: Path, *args: str) -> str:
@@ -347,6 +348,20 @@ class GitHubState:
                 f"Run: {self._run_url()}\n")
         self._upsert_issue(title, body)
 
+    def alert_queue(self) -> None:
+        self._upsert_issue(
+            QUEUE_ISSUE_TITLE,
+            "All producer-main drafts at or above the control episode floor are "
+            "held, already scheduled, or absent. No new History Short can enter "
+            "the live control path until a checked draft appears.\n"
+            f"Run: {self._run_url()}\n",
+        )
+
+    def resolve_queue(self) -> None:
+        issue = self._open_issue(QUEUE_ISSUE_TITLE)
+        if issue:
+            self.request("PATCH", f"/issues/{issue['number']}", json={"state": "closed"})
+
     def resolve_qa_retry(self, episode: str) -> None:
         require(bool(EPISODE.fullmatch(episode)), "QA retry resolution episode is malformed")
         issue = self._open_issue(f"[qa-retry] {episode} pending")
@@ -389,6 +404,7 @@ def discover(args, config: dict, state: GitHubState) -> dict:
                 "only a held receipt can be resumed")
         require(receipts[resume].get("resume_phase") in PHASES[:4],
                 "release attempts require manual Buffer inspection; automatic resume is disabled")
+    waiting_for_qa_retry = False
     for episode, commit in candidates:
         if resume and episode != resume:
             continue
@@ -426,6 +442,7 @@ def discover(args, config: dict, state: GitHubState) -> dict:
             state.alert(episode, "discovery", held["held_reason"])
             raise Hold(held["held_reason"])
         if old and qa_retry_waiting(old, datetime.now(timezone.utc)):
+            waiting_for_qa_retry = True
             continue
         if resume:
             old = {k: v for k, v in old.items() if k not in ("held_reason", "resume_phase")}
@@ -442,11 +459,15 @@ def discover(args, config: dict, state: GitHubState) -> dict:
                 phase == "qa_approved" and not enabled(config, "sign") or
                 phase == "signed" and not enabled(config, "publish")):
             continue
+        if enabled(config, "publish"):
+            state.resolve_queue()
         return {"episode": episode, "source_commit": commit,
                 "intake_enabled": enabled(config, "intake"),
                 "signing_enabled": enabled(config, "sign"),
                 "publishing_enabled": enabled(config, "publish")}
     require(not resume, "held episode is no longer a producer-main draft")
+    if enabled(config, "publish") and not waiting_for_qa_retry:
+        state.alert_queue()
     return {}
 
 

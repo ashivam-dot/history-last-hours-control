@@ -9,6 +9,9 @@ on:
       episode:
         description: Draft epNNN candidate
         required: true
+      speech_review_sha:
+        description: Optional exact SHA-256 of a held final-audio video for private review
+        required: false
 
 permissions:
   contents: read
@@ -19,6 +22,7 @@ concurrency:
 
 jobs:
   intake:
+    if: inputs.speech_review_sha == ''
     environment: history-publisher
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -78,4 +82,85 @@ jobs:
           name: private-history-draft-intake-${{ inputs.episode }}-${{ github.run_id }}
           path: private/review-packet/
           retention-days: 14
+          if-no-files-found: error
+
+  speech_review:
+    if: inputs.speech_review_sha != ''
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ inputs.source_commit }}
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Verify committed speech hold and fetch exact private Modal video
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          EPISODE: ${{ inputs.episode }}
+          MEDIA_SHA256: ${{ inputs.speech_review_sha }}
+          MODAL_TOKEN_ID: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_SECRET }}
+        run: |
+          umask 077
+          mkdir -m 700 private
+          uv run --frozen --no-dev python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          import modal
+
+          commit = os.environ['SOURCE_COMMIT']
+          episode = os.environ['EPISODE']
+          media_sha = os.environ['MEDIA_SHA256']
+          assert re.fullmatch(r'[0-9a-f]{40}', commit)
+          assert re.fullmatch(r'ep[0-9]{3,}', episode)
+          assert re.fullmatch(r'[0-9a-f]{64}', media_sha)
+          git = lambda *args: subprocess.check_output(['git', '-C', 'source', *args], text=True).strip()
+          assert git('rev-parse', 'HEAD') == commit
+          assert git('remote', 'get-url', 'origin') == 'https://github.com/ashivam-dot/creature-receipts'
+          git('fetch', '--no-tags', 'origin', 'main')
+          subprocess.run(['git', '-C', 'source', 'merge-base', '--is-ancestor', commit, 'FETCH_HEAD'], check=True)
+          hold = json.loads(Path('source/content/episodes', episode, 'editorial_hold.json').read_text())
+          path = f'drafts/speech-review/{episode}-{media_sha}.mp4'
+          assert (hold.get('schema') == 'ytc.final-audio-speech-hold/v1'
+                  and hold.get('episode_id') == episode and hold.get('media_sha256') == media_sha
+                  and hold.get('modal_volume') == 'creature-receipts-outbox'
+                  and hold.get('modal_path') == path)
+          assert not Path('source/content/episodes', episode, 'draft.json').exists()
+          assert os.environ.get('MODAL_TOKEN_ID') and os.environ.get('MODAL_TOKEN_SECRET')
+          assert modal.Workspace.from_context().hydrate().name == 'aksha-shivam18'
+          volume = modal.Volume.from_name('creature-receipts-outbox', create_if_missing=False)
+          target = Path('private', f'{episode}.mp4')
+          digest = hashlib.sha256()
+          size = 0
+          with target.open('xb') as output:
+              for chunk in volume.read_file(path):
+                  assert isinstance(chunk, bytes) and chunk
+                  size += len(chunk)
+                  assert size <= 100 * 1024 * 1024
+                  digest.update(chunk)
+                  output.write(chunk)
+          assert size >= 12 and target.read_bytes()[4:8] == b'ftyp'
+          assert digest.hexdigest() == media_sha
+          print(f'Verified private held video: {episode}, {size} bytes, SHA-256 {media_sha}')
+          PY
+      - name: Keep held video briefly in the private control repo
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-history-speech-review-${{ inputs.episode }}-${{ github.run_id }}
+          path: private/${{ inputs.episode }}.mp4
+          retention-days: 1
           if-no-files-found: error

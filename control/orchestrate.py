@@ -24,7 +24,8 @@ from .release import COMMIT, EPISODE, SHA, Hold, policy, read_object, require, u
 
 STATE_BRANCH = "unattended-state"
 RECEIPT_DIR = "receipts"
-PHASES = ("claimed", "intake_verified", "qa_approved", "signed", "release_planned", "published")
+PHASES = ("claimed", "intake_verified", "qa_approved", "signed", "release_planned",
+          "scheduled", "published")
 NEXT = dict(zip(PHASES, PHASES[1:]))
 SWITCHES = {
     "intake": ("intake_enabled",),
@@ -227,8 +228,16 @@ class GitHubState:
             return []
         require(isinstance(listing, list) and len(listing) < 1000,
                 "private receipt directory exceeds bounded listing")
-        return [self.receipt(item["name"][:-5]) for item in listing
-                if item.get("type") == "file" and re.fullmatch(r"ep[0-9]{3,}\.json", item.get("name", ""))]
+        found = []
+        for item in listing:
+            require(isinstance(item, dict) and isinstance(item.get("name"), str) and
+                    isinstance(item.get("type"), str),
+                    "private receipt directory has a malformed entry")
+            if item["type"] == "file" and re.fullmatch(r"ep[0-9]{3,}\.json", item["name"]):
+                receipt = self.receipt(item["name"][:-5])
+                require(receipt is not None, "private receipt disappeared during listing")
+                found.append(receipt)
+        return found
 
     def put(self, receipt: dict) -> None:
         episode = receipt["episode"]
@@ -242,24 +251,45 @@ class GitHubState:
             body["sha"] = old["sha"]
         self.request("PUT", f"/contents/{path}", allowed=(200, 201), json=body)
 
-    def alert(self, episode: str | None, stage: str, reason: str) -> None:
-        title = f"[unattended] {episode or 'discovery'} held"
-        run_url = (f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/"
-                   f"{os.environ.get('GITHUB_REPOSITORY', '')}/actions/runs/"
-                   f"{os.environ.get('GITHUB_RUN_ID', '')}")
-        body = f"Stage: {stage}\nReason: {reason[:500]}\nRun: {run_url}\n"
-        issue = None
+    def _run_url(self) -> str:
+        return (f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/"
+                f"{os.environ.get('GITHUB_REPOSITORY', '')}/actions/runs/"
+                f"{os.environ.get('GITHUB_RUN_ID', '')}")
+
+    def _open_issue(self, title: str) -> dict | None:
         for page in range(1, 11):
             entries = self.request("GET", f"/issues?state=open&per_page=100&page={page}")
             require(isinstance(entries, list), "private issue listing is invalid")
             issue = next((entry for entry in entries if entry.get("title") == title and
                           "pull_request" not in entry), None)
             if issue or len(entries) < 100:
-                break
+                return issue
+        raise Hold("private issue listing exceeds bounded pagination")
+
+    def _upsert_issue(self, title: str, body: str) -> None:
+        issue = self._open_issue(title)
         if issue:
             self.request("PATCH", f"/issues/{issue['number']}", json={"body": body})
         else:
             self.request("POST", "/issues", allowed=(201,), json={"title": title, "body": body})
+
+    def alert(self, episode: str | None, stage: str, reason: str) -> None:
+        title = f"[unattended] {episode or 'discovery'} held"
+        body = f"Stage: {stage}\nReason: {reason[:500]}\nRun: {self._run_url()}\n"
+        self._upsert_issue(title, body)
+
+    def alert_delivery(self, episode: str | None, reason: str) -> None:
+        require(episode is None or bool(EPISODE.fullmatch(episode)),
+                "delivery alert episode is malformed")
+        title = f"[delivery] {episode or 'monitor'} unverified"
+        body = f"Reason: {reason[:500]}\nRun: {self._run_url()}\n"
+        self._upsert_issue(title, body)
+
+    def resolve_delivery(self, episode: str) -> None:
+        require(bool(EPISODE.fullmatch(episode)), "delivery resolution episode is malformed")
+        issue = self._open_issue(f"[delivery] {episode} unverified")
+        if issue:
+            self.request("PATCH", f"/issues/{issue['number']}", json={"state": "closed"})
 
 
 def _identity(args, state: GitHubState) -> dict:
@@ -277,7 +307,7 @@ def discover(args, config: dict, state: GitHubState) -> dict:
     candidates = list(draft_candidates(args.source, config))
     visible = {episode for episode, _ in candidates}
     for episode, old in receipts.items():
-        if episode not in visible and old["phase"] not in ("held", "published"):
+        if episode not in visible and old["phase"] not in ("held", "scheduled", "published"):
             held = {**old, "phase": "held", "resume_phase": old["phase"],
                     "held_reason": "claimed draft disappeared from producer main",
                     "updated_at_utc": datetime.now(timezone.utc).isoformat()}
@@ -304,8 +334,9 @@ def discover(args, config: dict, state: GitHubState) -> dict:
             state.put(held)
             state.alert(episode, "discovery", held["held_reason"])
             raise Hold(held["held_reason"])
-        if old and old["phase"] == "published" and old["source_commit"] == commit:
-            # The exact Git commit is immutable. A changed draft has a new commit.
+        if old and old["phase"] in ("scheduled", "published"):
+            # The exact scheduled receipt is monitored separately, even if
+            # producer main changes after Buffer has accepted the post.
             continue
         try:
             producer_unreleased(args.source, "HEAD", episode)
@@ -326,8 +357,6 @@ def discover(args, config: dict, state: GitHubState) -> dict:
             state.put(held)
             state.alert(episode, "discovery", held["held_reason"])
             raise Hold(held["held_reason"])
-        if old and old["phase"] == "published":
-            continue
         if resume:
             old = {k: v for k, v in old.items() if k not in ("held_reason", "resume_phase")}
             old["phase"] = receipts[episode]["resume_phase"]
@@ -361,7 +390,7 @@ def run(args) -> dict | None:
         reason = "Actions job failed; inspect the linked run and private artifacts"
         if args.episode:
             receipt = state.receipt(args.episode)
-            if receipt and receipt["phase"] != "published":
+            if receipt and receipt["phase"] not in ("scheduled", "published"):
                 if receipt["phase"] != "held":
                     receipt = {**receipt, "resume_phase": receipt["phase"], "phase": "held",
                                "held_reason": reason,
@@ -412,12 +441,17 @@ def run(args) -> dict | None:
                 (published.get("episode"), published.get("source_commit"),
                  published.get("media_sha256")) ==
                 (receipt["episode"], receipt["source_commit"], receipt["media_sha256"]) and
+                published.get("control_media_public_id") ==
+                f"history-last-hours/{args.episode}-{receipt['media_sha256']}" and
+                published.get("control_media_url") ==
+                config["publisher_media_url_prefix"] + published.get("control_media_public_id", "") + ".mp4" and
                 isinstance(published.get("youtube"), dict) and
+                bool(re.fullmatch(r"[A-Za-z0-9_-]{8,128}", str(published["youtube"].get("id")))) and
                 published["youtube"].get("status") in ("scheduled", "sent") and
                 utc(published["youtube"].get("due_at"), "publisher due time") ==
                 utc(receipt["due_at_utc"], "reserved due time"),
                 "publisher receipt differs from reserved release")
-        state.put({**advance(receipt, "published"), "publisher_receipt": published})
+        state.put({**advance(receipt, "scheduled"), "publisher_receipt": published})
         return None
     raise Hold("unknown orchestration command")
 

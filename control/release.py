@@ -86,6 +86,7 @@ def policy(path: Path) -> dict:
                             "min_episode_id", "started_after_utc", "media_url_prefix",
                             "publisher_media_url_prefix",
                             "reviewer_key_sha256", "buffer_organization_id", "youtube_channel_id",
+                            "youtube_public_channel_id",
                             "qa_model", "qa_provider"},
             "control policy has missing or unexpected fields")
     require(type(config["version"]) is int and config["version"] == 1 and
@@ -111,6 +112,7 @@ def policy(path: Path) -> dict:
             "control policy reviewer fingerprint is invalid")
     require(isinstance(config["youtube_channel_id"], str) and
             isinstance(config["buffer_organization_id"], str) and
+            config["youtube_public_channel_id"] == "UC6e6OB3iw3yp8JnnBYxLItA" and
             config["qa_provider"] in ("", "gemini", "openai") and
             isinstance(config["qa_model"], str) and
             (not config["qa_model"] or bool(re.fullmatch(r"[A-Za-z0-9_.-]+", config["qa_model"]))),

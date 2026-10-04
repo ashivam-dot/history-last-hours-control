@@ -3,9 +3,9 @@
 Private owner-controlled repository: `ashivam-dot/history-last-hours-control`.
 The producer is `ashivam-dot/creature-receipts`. Producer automation has no
 write access or deploy key here. The tracked [`policy.json`](policy.json) has
-`intake_enabled: false`, `signing_enabled: false`, and
-`publishing_enabled: false`. Nothing here has
-reviewed, signed, scheduled, or published a real episode.
+`intake_enabled: true`, `signing_enabled: false`, and
+`publishing_enabled: false`. A real ep064 draft was ingested and held during
+independent QA. No real episode has been approved, signed, scheduled, or published.
 
 ## Current cloud state
 
@@ -18,10 +18,9 @@ reviewed, signed, scheduled, or published a real episode.
 - `unattended-control.yml` has four daily cloud slots after the Modal studio
   cycles. Scheduled jobs start only when the repository variable
   `HISTORY_CONTROL_AUTOMATION` is `1`; with it unset, they use no runner minutes.
-  Manual dispatch can resume a held pre-release receipt. Its tracked policy
-  gates are all off, so a permitted scheduled run can only discover and claim
-  a producer draft. It cannot read the private render, sign, or publish until
-  those switches are reviewed and enabled in the control repository.
+  Manual dispatch can resume a held pre-release receipt. The tracked intake
+  switch permits an exact private render to be ingested and independently
+  checked. Signing and publishing remain disabled in the control repository.
 - The Ed25519 private key exists only as the `HISTORY_REVIEW_SIGNING_KEY`
   secret in this repository's `history-review-signing` environment. The public
   half is [`reviewer.pub`](reviewer.pub); its SHA-256 fingerprint is pinned in
@@ -99,9 +98,8 @@ then reads that private MP4 from the History Modal workspace and checks every
 byte against the draft and manifest SHA-256 values. Before opening the volume,
 it verifies the Modal token belongs to the pinned `aksha-shivam18` workspace.
 
-The tracked `intake_enabled` switch is also `false`; the workflow holds before
-Modal or Cloudinary access until it is separately reviewed and enabled.
-The control process then uploads those bytes with `overwrite=false` to the pinned
+The tracked `intake_enabled` switch is `true`. The control process uploads the
+verified bytes with `overwrite=false` to the pinned
 `mw0oh0v8` Cloudinary cloud as an **authenticated** video under
 `history-last-hours/drafts/`. It re-downloads the asset through Cloudinary's
 signed asset-download API and checks every byte. The pre-QA asset's URL cannot
@@ -115,9 +113,8 @@ The workflow writes a new, private, 14-day Actions artifact for each run. It
 contains the exact MP4, committed evidence files, `draft.json`, a version 2
 `subject.json` binding the producer commit and authenticated media, and a
 control-owned `control_hold.json`. It never accepts a producer `hold.json` or
-publisher credential. It has not been run on a real draft. A read-only local
-Modal SDK check confirmed that the pinned outbox volume can be opened; it is
-currently empty.
+publisher credential. Run `37191082431` ingested ep064 and verified the exact
+MP4 in its authenticated control asset. Its unsigned URL returned HTTP 401.
 
 The manual independent QA workflow takes only the intake run ID, exact source
 commit, and episode. It downloads the private artifact, compares every evidence
@@ -153,8 +150,10 @@ three bounded retries before a hold. The OpenAI path uses documented
 [Responses image input](https://platform.openai.com/docs/guides/images),
 [structured output](https://platform.openai.com/docs/guides/structured-outputs),
 and [audio transcription](https://platform.openai.com/docs/guides/speech-to-text)
-APIs. The separate control QA key is provisioned; this model's access and the
-full QA path have not yet been exercised on a real draft.
+APIs. In run `37191082431`, the pinned Gemini model transcribed ep064 after
+source, rights, full decode, and loudness checks. Its multimodal review then
+exhausted bounded 429/503 retries, so the private report held and no approval
+was produced.
 Automated evidence matching and model judgments can miss factual or rights
 problems. Signing and publishing remain disabled until this gate passes a real
 private draft and its failure cases are checked.
@@ -166,8 +165,8 @@ existing `HISTORY_PUBLISHER_CLOUDINARY_URL`; it never injects the Buffer key.
 The Modal token must access the History workspace and the Cloudinary credential
 must belong to `mw0oh0v8`. A read-only probe resolved the Modal token to the
 pinned `aksha-shivam18` workspace and found the outbox volume. The
-intake switch must be enabled in a reviewed control commit while signing and
-publishing remain off. The signing and publishing switches need separate live
+intake switch is enabled while signing and publishing remain off. The signing and
+publishing switches need separate live
 QA, signer, and publisher checks before use.
 
 The legacy `python -m control sign` re-downloads the hosted MP4 and recomputes every
@@ -203,13 +202,21 @@ or sent a Buffer create mutation. Buffer's create API
 has no client idempotency key, so external
 concurrent executors and ambiguous failures remain deployment risks.
 
+An accepted Buffer release records a `scheduled` receipt. The separate
+`post-due-monitor.yml` workflow checks it after the reserved 17:00 UTC slot and
+a two-hour grace period. It reads the exact sent Buffer post, verifies the
+control-owned media SHA-256, and compares the public YouTube watch page's video
+ID, channel ID, title, description, and visibility with the approved source
+commit. Only then does it advance the private receipt to `published`; failures
+leave it scheduled and open or update a private delivery issue. This monitor
+has not yet observed a real scheduled release.
+
 ## Work still required before activation
 
-1. Run a controlled ep063 intake from one exact producer commit, inspect the
-   authenticated Cloudinary bytes and private packet, then run independent
-   automated QA against that packet. Confirm both a passing report and clear
-   holds for changed media, missing live source quotes, and failed model or
-   media checks. Keep signing and publishing disabled during this trial.
+1. Run a corrected real draft through independent QA to a passing report and
+   inspect its exact media and evidence. Ep064 remains held: the model review
+   failed operationally, and its source claims and visuals need editorial work.
+   Keep signing and publishing disabled during this trial.
 2. After the private QA trial passes, enable signing in a separately reviewed
    control commit while publishing stays off. Test the signer job with the
    passing QA artifact and pin `reviewer.pub` in a reviewed History producer
@@ -249,10 +256,10 @@ concurrent executors and ambiguous failures remain deployment risks.
    It does not mount a Buffer key or enable either release switch.
 5. Verify the actual Buffer create and readback contract in a controlled
    integration, establish durable receipt transfer to History, and prevent
-   producer-owned code from publishing independently. Add the unattended
-   trigger only after the QA, signer, private-to-public media, and Buffer path
-   pass. Keep the producer `status/scheduling_hold.json` and both release
-   switches off until those checks pass.
+   producer-owned code from publishing independently. Exercise the staged
+   unattended trigger only after the QA, signer, private-to-public media, and
+   Buffer path pass. Keep the producer `status/scheduling_hold.json` and both
+   release switches off until those checks pass.
 
 The local control code and cloud workflow installation do not activate any
 release. This branch does not change credentials; the prior cutover rotated

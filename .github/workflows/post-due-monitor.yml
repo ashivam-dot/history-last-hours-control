@@ -1,0 +1,41 @@
+name: Verify History YouTube delivery after the due time
+
+on:
+  schedule:
+    # Two hours after the control's reserved 17:00 UTC daily release slot.
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: history-unattended-control
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.event_name == 'workflow_dispatch' || vars.HISTORY_CONTROL_AUTOMATION == '1'
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: main
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Verify exact Buffer post and public YouTube video
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HISTORY_PUBLISHER_BUFFER_API_KEY: ${{ secrets.HISTORY_PUBLISHER_BUFFER_API_KEY }}
+        run: |
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python -m control.monitor --source source

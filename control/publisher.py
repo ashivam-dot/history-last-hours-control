@@ -54,6 +54,12 @@ POST_QUERY = """query Post($id: PostId!) {
     id status dueAt text assets { ... on VideoAsset { source } }
   }
 }"""
+SENT_POST_QUERY = """query SentPost($id: PostId!) {
+  post(input: {id: $id}) {
+    id status dueAt sentAt externalLink channelService text error { message }
+    assets { ... on VideoAsset { source } }
+  }
+}"""
 CREATE_MUTATION = """mutation Create($input: CreatePostInput!) {
   createPost(input: $input) {
     __typename
@@ -131,6 +137,11 @@ class BufferClient:
     def post(self, post_id: str) -> dict:
         result = self._call(POST_QUERY, {"id": post_id}).get("post")
         require(isinstance(result, dict), "matching Buffer post cannot be inspected")
+        return result
+
+    def sent_post(self, post_id: str) -> dict:
+        result = self._call(SENT_POST_QUERY, {"id": post_id}).get("post")
+        require(isinstance(result, dict), "sent Buffer post cannot be inspected")
         return result
 
     def create(self, payload: dict) -> dict:

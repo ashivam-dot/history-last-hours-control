@@ -146,6 +146,8 @@ def test_ordered_idempotent_transitions_and_fixed_due_reservation():
     assert due == "2026-10-06T17:00:00+00:00"
     planned = {**orch.advance(signed, "release_planned"), "due_at_utc": due}
     assert orch.advance(planned, "release_planned") is planned
+    scheduled = orch.advance(planned, "scheduled")
+    assert orch.advance(scheduled, "published")["phase"] == "published"
     assert datetime.fromisoformat(due) > now + timedelta(hours=2)
 
 
@@ -203,6 +205,10 @@ def test_existing_phases_wait_for_their_next_policy_switch(monkeypatch, tmp_path
     assert orch.discover(args, signing, state) == {}
     publishing = {**signing, "publishing_enabled": True}
     assert orch.discover(args, publishing, state)["publishing_enabled"] is True
+    state.put(_receipt("scheduled"))
+    monkeypatch.setattr(orch, "draft_candidates", lambda repo, config: iter([("ep063", "d" * 40)]))
+    assert orch.discover(args, publishing, state) == {}
+    assert state.receipt("ep063")["phase"] == "scheduled"
 
 
 def test_release_planned_reentry_holds_and_alerts_before_second_attempt(monkeypatch, tmp_path, config):
@@ -223,8 +229,11 @@ def test_publisher_receipt_must_match_reserved_identity_and_time(monkeypatch, tm
     monkeypatch.setattr(orch, "policy", lambda path: live)
     monkeypatch.setattr(orch, "GitHubState", lambda *args: state)
     publisher = tmp_path / "publisher.json"
+    public_id = "history-last-hours/ep063-" + "c" * 64
     receipt = {"episode": "ep063", "source_commit": "a" * 40, "media_sha256": "c" * 64,
-               "youtube": {"status": "scheduled", "due_at": due}}
+               "control_media_public_id": public_id,
+               "control_media_url": live["publisher_media_url_prefix"] + public_id + ".mp4",
+               "youtube": {"id": "buffer-post-12345678", "status": "scheduled", "due_at": due}}
     args = SimpleNamespace(command="complete", episode="ep063", commit="a" * 40,
                            publisher_receipt=publisher, policy=Path("unused"))
     publisher.write_text(json.dumps({**receipt, "media_sha256": "0" * 64}))
@@ -232,7 +241,7 @@ def test_publisher_receipt_must_match_reserved_identity_and_time(monkeypatch, tm
         orch.run(args)
     publisher.write_text(json.dumps(receipt))
     orch.run(args)
-    assert state.receipt("ep063")["phase"] == "published"
+    assert state.receipt("ep063")["phase"] == "scheduled"
 
 
 def test_contents_write_uses_prior_sha_for_compare_and_swap(monkeypatch):
@@ -245,6 +254,17 @@ def test_contents_write_uses_prior_sha_for_compare_and_swap(monkeypatch):
     assert (method, path) == ("PUT", "/contents/receipts/ep063.json")
     assert kwargs["json"]["branch"] == orch.STATE_BRANCH
     assert kwargs["json"]["sha"] == "old-blob"
+
+
+def test_receipt_listing_holds_on_disappeared_or_malformed_entry(monkeypatch):
+    state = orch.GitHubState("test-token", "owner/control", "a" * 40)
+    monkeypatch.setattr(state, "file", lambda path: [{"type": "file", "name": "ep063.json"}])
+    monkeypatch.setattr(state, "receipt", lambda episode: None)
+    with pytest.raises(Hold, match="disappeared"):
+        state.receipts()
+    monkeypatch.setattr(state, "file", lambda path: [{"type": "file", "name": None}])
+    with pytest.raises(Hold, match="malformed entry"):
+        state.receipts()
 
 
 def test_failure_alert_opens_then_updates_one_private_issue(monkeypatch):
@@ -268,6 +288,29 @@ def test_failure_alert_opens_then_updates_one_private_issue(monkeypatch):
     existing.append({"number": 7, "title": "[unattended] ep063 held"})
     state.alert("ep063", "publish", "publisher held")
     assert calls[-1][0:2] == ("PATCH", "/issues/7")
+
+
+def test_delivery_issue_is_separate_and_closes_after_verification(monkeypatch):
+    state = orch.GitHubState("test-token", "owner/control", "a" * 40)
+    calls = []
+    existing = []
+
+    def request(method, path, **kwargs):
+        calls.append((method, path, kwargs))
+        return existing if method == "GET" else {}
+
+    monkeypatch.setattr(state, "request", request)
+    monkeypatch.setenv("GITHUB_REPOSITORY", "owner/control")
+    monkeypatch.setenv("GITHUB_RUN_ID", "456")
+    state.alert_delivery("ep063", "public watch page is unavailable")
+    assert calls[-1][0:2] == ("POST", "/issues")
+    assert calls[-1][2]["json"]["title"] == "[delivery] ep063 unverified"
+    existing.append({"number": 9, "title": "[delivery] ep063 unverified"})
+    state.alert_delivery("ep063", "still unavailable")
+    assert calls[-1][0:2] == ("PATCH", "/issues/9")
+    state.resolve_delivery("ep063")
+    assert calls[-1][0:2] == ("PATCH", "/issues/9")
+    assert calls[-1][2]["json"] == {"state": "closed"}
 
 
 @pytest.mark.parametrize("operation", ["sign", "publish"])

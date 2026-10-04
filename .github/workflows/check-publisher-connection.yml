@@ -38,6 +38,15 @@ jobs:
           channel = config["youtube_channel_id"]
           client.organization(organization)
           _channel(client.channels(organization), channel, "youtube")
+          posts = client.posts(organization, channel)
+          sent = next((post for post in posts if post["status"] == "sent"), None)
+          require(sent is not None, "pinned YouTube channel has no sent Buffer post for readback")
+          detail = client.sent_post(sent["id"])
+          require(detail.get("id") == sent["id"] and detail.get("status") == "sent" and
+                  all(name in detail for name in
+                      ("dueAt", "sentAt", "externalLink", "channelService", "text", "error", "assets")),
+                  "Buffer sent-post readback contract is incomplete")
           print(json.dumps({"status": "ready", "buffer_organization_id": organization,
-                            "youtube_channel_id": channel}))
+                            "youtube_channel_id": channel,
+                            "sent_post_readback": "verified"}))
           PY

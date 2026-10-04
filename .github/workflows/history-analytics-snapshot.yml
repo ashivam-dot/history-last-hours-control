@@ -1,0 +1,28 @@
+name: Snapshot verified History Shorts analytics
+
+on:
+  schedule:
+    # Runs after the 19:00 UTC post-due delivery monitor; both share its queue.
+    - cron: '40 19 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: history-unattended-control
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Read exact public Shorts and create private dated snapshots
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: uv run --frozen --no-dev python -m control.analytics

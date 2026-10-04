@@ -220,6 +220,18 @@ has not yet observed a real scheduled release. Read-only run `37192202771`
 verified the sent-post GraphQL fields and the public Shorts player on an
 existing channel video from an Actions runner.
 
+The separate `history-analytics-snapshot.yml` workflow runs at 19:40 UTC and
+reads only receipts already marked `published` with a bound post-due proof. It
+inspects at most the 20 newest verified video IDs on the pinned public Shorts
+route and reports how many older receipts it skipped. It verifies the player
+video ID, channel and public visibility before reading decimal view and like
+counts from `playerMicroformatRenderer`. Missing or malformed counts are stored
+as `null` with an explicit status; zero remains zero. Each snapshot records the
+Buffer sent time, collection time and age in seconds since that sent time. The
+workflow creates one file per episode and UTC date under `analytics/` on the
+private `unattended-state` branch. Existing files are never updated. Analytics
+does not alter receipts or release gates.
+
 ## Work still required before activation
 
 1. Run a corrected real draft through independent QA to a passing report and

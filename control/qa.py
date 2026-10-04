@@ -25,7 +25,7 @@ import yaml
 from pypdf import PdfReader
 
 from .intake import validated_packet
-from .release import Hold, canonical, digest, read_object, require
+from .release import Hold, ORIGINAL_ASSETS, canonical, digest, read_object, require
 
 MAX_PAGE_BYTES = 3 * 1024 * 1024
 MAX_PAGES = 40
@@ -69,8 +69,8 @@ def _site(host: str) -> str:
     return ".".join(labels[-keep:])
 
 
-def fetch_public_document(url: str) -> str:
-    """Fetch bounded public HTTPS text without following producer-controlled redirects."""
+def fetch_public_document(url: str, *, _archive_redirected: bool = False) -> str:
+    """Fetch bounded HTTPS text, allowing one vetted Internet Archive CDN redirect."""
     parsed = urlsplit(url)
     try:
         host, port = parsed.hostname, parsed.port
@@ -103,6 +103,7 @@ def fetch_public_document(url: str) -> str:
         target += "?" + parsed.query
     body: bytearray | None = None
     content_type = ""
+    archive_location: str | None = None
     for address in vetted:
         pool = urllib3.HTTPSConnectionPool(address, port=443, server_hostname=host_ascii,
                                            assert_hostname=host_ascii, cert_reqs="CERT_REQUIRED",
@@ -116,6 +117,23 @@ def fetch_public_document(url: str) -> str:
                 redirect=False, retries=False, preload_content=False,
                 timeout=urllib3.Timeout(connect=15, read=35),
             )
+            if response.status in (301, 302, 303, 307, 308):
+                location = response.headers.get("Location", "")
+                redirected = urlsplit(location)
+                try:
+                    redirect_port = redirected.port
+                except ValueError as exc:
+                    raise Hold("independent evidence page is unavailable or redirected") from exc
+                require(host_ascii == "archive.org" and not _archive_redirected and
+                        redirected.scheme == "https" and redirected.hostname is not None and
+                        redirected.hostname.endswith(".archive.org") and
+                        redirected.username is None and redirected.password is None and
+                        redirect_port in (None, 443) and not redirected.fragment and
+                        redirected.path.startswith("/0/items/") and
+                        redirected.path.rsplit("/", 1)[-1] == parsed.path.rsplit("/", 1)[-1],
+                        "independent evidence page is unavailable or redirected")
+                archive_location = location
+                break
             require(response.status == 200,
                     "independent evidence page is unavailable or redirected")
             content_type = response.headers.get("Content-Type", "").split(";", 1)[0].lower()
@@ -134,6 +152,8 @@ def fetch_public_document(url: str) -> str:
             if response is not None:
                 response.release_conn()
             pool.close()
+    if archive_location is not None:
+        return fetch_public_document(archive_location, _archive_redirected=True)
     require(body is not None, "independent evidence fetch failed at vetted public addresses")
     if content_type == "application/pdf":
         try:
@@ -197,7 +217,7 @@ def verify_visual_rights(manifest: dict, fetcher=fetch_public_document) -> list[
         record = {"beat": index, "text": beat.get("text"), "source": source,
                   "title": asset.get("title"), "date": asset.get("date"),
                   "license": asset.get("license"), "credit": asset.get("credit")}
-        if source in {"designed card", "AI generated"}:
+        if source in ORIGINAL_ASSETS:
             record["rights_page_excerpt"] = "Control review: original or generated visual; inspect image identity."
         else:
             url = asset.get("url")

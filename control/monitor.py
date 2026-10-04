@@ -18,6 +18,7 @@ from .publisher import BufferClient, PUBLISHER_PUBLIC_ID_PREFIX, copy_and_metada
 from .release import COMMIT, EPISODE, SHA, Hold, digest, fetch_video, policy, require, utc
 
 DELIVERY_GRACE = timedelta(hours=2)
+EARLY_DELIVERY_GRACE = timedelta(minutes=45)
 MAX_WATCH_HTML = 5 * 1024 * 1024
 VIDEO_ID = re.compile(r"[A-Za-z0-9_-]{11}\Z")
 POST_ID = re.compile(r"[A-Za-z0-9_-]{8,128}\Z")
@@ -172,17 +173,21 @@ def verify_due(receipt: dict, source: Path, config: dict, api: BufferClient,
 
 def monitor_due(state: GitHubState, source: Path, config: dict, now: datetime,
                 api: BufferClient, public_reader=read_public_video,
-                media_reader=fetch_video) -> dict:
+                media_reader=fetch_video, *, only_episode: str | None = None,
+                grace: timedelta = DELIVERY_GRACE) -> dict:
     """Read external systems only; record proof or privately alert after the grace period."""
+    require(only_episode is None or bool(EPISODE.fullmatch(only_episode)),
+            "delivery monitor episode ID is malformed")
+    require(timedelta(0) <= grace <= DELIVERY_GRACE, "delivery grace is invalid")
     checked = verified = failed = 0
     for receipt in state.receipts():
-        if receipt.get("phase") != "scheduled":
+        if receipt.get("phase") != "scheduled" or (only_episode and receipt.get("episode") != only_episode):
             continue
         episode = receipt["episode"]
         counted = False
         try:
             due = utc(receipt.get("due_at_utc"), "reserved due time")
-            if due > now - DELIVERY_GRACE:
+            if due > now - grace:
                 continue
             checked += 1
             counted = True
@@ -202,13 +207,20 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Read-only post-due Buffer and YouTube verification")
     parser.add_argument("--policy", type=Path, default=Path(__file__).resolve().parents[1] / "policy.json")
     parser.add_argument("--source", type=Path, required=True)
+    parser.add_argument("--episode", help="Check only this scheduled episode")
+    parser.add_argument("--early-ep065", action="store_true",
+                        help="Use the 45-minute proof window for the one-time ep065 check")
     args = parser.parse_args(argv)
     state = GitHubState(os.environ.get("GITHUB_TOKEN", ""), os.environ.get("GITHUB_REPOSITORY", ""),
                         os.environ.get("GITHUB_SHA", ""))
     try:
         config = policy(args.policy)
         api = BufferClient(os.environ.get("HISTORY_PUBLISHER_BUFFER_API_KEY", ""))
-        result = monitor_due(state, args.source, config, datetime.now(timezone.utc), api)
+        require(not args.early_ep065 or args.episode == "ep065",
+                "early delivery window is reserved for ep065")
+        result = monitor_due(state, args.source, config, datetime.now(timezone.utc), api,
+                             only_episode=args.episode,
+                             grace=EARLY_DELIVERY_GRACE if args.early_ep065 else DELIVERY_GRACE)
         print(json.dumps(result, sort_keys=True))
         return 2 if result["failed"] else 0
     except Hold as exc:

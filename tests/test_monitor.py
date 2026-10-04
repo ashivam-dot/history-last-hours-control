@@ -236,6 +236,45 @@ def test_issue_resolution_failure_keeps_scheduled_receipt_retryable(delivery):
     assert state.alerts == [("ep063", "private issue API is unavailable")]
 
 
+def test_early_exact_episode_alert_is_retryable_and_later_proof_is_recorded(delivery):
+    config, source, video, due, receipt, post, page = delivery
+    state = FakeState(receipt)
+    api = FakeBuffer(config, post)
+    media_reader = lambda *_: video
+
+    assert monitor.monitor_due(state, source, config, due + timedelta(minutes=44),
+                               api, lambda _: page, media_reader,
+                               only_episode="ep063", grace=monitor.EARLY_DELIVERY_GRACE) == {
+                                   "checked": 0, "verified": 0, "failed": 0}
+    missing_public_page = {**page, "playability": "ERROR"}
+    assert monitor.monitor_due(state, source, config, due + timedelta(minutes=45),
+                               api, lambda _: missing_public_page, media_reader,
+                               only_episode="ep063", grace=monitor.EARLY_DELIVERY_GRACE) == {
+                                   "checked": 1, "verified": 0, "failed": 1}
+    assert state.item["phase"] == "scheduled" and state.alerts
+    assert monitor.monitor_due(state, source, config, due + timedelta(hours=2, minutes=5),
+                               api, lambda _: page, media_reader,
+                               only_episode="ep063") == {
+                                   "checked": 1, "verified": 1, "failed": 0}
+    proof = state.item["post_due_verification"]
+    assert state.item["phase"] == "published"
+    assert proof["youtube_video_id"] == page["video_id"]
+    assert proof["control_media_sha256"] == receipt["media_sha256"]
+    assert monitor.monitor_due(state, source, config, due + timedelta(days=1),
+                               api, lambda _: page, media_reader,
+                               only_episode="ep063")["checked"] == 0
+
+
+def test_exact_episode_filter_leaves_other_scheduled_receipt_untouched(delivery):
+    config, source, video, due, receipt, post, page = delivery
+    state = FakeState(receipt)
+    result = monitor.monitor_due(state, source, config, due + timedelta(days=1),
+                                 FakeBuffer(config, post), lambda _: page, lambda *_: video,
+                                 only_episode="ep065")
+    assert result == {"checked": 0, "verified": 0, "failed": 0}
+    assert state.item["phase"] == "scheduled" and not state.alerts
+
+
 @pytest.mark.parametrize("link", [
     "http://www.youtube.com/watch?v=AbCdEfGhI12",
     "https://youtube.com.evil.example/watch?v=AbCdEfGhI12",

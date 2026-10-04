@@ -1,99 +1,103 @@
-# History's Last Hours control (local, dormant)
+# History's Last Hours independent control
 
-This repository is separate from the producer repository `ashivam-dot/creature-receipts`.
-It is a proposed owner-controlled review boundary for future episodes. The tracked
-[`policy.json`](policy.json) has `signing_enabled: false` and
-`publishing_enabled: false`. It has no remote, signing key, public key, publisher
-credential, runnable GitHub workflow, or Buffer mutation. It has not reviewed or
-released an episode.
+Private owner-controlled repository: `ashivam-dot/history-last-hours-control`.
+The producer is `ashivam-dot/creature-receipts`. Producer automation has no
+write access or deploy key here. The tracked [`policy.json`](policy.json) has
+`signing_enabled: false` and `publishing_enabled: false`. Nothing here has
+reviewed, signed, scheduled, or published a real episode.
 
-## What is implemented
+## Current cloud state
 
-- `python -m control prepare` reads only Git blobs from one immutable producer
-  commit, downloads the exact Cloudinary MP4 from the pinned account, checks the
-  producer's media/spec/manifest bindings, and saves the MP4 and matching
-  review subject in a private, newly created directory. It does not execute
-  producer code.
-- `python -m control sign` downloads and rechecks the candidate again, requires
-  a separate `approval.json` with all three explicit checks true, and signs the
-  exact schema and Ed25519 message used by the producer's dormant
-  `ytc.release._independent_review` verifier. It works only after the control
-  policy is reviewed to enable signing and pin a public-key fingerprint.
-  The private key comes solely from `HISTORY_REVIEW_SIGNING_KEY` in the signer
-  job's protected environment and is never written by this code.
-- `python -m control publisher-preflight` rechecks hosted bytes, the Git
-  candidate, and the review signature before returning a destination-bound
-  release plan. It refuses to run under the tracked disabled policy. It is
-  credential-free and does not call Buffer; the publisher mutation remains to
-  be built and independently reviewed before release activation.
+- Three **manual-only** Actions workflows prepare a review packet, sign a
+  reviewed candidate, or release one certified video to **YouTube only**.
+  The signing and publishing jobs fail closed under the disabled policy.
+- The Ed25519 private key exists only as the `HISTORY_REVIEW_SIGNING_KEY`
+  secret in this repository's `history-review-signing` environment. The public
+  half is [`reviewer.pub`](reviewer.pub); its SHA-256 fingerprint is pinned in
+  the control policy. The private key was generated in memory and was never
+  written to the producer repository or a local file.
+- The `history-publisher` environment exists but has **no Buffer credential**.
+  No publisher token was copied from the producer. The policy pins the exact
+  History Buffer organization and YouTube channel IDs, checked against the
+  current live Buffer API and the ep054 public readback. Buffer still shows the
+  channel's older display name, “Creature Receipts”; the channel ID is the
+  History destination.
+- GitHub's current private-repository plan rejects branch protection and
+  required environment reviewers. Both environments have no approval rules.
+  The separate private repository, owner-only collaborator list, no deploy
+  keys, and manual workflows limit producer access, but they do not provide
+  an enforced owner approval before a signer job. Keep signing disabled until
+  a protected approval method or equivalent independent service is available.
 
-## Independent human review handoff
+## Exact candidate gate
 
-The candidate packet contains the MP4 and `subject.json`. The owner-controlled
-reviewer must watch and listen to the entire hosted video, inspect each cited
-claim against source pages, verify visual identity and image rights, and compare
-the exact committed `topic.json`, `short.yaml`, `script.json`, `research.json`,
-`visuals.json`, `review.json`, and `work/manifest.json`. If any claim, visual,
-audio, right, credit, source, or provenance is uncertain, do not approve it.
-An approval file is created **inside the trusted review process**, never read
-from the producer repository. Its exact shape is:
+`python -m control prepare` reads only Git blobs from an exact producer commit,
+downloads the MP4 from the pinned Cloudinary account without redirects, and
+saves the video and matching review subject in a newly created private folder.
+It never imports or executes producer code. The candidate check enforces the
+episode floor and cutoff, media/spec/manifest hashes, exact narration across
+the spec, script, and render, two quoted source sites per cited claim, image
+rights and credits, and a clean producer review of the same MP4 hash.
 
-```json
-{
-  "subject": {"id": "ep063", "media_sha256": "...", "media_url": "...", "media_public_id": "...", "files": {"topic.json": "..."}},
-  "decision": "approved",
-  "checks": {"claim_sources": true, "visual_identity_rights": true, "full_video_audio": true},
-  "reviewed_at_utc": "2026-10-04T06:00:00+00:00"
-}
-```
+The independent reviewer must watch and listen to the **entire hosted video**,
+verify each factual source and visual right, and inspect the exact packet. An
+`approval.json` is authored in the trusted control process, never accepted
+from the producer repository. It contains the full packet `subject`,
+`decision: approved`, `reviewed_at_utc`, and three true checks:
+`claim_sources`, `visual_identity_rights`, and `full_video_audio`. A missing
+or uncertain check means hold. Code can verify the attestation and exact
+bytes; it cannot prove that a person actually completed this review.
 
-The `subject` must be copied in full from the packet. The signer recomputes it
-from the source commit and hosted bytes. A changed field or unchecked assertion
-holds the candidate. The code verifies an explicit attestation; it cannot prove
-that a human watched the video. The protected signing environment must require
-the reviewer to inspect the packet before releasing the key.
+`python -m control sign` re-downloads the hosted MP4 and recomputes every
+binding before producing `independent_review.json`. Its Ed25519 message and
+schema match History's existing dormant verifier. It receives only the
+signing key, not a Buffer credential. A direct integration check showed that
+the existing producer verifier accepts a synthetic review signed here.
 
-## Intended cloud isolation
+## Isolated YouTube publisher
 
-1. Create a **private, separate** GitHub repository for this code. The producer's
-   deploy key must have no write permission there. Protect the control branch,
-   workflow files, policy, and signing/publishing environments from producer
-   credentials and producer-authored changes. Use a read-only source checkout
-   pinned to an exact commit. `workflow-drafts/review-release.yml` is an inert
-   outline, not an installed workflow.
-2. Put only the reviewer private key in a protected `history-review-signing`
-   environment. Pin its public key in a reviewed History producer commit at
-   `kit/independent-review.pub` and pin its SHA-256 fingerprint in this control
-   policy. Do not create or expose the key in the producer repository.
-3. Put a **new, rotated Buffer publisher credential** only in a different
-   protected `history-publisher` environment. Pin the exact History YouTube and
-   Instagram destination IDs in this control policy and verify their service,
-   organization, status, existing posts, media URL, and due time before any
-   create. Use one serialized executor and reconcile uncertain responses before
-   retrying; Buffer's current create mutation lacks a client idempotency key.
-4. Remove and revoke the producer's current `BUFFER_API_KEY` from GitHub Actions,
-   Modal `creature-receipts-studio`, local `.env` copies, and any other producer
-   executor. The producer currently also holds `CLOUDINARY_URL`, its deploy key,
-   and YouTube credentials, and can run scheduling code. A signer in this repo
-   alone is **not** an isolated release boundary while those remain. Move
-   necessary monitoring to a least-privilege read-only path or separate trusted
-   service before revoking credentials; inspect the existing production jobs so
-   that monitoring does not break.
-5. Build and test the control-owned Buffer publisher, then separately review a
-   staged producer integration that accepts only signed handoffs. Keep History's
-   `status/autonomous_release_policy.json` disabled and its
-   `status/scheduling_hold.json` in place until the trust boundary, destinations,
-   review process, and publisher are verified end to end. A local repository or
-   inert workflow draft cannot enforce cloud permissions.
+`python -m control publish` is a real but dormant YouTube scheduling path.
+Before Buffer access, it rechecks the signed review, source commit, and all
+hosted video bytes. It verifies the pinned Buffer organization and YouTube
+channel service/status, builds title/text/credits from the signed Git blobs,
+searches complete post history for an exact duplicate, verifies an existing
+post's text/video/due time, and checks queue capacity. A new due time must be
+UTC and 30 minutes to 30 days ahead. It checks hosted bytes once more before
+the create mutation. Uncertain Buffer responses hold and require inspection;
+retries reconcile accepted posts rather than blindly creating another one.
+The manual workflow serializes publisher runs. The code has no Instagram
+destination, query, or mutation.
 
-No credential migration, key pinning, remote creation, deployment, or release is
-performed by this repository's current code.
+The publisher has only synthetic and mocked API tests. It has never received
+a Buffer credential, queried Buffer with its own credential, or sent a create
+mutation. Buffer's create API has no client idempotency key, so external
+concurrent executors and ambiguous failures remain deployment risks.
 
-## Local verification
+## Work still required before activation
 
-Use Python 3.12 with the locked `uv` environment. The tests create a
-synthetic Git candidate and an in-memory Ed25519 key; they make no network or
-Buffer calls.
+1. Enforce reviewer approval using a supported GitHub plan or independent
+   service. The current private plan cannot require a reviewer for the
+   signing environment.
+2. Pin `reviewer.pub` in a reviewed History producer commit at
+   `kit/independent-review.pub`. Align History's dormant policy to YouTube
+   only while retaining `enabled: false`, then test the source-to-control
+   handoff and signed review delivery.
+3. Issue a **new, rotated Buffer credential** available only to the control
+   publisher environment. Remove and revoke producer access to the old
+   `BUFFER_API_KEY` in GitHub Actions, Modal, local `.env` copies, and other
+   executors. The producer currently uses it for monitoring and legacy
+   scheduling, so migrate those jobs first. Producer access to the old key
+   means true credential isolation has **not** been achieved.
+4. Verify the actual Buffer create and readback contract in a reviewed
+   dry-run/staged integration, establish durable receipt transfer to History,
+   and prevent producer-owned code from publishing independently. Keep the
+   producer `status/scheduling_hold.json` and both release switches off until
+   those checks pass.
+
+The local control code and cloud workflow installation do not activate any
+release. No producer secret has been deleted or rotated.
+
+## Verification
 
 ```sh
 uv sync --frozen --python 3.12

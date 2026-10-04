@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from .release import Hold, _blob, candidate, episode_root, fetch_video, policy, publisher_preflight, read_object, sign
+from .publisher import publish_reviewed
 
 HERE = Path(__file__).resolve().parents[1]
 
@@ -22,7 +23,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Independent History release control")
     parser.add_argument("--policy", type=Path, default=HERE / "policy.json")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "sign", "publisher-preflight"):
+    for name in ("prepare", "sign", "publisher-preflight", "publish"):
         command = commands.add_parser(name)
         command.add_argument("--source", type=Path, required=True)
         command.add_argument("--commit", required=True)
@@ -35,6 +36,11 @@ def main(argv: list[str] | None = None) -> int:
         if name == "publisher-preflight":
             command.add_argument("--review", type=Path, required=True)
             command.add_argument("--public-key", type=Path, required=True)
+        if name == "publish":
+            command.add_argument("--review", type=Path, required=True)
+            command.add_argument("--public-key", type=Path, required=True)
+            command.add_argument("--due-at-utc", required=True)
+            command.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
         config = policy(args.policy)
@@ -58,11 +64,19 @@ def main(argv: list[str] | None = None) -> int:
             result = sign(approval, subject, os.environ.get("HISTORY_REVIEW_SIGNING_KEY", ""), config)
             write_new(args.output, (json.dumps(result, indent=2, ensure_ascii=False) + "\n").encode())
             print(f"Signed exact candidate review in {args.output}")
-        else:
+        elif args.command == "publisher-preflight":
             review = read_object(args.review.read_bytes(), "signed review")
             plan = publisher_preflight(args.source, args.commit, args.episode, review,
                                        args.public_key.read_text(encoding="ascii").strip(), config)
             print(json.dumps(plan, sort_keys=True))
+        else:
+            review = read_object(args.review.read_bytes(), "signed review")
+            receipt = publish_reviewed(
+                args.source, args.commit, args.episode, review,
+                args.public_key.read_text(encoding="ascii").strip(), config,
+                os.environ.get("HISTORY_PUBLISHER_BUFFER_API_KEY", ""), args.due_at_utc)
+            write_new(args.output, (json.dumps(receipt, indent=2, ensure_ascii=False) + "\n").encode())
+            print(f"Control publisher receipt in {args.output}")
         return 0
     except (Hold, FileExistsError, FileNotFoundError) as exc:
         print(f"Control hold: {exc}", file=sys.stderr)

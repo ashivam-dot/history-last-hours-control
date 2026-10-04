@@ -2,7 +2,7 @@ import base64
 import hashlib
 import json
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from control.release import (Hold, FILES, candidate, digest, policy, publisher_preflight,
                              sign, verify)
+from control.publisher import publish_reviewed
 
 
 def git(repo, *args):
@@ -28,17 +29,32 @@ def fixture(tmp_path):
     episode = source / "content" / "episodes" / "ep063"
     (episode / "work").mkdir(parents=True)
     video = b"a complete test video byte sequence"
-    manifest = {"id": "ep063", "video_sha256": digest(video), "beats": []}
+    manifest = {"id": "ep063", "video_sha256": digest(video), "beats": [
+        {"text": "The ship was lost.", "asset": {"source": "designed card", "license": None}}]}
     documents = {
         "topic.json": {"started_at": "2026-10-04T05:00:00+00:00"},
-        "script.json": {"beats": []}, "research.json": {"viable": True},
+        "script.json": {"beats": [{"text": "The ship was lost.", "claims": [1]}]},
+        "research.json": {"viable": True,
+                          "sources": [{"label": "S1", "url": "https://museum.example/story"},
+                                      {"label": "S2", "url": "https://archive.example/story"}],
+                          "claims": [{"sources": ["S1", "S2"], "evidence": [
+                              {"source": "S1", "quote": "The ship was lost during the long voyage."},
+                              {"source": "S2", "quote": "The ship was lost while crossing the ocean."}]}]},
         "visuals.json": {"used": []},
-        "review.json": {"rounds": [{"media_sha256": digest(video), "passed": True}]},
+        "review.json": {"rounds": [{"media_sha256": digest(video), "passed": True,
+                                      "check": {"warnings": [], "speech_differences": [], "speech_error": None},
+                                      "scores": {name: 4 for name in
+                                                 ("hook", "clarity", "payoff", "visuals", "loop")},
+                                      "frames": [], "speech": []}]},
         "work/manifest.json": manifest,
     }
     for name, data in documents.items():
         (episode / name).write_text(json.dumps(data), encoding="utf-8")
-    (episode / "short.yaml").write_text("id: ep063\n", encoding="utf-8")
+    (episode / "short.yaml").write_text(
+        "id: ep063\ntitle: The final voyage\ndescription: A documented loss.\n"
+        "sources:\n  - https://museum.example/story\n"
+        "hashtags:\n  - '#history'\nbeats:\n  - text: The ship was lost.\n",
+        encoding="utf-8")
     held = {"id": "ep063", "media_sha256": digest(video),
             "media_url": "https://res.cloudinary.com/uj4a07e7/video/upload/v1/history/ep063.mp4",
             "media_public_id": "history/ep063",
@@ -83,6 +99,35 @@ def test_changed_or_untrusted_candidate_holds(fixture, mutation):
         commit = "0" * 40
     else:
         git(source, "remote", "set-url", "origin", "https://github.com/attacker/other.git")
+    with pytest.raises(Hold):
+        candidate(source, commit, "ep063", video, config)
+
+
+@pytest.mark.parametrize("mutation", ["missing_second_quote", "unlicensed_visual", "dirty_review"])
+def test_independent_structural_source_rights_and_media_gates_hold(fixture, mutation):
+    source, _, episode, video, config = fixture
+    if mutation == "missing_second_quote":
+        path = episode / "research.json"
+        data = json.loads(path.read_text())
+        data["claims"][0]["evidence"] = data["claims"][0]["evidence"][:1]
+    elif mutation == "unlicensed_visual":
+        path = episode / "work" / "manifest.json"
+        data = json.loads(path.read_text())
+        data["beats"][0]["asset"] = {"source": "Wikimedia Commons", "license": "unknown",
+                                        "url": "https://commons.example/image", "credit": "Archive"}
+    else:
+        path = episode / "review.json"
+        data = json.loads(path.read_text())
+        data["rounds"][0]["check"]["warnings"] = ["audio clipping"]
+    path.write_text(json.dumps(data))
+    if mutation == "unlicensed_visual":
+        held_path = episode / "hold.json"
+        held = json.loads(held_path.read_text())
+        held["manifest_sha256"] = digest(path.read_bytes())
+        held_path.write_text(json.dumps(held))
+    git(source, "add", ".")
+    git(source, "commit", "-m", "invalid independent evidence")
+    commit = git(source, "rev-parse", "HEAD")
     with pytest.raises(Hold):
         candidate(source, commit, "ep063", video, config)
 
@@ -136,7 +181,8 @@ def test_future_publisher_gate_rechecks_video_signature_and_destination(fixture,
                                         serialization.NoEncryption())
     public_raw = private.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
     config = {**config, "signing_enabled": True, "publishing_enabled": True,
-              "reviewer_key_sha256": digest(public_raw), "youtube_channel_id": "history-yt"}
+              "reviewer_key_sha256": digest(public_raw), "buffer_organization_id": "history-org",
+              "youtube_channel_id": "history-yt"}
     approval = {"subject": subject, "decision": "approved", "checks": {name: True for name in
                 ("claim_sources", "visual_identity_rights", "full_video_audio")},
                 "reviewed_at_utc": datetime.now(timezone.utc).isoformat()}
@@ -153,3 +199,94 @@ def test_future_publisher_gate_rechecks_video_signature_and_destination(fixture,
     with pytest.raises(Hold, match="destination"):
         publisher_preflight(source, commit, "ep063", review, public_b64,
                             {**config, "youtube_channel_id": ""})
+
+
+class FakeBuffer:
+    def __init__(self, media_url):
+        self.media_url = media_url
+        self.created = []
+        self.by_channel = {"history-yt": []}
+        self.by_id = {}
+        self.services = ("youtube",)
+
+    def organization(self, wanted):
+        assert wanted == "history-org"
+
+    def channels(self, organization):
+        assert organization == "history-org"
+        return [{"id": channel, "service": service, "isDisconnected": False,
+                 "isLocked": False, "isQueuePaused": False}
+                for channel, service in zip(self.by_channel, self.services)]
+
+    def posts(self, organization, channel):
+        assert organization == "history-org"
+        return list(self.by_channel[channel])
+
+    def post(self, post_id):
+        return self.by_id[post_id]
+
+    def create(self, payload):
+        self.created.append(payload)
+        post_id = f"buffer-{len(self.created)}"
+        summary = {"id": post_id, "status": "scheduled", "dueAt": payload["dueAt"],
+                   "text": payload["text"]}
+        self.by_channel[payload["channelId"]].append(summary)
+        self.by_id[post_id] = {**summary, "assets": [{"source": self.media_url}]}
+        return summary
+
+
+def approved_publisher(fixture):
+    source, commit, _, video, config = fixture
+    subject = candidate(source, commit, "ep063", video, config)
+    private = Ed25519PrivateKey.generate()
+    private_raw = private.private_bytes(serialization.Encoding.Raw, serialization.PrivateFormat.Raw,
+                                        serialization.NoEncryption())
+    public_raw = private.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    config = {**config, "signing_enabled": True, "publishing_enabled": True,
+              "reviewer_key_sha256": digest(public_raw), "buffer_organization_id": "history-org",
+              "youtube_channel_id": "history-yt"}
+    approval = {"subject": subject, "decision": "approved", "checks": {name: True for name in
+                ("claim_sources", "visual_identity_rights", "full_video_audio")},
+                "reviewed_at_utc": datetime.now(timezone.utc).isoformat()}
+    review = sign(approval, subject, base64.b64encode(private_raw).decode(), config)
+    return source, commit, video, subject, config, review, base64.b64encode(public_raw).decode()
+
+
+def test_control_publisher_schedules_exact_youtube_media_and_reconciles_without_duplicate(fixture, monkeypatch):
+    source, commit, video, subject, config, review, public = approved_publisher(fixture)
+    monkeypatch.setattr("control.release.fetch_video", lambda *_: video)
+    monkeypatch.setattr("control.publisher.fetch_video", lambda *_: video)
+    api = FakeBuffer(subject["media_url"])
+    due = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0).isoformat()
+    first = publish_reviewed(source, commit, "ep063", review, public, config, "test-token", due, api)
+    assert [item["channelId"] for item in api.created] == ["history-yt"]
+    assert all(item["assets"] == [{"video": {"url": subject["media_url"]}}] for item in api.created)
+    assert first["youtube"]["reconciled"] is False
+    second = publish_reviewed(source, commit, "ep063", review, public, config, "test-token", due, api)
+    assert len(api.created) == 1
+    assert second["youtube"]["reconciled"] is True
+    assert "instagram" not in second
+
+
+@pytest.mark.parametrize("failure", ["wrong_channel", "duplicate", "changed_media", "missing_token"])
+def test_control_publisher_holds_before_buffer_create(fixture, monkeypatch, failure):
+    source, commit, video, subject, config, review, public = approved_publisher(fixture)
+    monkeypatch.setattr("control.release.fetch_video", lambda *_: video)
+    monkeypatch.setattr("control.publisher.fetch_video", lambda *_: video)
+    api = FakeBuffer(subject["media_url"])
+    if failure == "wrong_channel":
+        api.services = ("instagram",)
+    elif failure == "duplicate":
+        spec_text = __import__("control.publisher", fromlist=["copy_and_metadata"]).copy_and_metadata(
+            source, commit, "ep063")[0]["youtube"]
+        api.by_channel["history-yt"] = [
+            {"id": "one", "status": "scheduled", "text": spec_text},
+            {"id": "two", "status": "scheduled", "text": spec_text},
+        ]
+    elif failure == "changed_media":
+        monkeypatch.setattr("control.publisher.fetch_video", lambda *_: video + b"changed")
+    due = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0).isoformat()
+    with pytest.raises(Hold):
+        publish_reviewed(source, commit, "ep063", review, public, config,
+                         "" if failure == "missing_token" else "test-token", due, api)
+    assert api.created == []

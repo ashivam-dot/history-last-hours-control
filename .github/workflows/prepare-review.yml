@@ -1,0 +1,61 @@
+name: Prepare exact History review packet
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Exact 40-character producer Git commit
+        required: true
+      episode:
+        description: New epNNN candidate
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate immutable input
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          EPISODE: ${{ inputs.episode }}
+        run: |
+          [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$EPISODE" =~ ^ep[0-9]{3,}$ ]]
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ inputs.source_commit }}
+          path: source
+          persist-credentials: false
+      - name: Confirm read-only source identity
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          test "$(git -C source rev-parse HEAD)" = "$SOURCE_COMMIT"
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          test "$(git -C source remote get-url origin)" = https://github.com/ashivam-dot/creature-receipts.git
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install locked control only
+        run: uv sync --frozen --python 3.12 --no-dev
+      - name: Read hosted bytes and prepare private packet
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          EPISODE: ${{ inputs.episode }}
+        run: |
+          uv run --frozen --no-dev python -m control prepare \
+            --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
+            --output private/review-packet
+      - name: Keep packet private for one day
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-history-review-packet
+          path: private/review-packet/
+          retention-days: 1
+          if-no-files-found: error

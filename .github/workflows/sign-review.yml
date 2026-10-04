@@ -1,0 +1,72 @@
+name: Sign independently reviewed History candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Exact producer commit used for full review
+        required: true
+      episode:
+        description: Episode from reviewed packet
+        required: true
+      approval_json:
+        description: Complete independent approval JSON from trusted reviewer
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  sign:
+    environment: history-review-signing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate immutable input
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          EPISODE: ${{ inputs.episode }}
+        run: |
+          [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$EPISODE" =~ ^ep[0-9]{3,}$ ]]
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ inputs.source_commit }}
+          path: source
+          persist-credentials: false
+      - name: Confirm read-only source identity
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          test "$(git -C source rev-parse HEAD)" = "$SOURCE_COMMIT"
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install locked control only
+        run: uv sync --frozen --python 3.12 --no-dev
+      - name: Save independent approval input
+        env:
+          APPROVAL_JSON: ${{ inputs.approval_json }}
+        run: |
+          mkdir -m 700 private
+          uv run --frozen --no-dev python -c 'import os,pathlib; pathlib.Path("private/approval.json").write_text(os.environ["APPROVAL_JSON"], encoding="utf-8")'
+      - name: Sign after exact candidate recheck
+        env:
+          HISTORY_REVIEW_SIGNING_KEY: ${{ secrets.HISTORY_REVIEW_SIGNING_KEY }}
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          EPISODE: ${{ inputs.episode }}
+        run: |
+          uv run --frozen --no-dev python -m control sign \
+            --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
+            --approval private/approval.json --output private/independent_review.json
+      - name: Keep signed review private for one day
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-history-signed-review
+          path: private/independent_review.json
+          retention-days: 1
+          if-no-files-found: error

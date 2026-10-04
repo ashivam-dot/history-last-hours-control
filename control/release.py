@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
+import yaml
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
@@ -24,6 +25,9 @@ EPISODE = re.compile(r"ep(\d{3,})\Z")
 SHA = re.compile(r"[0-9a-f]{64}\Z")
 COMMIT = re.compile(r"[0-9a-f]{40}\Z")
 MAX_VIDEO_BYTES = 300 * 1024 * 1024
+PASS_SCORES = ("hook", "clarity", "payoff", "visuals", "loop")
+OPEN_LICENSES = {"CC0", "Public domain", "Pexels License", "Pixabay Content License"}
+ORIGINAL_ASSETS = {"designed card", "AI generated"}
 
 
 class Hold(RuntimeError):
@@ -67,7 +71,7 @@ def policy(path: Path) -> dict:
     config = read_object(path.read_bytes(), "control policy")
     require(set(config) == {"version", "signing_enabled", "publishing_enabled", "source_remote",
                             "min_episode_id", "started_after_utc", "media_url_prefix",
-                            "reviewer_key_sha256", "youtube_channel_id", "instagram_channel_id"},
+                            "reviewer_key_sha256", "buffer_organization_id", "youtube_channel_id"},
             "control policy has missing or unexpected fields")
     require(type(config["version"]) is int and config["version"] == 1 and
             type(config["signing_enabled"]) is bool and
@@ -83,8 +87,9 @@ def policy(path: Path) -> dict:
             prefix.endswith("/video/upload/"), "control policy media prefix is invalid")
     require(config["reviewer_key_sha256"] == "" or bool(SHA.fullmatch(str(config["reviewer_key_sha256"]))),
             "control policy reviewer fingerprint is invalid")
-    for name in ("youtube_channel_id", "instagram_channel_id"):
-        require(isinstance(config[name], str), f"control policy {name} is invalid")
+    require(isinstance(config["youtube_channel_id"], str) and
+            isinstance(config["buffer_organization_id"], str),
+            "control policy Buffer organization or YouTube destination is invalid")
     return config
 
 
@@ -105,6 +110,94 @@ def episode_root(commit: str, episode: str) -> str:
     return f"content/episodes/{episode}/"
 
 
+def _check_editorial_evidence(blobs: dict[str, bytes], episode: str, media_hash: str) -> None:
+    """Independently enforce the producer certificate's structural source and rights gate."""
+    try:
+        spec = yaml.safe_load(blobs["short.yaml"])
+    except yaml.YAMLError as exc:
+        raise Hold("committed Short spec YAML is invalid") from exc
+    research = read_object(blobs["research.json"], "committed research")
+    script = read_object(blobs["script.json"], "committed script")
+    manifest = read_object(blobs["work/manifest.json"], "committed manifest")
+    review = read_object(blobs["review.json"], "committed producer review")
+    require(isinstance(spec, dict) and spec.get("id") == episode,
+            "committed spec identity differs")
+    spec_beats = spec.get("beats")
+    script_beats = script.get("beats")
+    manifest_beats = manifest.get("beats")
+    require(all(isinstance(beats, list) for beats in (spec_beats, script_beats, manifest_beats)) and
+            len(spec_beats) > 0 and len(spec_beats) == len(script_beats) == len(manifest_beats),
+            "spec, script, and render beats are incomplete")
+    sources = research.get("sources")
+    claims = research.get("claims")
+    require(research.get("viable") is True and isinstance(sources, list) and
+            isinstance(claims, list) and bool(sources) and bool(claims),
+            "independent source evidence is incomplete")
+    by_label: dict[str, str] = {}
+    for source in sources:
+        require(isinstance(source, dict) and isinstance(source.get("label"), str) and
+                isinstance(source.get("url"), str), "research source is malformed")
+        parsed = urlparse(source["url"])
+        require(parsed.scheme == "https" and bool(parsed.hostname) and
+                source["label"] not in by_label, "research source URL or label is invalid")
+        by_label[source["label"]] = parsed.hostname
+    cited: set[int] = set()
+    for spec_beat, script_beat, render_beat in zip(spec_beats, script_beats, manifest_beats):
+        require(all(isinstance(beat, dict) for beat in (spec_beat, script_beat, render_beat)) and
+                isinstance(spec_beat.get("text"), str) and
+                spec_beat["text"] == script_beat.get("text") == render_beat.get("text"),
+                "narrated script differs from spec or render")
+        numbers = script_beat.get("claims")
+        require(isinstance(numbers, list) and bool(numbers) and
+                all(type(number) is int and 1 <= number <= len(claims) for number in numbers),
+                "narrated beat lacks valid claim citations")
+        cited.update(numbers)
+        asset = render_beat.get("asset")
+        require(isinstance(asset, dict), "rendered visual asset is missing")
+        source = asset.get("source")
+        license_name = asset.get("license")
+        if source in ORIGINAL_ASSETS:
+            require(source != "AI generated" or spec.get("synthetic_media") is True,
+                    "AI asset lacks synthetic-media disclosure")
+        else:
+            require(isinstance(license_name, str) and
+                    (license_name in OPEN_LICENSES or
+                     re.fullmatch(r"CC BY (?:2\.0|2\.5|3\.0|4\.0)(?: [a-z]{2})?", license_name, re.I)),
+                    "rendered visual license is missing or ambiguous")
+            require(isinstance(asset.get("url"), str) and
+                    urlparse(asset["url"]).scheme == "https" and
+                    isinstance(asset.get("credit"), str) and bool(asset["credit"].strip()),
+                    "rendered visual lacks provenance or credit")
+    for number in cited:
+        claim = claims[number - 1]
+        require(isinstance(claim, dict) and isinstance(claim.get("sources"), list) and
+                isinstance(claim.get("evidence"), list), "cited claim is malformed")
+        sites = set()
+        for evidence in claim["evidence"]:
+            if not isinstance(evidence, dict):
+                continue
+            label, quote = evidence.get("source"), evidence.get("quote")
+            if (label in claim["sources"] and label in by_label and isinstance(quote, str) and
+                    len(quote) >= 20 and len(quote.split()) >= 4):
+                sites.add(by_label[label])
+        require(len(sites) >= 2, "cited claim lacks quoted evidence from two source sites")
+    rounds = review.get("rounds")
+    require(isinstance(rounds, list) and bool(rounds), "producer final-media review is missing")
+    kept = review.get("kept_round", len(rounds))
+    require(type(kept) is int and 1 <= kept <= len(rounds), "producer kept review round is invalid")
+    final = rounds[kept - 1]
+    require(isinstance(final, dict) and isinstance(final.get("check"), dict) and
+            isinstance(final.get("scores"), dict), "producer final-media review is malformed")
+    checks = final["check"]
+    scores = final["scores"]
+    require(final.get("media_sha256") == media_hash and final.get("passed") is True and
+            checks.get("warnings") == [] and checks.get("speech_differences") == [] and
+            not checks.get("speech_error") and final.get("frames") == [] and
+            final.get("speech") == [] and
+            all(type(scores.get(name)) is int and scores[name] >= 4 for name in PASS_SCORES),
+            "producer final-media review is not clean for exact video")
+
+
 def candidate(repo: Path, commit: str, episode: str, video: bytes, config: dict) -> dict:
     """Construct the exact subject expected by the dormant producer verifier."""
     require(bool(COMMIT.fullmatch(commit)), "source commit must be an immutable 40-character SHA")
@@ -121,7 +214,6 @@ def candidate(repo: Path, commit: str, episode: str, video: bytes, config: dict)
     held = read_object(_blob(repo, commit, root + "hold.json"), "committed hold")
     manifest = read_object(blobs["work/manifest.json"], "committed manifest")
     topic = read_object(blobs["topic.json"], "committed topic")
-    review = read_object(blobs["review.json"], "committed producer review")
     require(utc(topic.get("started_at"), "topic start") >= utc(config["started_after_utc"], "control cutoff"),
             "candidate predates control cutoff")
     require(held.get("id") == manifest.get("id") == episode and held.get("superseded") is not True,
@@ -135,13 +227,7 @@ def candidate(repo: Path, commit: str, episode: str, video: bytes, config: dict)
     require(held.get("spec_sha256") == files["short.yaml"] and
             held.get("manifest_sha256") == files["work/manifest.json"],
             "hosted hold has stale spec or manifest binding")
-    require(isinstance(review.get("rounds"), list) and bool(review["rounds"]),
-            "producer final-media review is missing")
-    kept = review.get("kept_round", len(review["rounds"]))
-    require(type(kept) is int and 1 <= kept <= len(review["rounds"]) and
-            review["rounds"][kept - 1].get("media_sha256") == media_hash and
-            review["rounds"][kept - 1].get("passed") is True,
-            "producer final-media review does not bind the video")
+    _check_editorial_evidence(blobs, episode, media_hash)
     media_url = held.get("media_url")
     require(isinstance(media_url, str) and media_url.startswith(config["media_url_prefix"]) and
             not urlparse(media_url).username and not urlparse(media_url).password and
@@ -227,6 +313,7 @@ def publisher_preflight(repo: Path, commit: str, episode: str, review: dict,
                         public_raw_b64: str, config: dict) -> dict:
     """Credential-free gate for a future control-owned publisher job; never mutates Buffer."""
     require(config["publishing_enabled"] is True, "control publisher is disabled")
+    require(bool(config["buffer_organization_id"]), "pinned Buffer organization is missing")
     require(bool(config["youtube_channel_id"]), "pinned YouTube destination is missing")
     root = episode_root(commit, episode)
     held = read_object(_blob(repo, commit, root + "hold.json"), "committed hold")
@@ -234,5 +321,4 @@ def publisher_preflight(repo: Path, commit: str, episode: str, review: dict,
     subject = candidate(repo, commit, episode, video, config)
     verify(review, subject, public_raw_b64, config)
     return {"source_commit": commit, "subject": subject,
-            "youtube_channel_id": config["youtube_channel_id"],
-            "instagram_channel_id": config["instagram_channel_id"]}
+            "youtube_channel_id": config["youtube_channel_id"]}

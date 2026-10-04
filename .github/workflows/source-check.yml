@@ -1,0 +1,41 @@
+name: Check exact read-only History source
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Exact 40-character producer Git commit
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate control and immutable input
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          test "$GITHUB_REPOSITORY" = ashivam-dot/history-last-hours-control
+          [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ inputs.source_commit }}
+          path: source
+          persist-credentials: false
+      - name: Verify exact read-only source checkout
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          test "$(git -C source rev-parse HEAD)" = "$SOURCE_COMMIT"
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          test "$(git -C source remote get-url origin)" = https://github.com/ashivam-dot/creature-receipts.git
+          test -z "$(git -C source config --get http.https://github.com/.extraheader || true)"
+          echo "Read-only source commit: $SOURCE_COMMIT"

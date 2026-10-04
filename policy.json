@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "signing_enabled": false,
-  "publishing_enabled": false,
+  "signing_enabled": true,
+  "publishing_enabled": true,
   "intake_enabled": true,
   "qa_model": "gemini-3.8-flash",
   "qa_provider": "gemini",

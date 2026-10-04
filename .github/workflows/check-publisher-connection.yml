@@ -27,8 +27,9 @@ jobs:
           import os
           from pathlib import Path
 
+          from control.monitor import read_public_video, video_id_from_buffer
           from control.publisher import BufferClient, _channel
-          from control.release import policy, require
+          from control.release import policy, require, utc
 
           config = policy(Path("policy.json"))
           require(config["signing_enabled"] is False and config["publishing_enabled"] is False,
@@ -46,7 +47,15 @@ jobs:
                   all(name in detail for name in
                       ("dueAt", "sentAt", "externalLink", "channelService", "text", "error", "assets")),
                   "Buffer sent-post readback contract is incomplete")
+          utc(detail.get("sentAt"), "Buffer sent time")
+          video_id = video_id_from_buffer(detail.get("externalLink"))
+          public = read_public_video(video_id)
+          require(public.get("playability") == "OK" and public.get("video_id") == video_id and
+                  public.get("channel_id") == config["youtube_public_channel_id"] and
+                  public.get("external_channel_id") == config["youtube_public_channel_id"] and
+                  public.get("is_private") is False and public.get("is_unlisted") is False,
+                  "pinned YouTube channel public watch readback is incomplete")
           print(json.dumps({"status": "ready", "buffer_organization_id": organization,
                             "youtube_channel_id": channel,
-                            "sent_post_readback": "verified"}))
+                            "sent_post_readback": "verified", "public_watch_readback": "verified"}))
           PY

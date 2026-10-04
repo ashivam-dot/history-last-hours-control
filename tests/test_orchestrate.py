@@ -11,11 +11,33 @@ import pytest
 import yaml
 
 from control import orchestrate as orch
+from control import release as release_module
 from control.release import Hold, policy
 
 
 def git(repo, *args):
     return subprocess.check_output(["git", "-C", str(repo), *args], text=True).strip()
+
+
+def test_trusted_git_helpers_do_not_forward_live_policy_token(tmp_path, monkeypatch):
+    monkeypatch.setenv("HISTORY_CONTROL_POLICY_TOKEN", "private-control-token")
+    monkeypatch.setenv("SAFE_GIT_TEST_VALUE", "retained")
+    calls = []
+
+    def check_output(*args, **kwargs):
+        calls.append(kwargs["env"])
+        return "main\n"
+
+    def run(*args, **kwargs):
+        calls.append(kwargs["env"])
+        return SimpleNamespace(returncode=0, stdout=b"main\n")
+
+    monkeypatch.setattr(orch.subprocess, "check_output", check_output)
+    monkeypatch.setattr(release_module.subprocess, "run", run)
+    assert orch._git(tmp_path, "branch", "--show-current") == "main"
+    assert release_module._git(tmp_path, "branch", "--show-current") == b"main\n"
+    assert all("HISTORY_CONTROL_POLICY_TOKEN" not in env and
+               env["SAFE_GIT_TEST_VALUE"] == "retained" for env in calls)
 
 
 @pytest.fixture

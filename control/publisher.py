@@ -33,6 +33,13 @@ def _require_live_publish_policy(config: dict) -> None:
         from .orchestrate import require_mutation_policy
         require_mutation_policy(config, "publish")
 
+
+def _require_live_unreleased_draft(repo, commit: str, episode: str, config: dict) -> None:
+    """Refuse an unattended mutation if producer main withdrew this exact draft."""
+    if os.environ.get("HISTORY_UNATTENDED_LIVE_POLICY") == "1":
+        from .orchestrate import current_draft
+        current_draft(repo, episode, commit, config)
+
 CHANNELS_QUERY = """query Channels($input: ChannelsInput!) {
   channels(input: $input) { id name service isDisconnected isLocked isQueuePaused }
 }"""
@@ -488,6 +495,7 @@ def publish_draft_reviewed(repo, commit: str, episode: str, packet_dir, review: 
     api = _preflight_before_public_copy(repo, commit, episode, config, buffer_token,
                                         due, expected_public_url, api)
     _require_live_publish_policy(config)
+    _require_live_unreleased_draft(repo, commit, episode, config)
     media_url, media_public_id = media_client.upload_exact(
         private_video, episode, subject["media_sha256"])
     require(media_public_id == expected_public_id and media_url == expected_public_url and
@@ -496,7 +504,7 @@ def publish_draft_reviewed(repo, commit: str, episode: str, packet_dir, review: 
             subject["media_sha256"],
             "approved public copy differs from authenticated draft")
     return _schedule_exact(repo, commit, episode, subject, config, buffer_token,
-                           due, media_url, media_public_id, api)
+                           due, media_url, media_public_id, api, unattended_draft=True)
 
 
 def _preflight_before_public_copy(repo, commit: str, episode: str, config: dict,
@@ -524,7 +532,8 @@ def _preflight_before_public_copy(repo, commit: str, episode: str, config: dict,
 
 def _schedule_exact(repo, commit: str, episode: str, subject: dict, config: dict,
                     buffer_token: str, due: datetime, media_url: str,
-                    media_public_id: str, api: BufferClient | None) -> dict:
+                    media_public_id: str, api: BufferClient | None,
+                    *, unattended_draft: bool = False) -> dict:
     api = api or BufferClient(buffer_token)
     org = config["buffer_organization_id"]
     api.organization(org)
@@ -543,11 +552,16 @@ def _schedule_exact(repo, commit: str, episode: str, subject: dict, config: dict
         require(digest(fetch_video(media_url, {"media_url_prefix": config["publisher_media_url_prefix"]})) ==
                 subject["media_sha256"],
                 "control-owned media changed before Buffer mutation")
-    _require_live_publish_policy(config)
+    def before_create() -> None:
+        _require_live_publish_policy(config)
+        if unattended_draft:
+            _require_live_unreleased_draft(repo, commit, episode, config)
+
+    before_create()
     youtube = _create_or_reconcile(api, config["youtube_channel_id"],
                                    copy["youtube"], {"youtube": metadata["youtube"]},
                                    media_url, due, youtube_posts,
-                                   before_create=lambda: _require_live_publish_policy(config))
+                                   before_create=before_create)
     return {"episode": episode, "media_sha256": subject["media_sha256"],
             "source_commit": commit, "control_media_url": media_url,
             "control_media_public_id": media_public_id, "youtube": youtube}

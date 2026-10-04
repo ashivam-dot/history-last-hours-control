@@ -753,6 +753,7 @@ def test_live_policy_flip_blocks_draft_mutation_after_preflight(fixture, tmp_pat
 
     api.posts = posts
     monkeypatch.setattr(orch.GitHubState, "require_live_policy", check_live_policy)
+    monkeypatch.setattr(orch, "current_draft", lambda *_args: None)
     monkeypatch.setattr("control.publisher.fetch_video", lambda url, _: video)
     monkeypatch.setenv("HISTORY_UNATTENDED_LIVE_POLICY", "1")
     monkeypatch.setenv("HISTORY_CONTROL_POLICY_TOKEN", "test-control-token")
@@ -765,6 +766,57 @@ def test_live_policy_flip_blocks_draft_mutation_after_preflight(fixture, tmp_pat
                                "test-token", "test-cloudinary", due, api, media)
     assert not api.created
     assert len(media.uploads) == (1 if flip_at == "before_public_copy" else 2)
+
+
+@pytest.mark.parametrize("fail_on", [1, 2, 3])
+def test_unattended_publish_rechecks_producer_main_at_each_mutation_boundary(
+        fixture, tmp_path, monkeypatch, fail_on):
+    source, commit, _, video, _, config = draft_fixture(fixture)
+    private_prefix = config["publisher_media_url_prefix"].replace("/video/upload/", "/video/authenticated/")
+    private_url = private_prefix + PUBLISHER_PUBLIC_ID_PREFIX + "drafts/ep063-" + digest(video) + ".mp4"
+    media = FakePrivateMedia(private_url, video)
+    packet_dir = tmp_path / "packet"
+    intake_draft(source, commit, "ep063", config, "test-cloudinary", packet_dir,
+                 lambda _: video, media)
+    subject, _ = validated_packet(source, commit, "ep063", config, packet_dir)
+    private = Ed25519PrivateKey.generate()
+    private_raw = private.private_bytes(serialization.Encoding.Raw, serialization.PrivateFormat.Raw,
+                                        serialization.NoEncryption())
+    public_raw = private.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    config = {**config, "signing_enabled": True, "publishing_enabled": True,
+              "reviewer_key_sha256": digest(public_raw), "buffer_organization_id": "history-org",
+              "youtube_channel_id": "history-yt"}
+    approval = {"subject": subject, "decision": "approved",
+                "checks": {name: True for name in ("claim_sources", "visual_identity_rights", "full_video_audio")},
+                "reviewed_at_utc": datetime.now(timezone.utc).isoformat()}
+    review = sign(approval, subject, base64.b64encode(private_raw).decode(), config)
+    public_url = config["publisher_media_url_prefix"] + PUBLISHER_PUBLIC_ID_PREFIX + "ep063-" + digest(video) + ".mp4"
+    media.public_url = public_url
+    api = FakeBuffer(public_url)
+    checks = []
+
+    def current(repo, episode, source_commit, policy):
+        assert (repo, episode, source_commit, policy) == (source, "ep063", commit, config)
+        checks.append(fail_on)
+        if len(checks) == fail_on:
+            raise Hold("producer main withdrew the exact draft")
+
+    monkeypatch.setattr(orch, "current_draft", current)
+    monkeypatch.setattr(orch.GitHubState, "require_live_policy", lambda *_args: None)
+    monkeypatch.setattr("control.publisher.fetch_video", lambda url, _: video)
+    monkeypatch.setenv("HISTORY_UNATTENDED_LIVE_POLICY", "1")
+    monkeypatch.setenv("HISTORY_CONTROL_POLICY_TOKEN", "test-control-token")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "owner/control")
+    monkeypatch.setenv("GITHUB_SHA", "a" * 40)
+    due = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0).isoformat()
+    uploads_before_release = len(media.uploads)
+    with pytest.raises(Hold, match="producer main withdrew"):
+        publish_draft_reviewed(source, commit, "ep063", packet_dir, review,
+                               base64.b64encode(public_raw).decode(), config,
+                               "test-token", "test-cloudinary", due, api, media)
+    assert len(checks) == fail_on
+    assert len(media.uploads) - uploads_before_release == (0 if fail_on == 1 else 1)
+    assert api.created == []
 
 
 def test_live_policy_is_checked_after_reconcile_and_before_buffer_create():

@@ -110,7 +110,9 @@ def policy(path: Path) -> dict:
 
 
 def _git(repo: Path, *args: str) -> bytes:
-    done = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, check=False)
+    done = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, check=False,
+                          env={key: value for key, value in os.environ.items()
+                               if key != "HISTORY_CONTROL_POLICY_TOKEN"})
     if done.returncode:
         raise Hold("source Git checkout or committed candidate is unavailable")
     return done.stdout

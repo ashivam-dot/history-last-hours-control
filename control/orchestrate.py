@@ -40,7 +40,9 @@ FORBIDDEN_PRODUCER_RECORDS = ("hold.json", "publish.json", "release_certificate.
 def _git(repo: Path, *args: str) -> str:
     try:
         return subprocess.check_output(["git", "-C", str(repo), *args],
-                                       stderr=subprocess.DEVNULL, text=True).strip()
+                                       stderr=subprocess.DEVNULL, text=True,
+                                       env={key: value for key, value in os.environ.items()
+                                            if key != "HISTORY_CONTROL_POLICY_TOKEN"}).strip()
     except subprocess.CalledProcessError as exc:
         raise Hold("producer Git discovery failed") from exc
 

@@ -486,6 +486,10 @@ def test_inflight_run_holds_when_main_policy_switch_is_turned_off(monkeypatch, c
         state.require_live_policy(local, operation)
     entry["content"] = base64.b64encode(json.dumps(local).encode()).decode()
     state.require_live_policy(local, operation)
+    encoded = entry["content"]
+    entry["content"] = "\n".join(encoded[index:index + 76]
+                                   for index in range(0, len(encoded), 76)) + "\n"
+    state.require_live_policy(local, operation)
 
 
 def test_workflow_separates_credentials_and_gates_release():

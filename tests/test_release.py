@@ -72,7 +72,8 @@ def fixture(tmp_path):
     git(source, "add", ".")
     git(source, "commit", "-m", "test candidate")
     commit = git(source, "rev-parse", "HEAD")
-    config = policy(Path(__file__).resolve().parents[1] / "policy.json")
+    config = {**policy(Path(__file__).resolve().parents[1] / "policy.json"),
+              "intake_enabled": False, "signing_enabled": False, "publishing_enabled": False}
     return source, commit, episode, video, config
 
 

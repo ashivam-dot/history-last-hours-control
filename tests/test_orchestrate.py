@@ -42,7 +42,8 @@ def test_trusted_git_helpers_do_not_forward_live_policy_token(tmp_path, monkeypa
 
 @pytest.fixture
 def config():
-    return policy(Path(__file__).resolve().parents[1] / "policy.json")
+    return {**policy(Path(__file__).resolve().parents[1] / "policy.json"),
+            "intake_enabled": False, "signing_enabled": False, "publishing_enabled": False}
 
 
 def test_discovery_pins_last_draft_change_not_unrelated_main_commit(tmp_path, config):
@@ -199,9 +200,10 @@ def test_ordered_idempotent_transitions_and_fixed_due_reservation():
     qa = orch.advance(intake, "qa_approved")
     signed = orch.advance(qa, "signed")
     now = datetime(2026, 10, 4, 16, tzinfo=timezone.utc)
-    occupied = [{"due_at_utc": datetime(2026, 10, 5, 17, tzinfo=timezone.utc).isoformat()}]
+    occupied = [{"due_at_utc": datetime(2026, 10, 4, 22, tzinfo=timezone.utc).isoformat()},
+                {"due_at_utc": datetime(2026, 10, 5, 13, tzinfo=timezone.utc).isoformat()}]
     due = orch.next_due(occupied, now)
-    assert due == "2026-10-06T17:00:00+00:00"
+    assert due == "2026-10-05T17:00:00+00:00"
     planned = {**orch.advance(signed, "release_planned"), "due_at_utc": due}
     assert orch.advance(planned, "release_planned") is planned
     scheduled = orch.advance(planned, "scheduled")

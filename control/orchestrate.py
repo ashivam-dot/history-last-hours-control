@@ -186,16 +186,20 @@ def qa_retry_update(receipt: dict, report: dict, config: dict,
     return updated
 
 
+RELEASE_HOURS_UTC = (13, 17, 22)
+
+
 def next_due(receipts: list[dict], now: datetime) -> str:
-    """Reserve one 17:00 UTC daily slot, at least two hours ahead."""
+    """Reserve the earliest free daily slot (13:00, 17:00, 22:00 UTC), at least two hours ahead."""
     occupied = {item.get("due_at_utc") for item in receipts if item.get("due_at_utc")}
     for day in range(30):
         date = (now + timedelta(days=day)).date()
-        candidate = datetime(date.year, date.month, date.day, 17, tzinfo=timezone.utc)
-        if candidate > now + timedelta(hours=2) and candidate <= now + timedelta(days=29):
-            due = candidate.isoformat()
-            if due not in occupied:
-                return due
+        for hour in RELEASE_HOURS_UTC:
+            candidate = datetime(date.year, date.month, date.day, hour, tzinfo=timezone.utc)
+            if candidate > now + timedelta(hours=2) and candidate <= now + timedelta(days=29):
+                due = candidate.isoformat()
+                if due not in occupied:
+                    return due
     raise Hold("no unreserved release slot is available")
 
 

@@ -69,6 +69,17 @@ def utc(value: str, label: str) -> datetime:
     return parsed
 
 
+def source_time(value: object, label: str) -> datetime:
+    """Interpret an aware producer timestamp on the control's UTC timeline."""
+    try:
+        parsed = datetime.fromisoformat(value)
+    except (TypeError, ValueError) as exc:
+        raise Hold(f"{label} is not a time") from exc
+    require(parsed.tzinfo is not None and parsed.utcoffset() is not None,
+            f"{label} has no timezone")
+    return parsed.astimezone(timezone.utc)
+
+
 def policy(path: Path) -> dict:
     config = read_object(path.read_bytes(), "control policy")
     require(set(config) == {"version", "signing_enabled", "publishing_enabled", "intake_enabled", "source_remote",
@@ -232,7 +243,8 @@ def candidate(repo: Path, commit: str, episode: str, video: bytes, config: dict)
     held = read_object(_blob(repo, commit, root + "hold.json"), "committed hold")
     manifest = read_object(blobs["work/manifest.json"], "committed manifest")
     topic = read_object(blobs["topic.json"], "committed topic")
-    require(utc(topic.get("started_at"), "topic start") >= utc(config["started_after_utc"], "control cutoff"),
+    require(source_time(topic.get("started_at"), "topic start") >=
+            utc(config["started_after_utc"], "control cutoff"),
             "candidate predates control cutoff")
     require(held.get("id") == manifest.get("id") == episode and held.get("superseded") is not True,
             "candidate identity or hosted state differs")

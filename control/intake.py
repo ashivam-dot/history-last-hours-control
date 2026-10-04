@@ -12,7 +12,7 @@ from typing import Callable
 
 from .publisher import CloudinaryClient, MAX_CLOUDINARY_UPLOAD, PUBLISHER_PUBLIC_ID_PREFIX
 from .release import (COMMIT, EPISODE, FILES, SHA, Hold, _blob, _check_editorial_evidence,
-                      _git, digest, episode_root, read_object, require, utc)
+                      _git, digest, episode_root, read_object, require, source_time, utc)
 
 OUTBOX_VOLUME = "creature-receipts-outbox"
 OUTBOX_WORKSPACE = "aksha-shivam18"
@@ -57,7 +57,7 @@ def committed_draft(repo: Path, commit: str, episode: str, config: dict) -> dict
             draft["spec_sha256"] == files["short.yaml"] and
             draft["manifest_sha256"] == files["work/manifest.json"],
             "draft, manifest, spec, or video hash differs")
-    require(utc(topic.get("started_at"), "draft topic start") >=
+    require(source_time(topic.get("started_at"), "draft topic start") >=
             utc(config["started_after_utc"], "control cutoff"),
             "draft predates control cutoff")
     _check_editorial_evidence(blobs, episode, media_hash)

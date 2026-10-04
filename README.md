@@ -26,6 +26,10 @@ reviewed, signed, scheduled, or published a real episode.
   ep054 public readback. Buffer still shows the
   channel's older display name, “Creature Receipts”; the channel ID is the
   History destination.
+- Manual run `37181688369` generated a 1,546 byte MP4, uploaded it under
+  `history-last-hours/test/` in `mw0oh0v8`, verified the delivered bytes and
+  SHA-256, and received Cloudinary's successful destroy response with cache
+  invalidation requested. No Buffer key was mounted for that test.
 - GitHub's current private-repository plan rejects branch protection and
   required environment reviewers. Both environments have no approval rules.
   The separate private repository, owner-only collaborator list, no deploy
@@ -78,9 +82,10 @@ retries reconcile accepted posts rather than blindly creating another one.
 The manual workflow serializes publisher runs. The code has no Instagram
 destination, query, or mutation.
 
-The publisher has only synthetic and mocked API tests. The control environment
-has passed a read-only Buffer connection check, but it has not uploaded a real
-episode copy or sent a create mutation. Buffer's create API
+The Buffer scheduling path has only synthetic and mocked create API tests. The
+control environment has passed a read-only Buffer connection check and a live
+temporary Cloudinary media probe, but it has not uploaded a real episode copy
+or sent a Buffer create mutation. Buffer's create API
 has no client idempotency key, so external
 concurrent executors and ambiguous failures remain deployment risks.
 

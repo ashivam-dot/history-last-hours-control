@@ -1,0 +1,31 @@
+name: Test dormant History control
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install locked control dependencies
+        run: uv sync --frozen --python 3.12
+      - name: Verify policy stays disabled and run synthetic tests
+        run: |
+          uv run --frozen python - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path('policy.json').read_text())
+          assert config['signing_enabled'] is False
+          assert config['publishing_enabled'] is False
+          assert 'instagram_channel_id' not in config
+          PY
+          uv run --frozen python -m pytest -q tests
+          uv run --frozen python -m compileall -q control

@@ -1,0 +1,372 @@
+name: Unattended private History control (policy gated)
+
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+    inputs:
+      resume_episode:
+        description: Resume one held pre-release episode after inspecting its issue
+        required: false
+        type: string
+
+concurrency:
+  group: history-unattended-control
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      issues: write
+    outputs:
+      episode: ${{ steps.select.outputs.episode }}
+      commit: ${{ steps.select.outputs.commit }}
+      intake_enabled: ${{ steps.select.outputs.intake_enabled }}
+      signing_enabled: ${{ steps.select.outputs.signing_enabled }}
+      publishing_enabled: ${{ steps.select.outputs.publishing_enabled }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: main
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Pin one main-ancestry draft and claim its private receipt
+        id: select
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RESUME_EPISODE: ${{ inputs.resume_episode }}
+        run: |
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          git -C source checkout -B main "$(git -C source rev-parse HEAD)"
+          uv run --frozen --no-dev python -m control.orchestrate discover \
+            --source source --output selection.json --resume-episode "$RESUME_EPISODE"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          selected = json.loads(Path('selection.json').read_text())
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              for key, field in (('episode', 'episode'), ('commit', 'source_commit')):
+                  print(f'{key}={selected.get(field, "")}', file=out)
+              for key in ('intake_enabled', 'signing_enabled', 'publishing_enabled'):
+                  print(f'{key}={str(selected.get(key, False)).lower()}', file=out)
+          PY
+
+  intake:
+    needs: discover
+    if: needs.discover.outputs.episode != '' && needs.discover.outputs.intake_enabled == 'true'
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ needs.discover.outputs.commit }}
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Confirm producer main still has the pinned unreleased draft
+        env:
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: |
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python -m control.orchestrate current \
+            --source source --episode "$EPISODE" --commit "$SOURCE_COMMIT"
+      - name: Recheck receipt and intake policy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: uv run --frozen --no-dev python -m control.orchestrate gate --episode "$EPISODE" --commit "$SOURCE_COMMIT" --operation intake
+      - name: Read exact private Modal render and make authenticated review packet
+        env:
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+          MODAL_TOKEN_ID: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_SECRET }}
+          HISTORY_INTAKE_CLOUDINARY_URL: ${{ secrets.HISTORY_PUBLISHER_CLOUDINARY_URL }}
+        run: |
+          umask 077
+          mkdir -m 700 private
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python -m control intake \
+            --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
+            --output private/review-packet
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-draft-${{ github.run_id }}
+          path: private/review-packet/
+          retention-days: 1
+          if-no-files-found: error
+      - name: Record exact private intake
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: uv run --frozen --no-dev python -m control.orchestrate advance --episode "$EPISODE" --commit "$SOURCE_COMMIT" --phase intake_verified
+
+  qa:
+    needs: [discover, intake]
+    if: needs.intake.result == 'success'
+    environment: history-independent-qa
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ needs.discover.outputs.commit }}
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Confirm producer main still has the pinned unreleased draft
+        env:
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: |
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python -m control.orchestrate current \
+            --source source --episode "$EPISODE" --commit "$SOURCE_COMMIT"
+      - name: Recheck receipt and QA policy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: uv run --frozen --no-dev python -m control.orchestrate gate --episode "$EPISODE" --commit "$SOURCE_COMMIT" --operation qa
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: private-draft-${{ github.run_id }}
+          path: private/review-packet
+      - name: Independently inspect sources, rights, full video, and audio
+        env:
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+          HISTORY_QA_GEMINI_API_KEY: ${{ secrets.HISTORY_QA_GEMINI_API_KEY }}
+        run: |
+          umask 077
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python -m control qa-draft \
+            --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
+            --packet private/review-packet \
+            --report private/qa_report.json --approval private/approval.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: private-qa-report-${{ github.run_id }}
+          path: private/qa_report.json
+          retention-days: 14
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: success()
+        with:
+          name: private-qa-pass-${{ github.run_id }}
+          path: |
+            private/qa_report.json
+            private/approval.json
+          retention-days: 1
+          if-no-files-found: error
+      - name: Record approved QA
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: uv run --frozen --no-dev python -m control.orchestrate advance --episode "$EPISODE" --commit "$SOURCE_COMMIT" --phase qa_approved
+
+  sign:
+    needs: [discover, qa]
+    if: needs.qa.result == 'success' && needs.discover.outputs.signing_enabled == 'true'
+    environment: history-review-signing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ needs.discover.outputs.commit }}
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Confirm producer main still has the pinned unreleased draft
+        env:
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: |
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python -m control.orchestrate current \
+            --source source --episode "$EPISODE" --commit "$SOURCE_COMMIT"
+      - name: Recheck receipt and signing policy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: uv run --frozen --no-dev python -m control.orchestrate gate --episode "$EPISODE" --commit "$SOURCE_COMMIT" --operation sign
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: private-draft-${{ github.run_id }}
+          path: private/review-packet
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: private-qa-pass-${{ github.run_id }}
+          path: private/qa-result
+      - name: Reverify passing QA and sign exact draft
+        env:
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+          HISTORY_REVIEW_SIGNING_KEY: ${{ secrets.HISTORY_REVIEW_SIGNING_KEY }}
+        run: |
+          umask 077
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python -m control sign-qa-draft \
+            --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
+            --packet private/review-packet --qa-report private/qa-result/qa_report.json \
+            --approval private/qa-result/approval.json --output private/independent_review.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-signed-review-${{ github.run_id }}
+          path: private/independent_review.json
+          retention-days: 1
+          if-no-files-found: error
+      - name: Record signed review
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: uv run --frozen --no-dev python -m control.orchestrate advance --episode "$EPISODE" --commit "$SOURCE_COMMIT" --phase signed
+
+  publish:
+    needs: [discover, sign]
+    if: needs.sign.result == 'success' && needs.discover.outputs.publishing_enabled == 'true'
+    concurrency:
+      group: history-control-publisher
+      cancel-in-progress: false
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: ${{ needs.discover.outputs.commit }}
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Confirm producer main still has the pinned unreleased draft
+        env:
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: |
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python -m control.orchestrate current \
+            --source source --episode "$EPISODE" --commit "$SOURCE_COMMIT"
+      - name: Recheck receipt and publishing policy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: uv run --frozen --no-dev python -m control.orchestrate gate --episode "$EPISODE" --commit "$SOURCE_COMMIT" --operation publish
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: private-draft-${{ github.run_id }}
+          path: private/review-packet
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: private-signed-review-${{ github.run_id }}
+          path: private
+      - name: Persist exclusive future release slot before any publisher mutation
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: uv run --frozen --no-dev python -m control.orchestrate reserve --episode "$EPISODE" --commit "$SOURCE_COMMIT" --output reserved.json
+      - name: Release approved exact media to pinned YouTube channel
+        env:
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+          HISTORY_PUBLISHER_BUFFER_API_KEY: ${{ secrets.HISTORY_PUBLISHER_BUFFER_API_KEY }}
+          HISTORY_PUBLISHER_CLOUDINARY_URL: ${{ secrets.HISTORY_PUBLISHER_CLOUDINARY_URL }}
+        run: |
+          umask 077
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          DUE_AT_UTC="$(python3 -c 'import json; print(json.load(open("reserved.json"))["due_at_utc"])')"
+          uv run --frozen --no-dev python -m control publish-draft \
+            --source source --commit "$SOURCE_COMMIT" --episode "$EPISODE" \
+            --packet private/review-packet --review private/independent_review.json \
+            --public-key reviewer.pub --due-at-utc "$DUE_AT_UTC" \
+            --output private/publisher-receipt.json
+      - name: Record verified publisher receipt
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          SOURCE_COMMIT: ${{ needs.discover.outputs.commit }}
+        run: uv run --frozen --no-dev python -m control.orchestrate complete --episode "$EPISODE" --commit "$SOURCE_COMMIT" --publisher-receipt private/publisher-receipt.json
+
+  alert:
+    needs: [discover, intake, qa, sign, publish]
+    if: always() && (needs.discover.result == 'failure' || needs.intake.result == 'failure' || needs.qa.result == 'failure' || needs.sign.result == 'failure' || needs.publish.result == 'failure')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Hold candidate and open or update private failure issue
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ needs.discover.outputs.episode }}
+          DISCOVER_RESULT: ${{ needs.discover.result }}
+          INTAKE_RESULT: ${{ needs.intake.result }}
+          QA_RESULT: ${{ needs.qa.result }}
+          SIGN_RESULT: ${{ needs.sign.result }}
+          PUBLISH_RESULT: ${{ needs.publish.result }}
+        run: |
+          for stage in discover intake qa sign publish; do
+            key="${stage^^}_RESULT"
+            if [ "${!key}" = failure ]; then
+              uv run --frozen --no-dev python -m control.orchestrate fail --episode "$EPISODE" --stage "$stage"
+              break
+            fi
+          done

@@ -9,12 +9,17 @@ reviewed, signed, scheduled, or published a real episode.
 
 ## Current cloud state
 
-- Six **manual-only** Actions workflows prepare a review packet, intake a
+- The manual Actions workflows prepare a review packet, intake a
   private draft, sign a
   reviewed candidate, check the pinned Buffer destination, probe the pinned
   Cloudinary cloud with a temporary test asset, or release one
   certified video to **YouTube only**.
   The signing and publishing jobs fail closed under the disabled policy.
+- `unattended-control.yml` runs on a cloud schedule and can be dispatched to
+  resume a held pre-release receipt. Its tracked policy gates are all off, so
+  a scheduled run can only discover and claim a producer draft. It cannot
+  read the private render, sign, or publish until those switches are reviewed
+  and enabled in the control repository.
 - The Ed25519 private key exists only as the `HISTORY_REVIEW_SIGNING_KEY`
   secret in this repository's `history-review-signing` environment. The public
   half is [`reviewer.pub`](reviewer.pub); its SHA-256 fingerprint is pinned in
@@ -61,6 +66,22 @@ or uncertain check means hold. Code can verify the attestation and exact
 bytes; it cannot prove that a person actually completed this review.
 
 ## Private draft intake (staged)
+
+The unattended workflow inspects the public producer `main` tree for
+`content/episodes/epNNN/draft.json` at or above the policy floor. It pins the
+commit that last changed each draft, validates it in a detached read-only
+checkout, and stores one receipt per episode on the private
+`unattended-state` branch. A changed draft, disappeared claimed draft, new
+producer release record, or failed stage holds the receipt and opens or
+updates a private issue with the
+Actions run. It processes one eligible episode per run. Separate jobs use the
+publisher, QA, and signing environments, with private one-day artifacts for
+the exact packet and passing review. The publisher uses the same concurrency
+group as the manual publisher. It reserves an unused 17:00 UTC slot more than
+two hours ahead before a Buffer mutation and reuses that time on a retry.
+An expired reservation or a held release attempt requires manual Buffer
+inspection; the dispatch resume path only accepts holds before release
+planning. No local Mac or running workstation is required.
 
 `intake-private-draft.yml` takes one exact producer `main` commit and episode.
 It checks the committed `draft.json`, spec, manifest, research, rights, and

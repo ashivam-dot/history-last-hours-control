@@ -29,7 +29,7 @@ COMMIT = re.compile(r"[0-9a-f]{40}\Z")
 MAX_VIDEO_BYTES = 300 * 1024 * 1024
 PASS_SCORES = ("hook", "clarity", "payoff", "visuals", "loop")
 OPEN_LICENSES = {"CC0", "Public domain", "Pexels License", "Pixabay Content License"}
-ORIGINAL_ASSETS = {"designed card", "AI generated"}
+ORIGINAL_ASSETS = {"designed card", "AI generated", "Royal Commission report / authored graphic"}
 
 
 class Hold(RuntimeError):

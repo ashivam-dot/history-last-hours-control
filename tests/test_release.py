@@ -1166,6 +1166,46 @@ def test_independent_evidence_does_not_follow_redirect_from_vetted_ip(monkeypatc
         fetch_public_document("https://archive.example.org/page")
 
 
+def test_independent_evidence_revalidates_one_archive_cdn_redirect(monkeypatch):
+    hosts = []
+    document = ("A verified original inquiry describes the bridge and its construction in "
+                "detail for the independent record. " * 5).encode()
+
+    class Response:
+        def __init__(self, status, headers):
+            self.status, self.headers = status, headers
+
+        def stream(self, size, decode_content):
+            yield document
+
+        def release_conn(self):
+            pass
+
+    class Pool:
+        def __init__(self, ip, **kwargs):
+            hosts.append((ip, kwargs["server_hostname"]))
+
+        def urlopen(self, method, target, **kwargs):
+            assert kwargs["redirect"] is False
+            if hosts[-1][1] == "archive.org":
+                return Response(302, {"Location": "https://dn1.ca.archive.org/0/items/report/report_djvu.txt"})
+            return Response(200, {"Content-Type": "text/plain"})
+
+        def close(self):
+            pass
+
+    def addresses(host, port, **kwargs):
+        return [(None, None, None, None, (("93.184.215.14" if host == "archive.org"
+                                         else "93.184.215.15"), 443))]
+
+    monkeypatch.setattr("control.qa.socket.getaddrinfo", addresses)
+    monkeypatch.setattr("control.qa.urllib3.HTTPSConnectionPool", Pool)
+    text = fetch_public_document("https://archive.org/download/report/report_djvu.txt")
+    assert "verified original inquiry" in text
+    assert hosts == [("93.184.215.14", "archive.org"),
+                     ("93.184.215.15", "dn1.ca.archive.org")]
+
+
 def test_independent_evidence_caps_decoded_response_from_pinned_socket(monkeypatch):
     closed = []
 

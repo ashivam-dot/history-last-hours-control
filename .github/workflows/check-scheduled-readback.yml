@@ -1,0 +1,103 @@
+name: Read back one scheduled History post (private)
+
+on:
+  workflow_dispatch:
+    inputs:
+      episode:
+        description: Exact scheduled episode ID
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  readback:
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          ref: main
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Verify exact scheduled Buffer post and hosted media
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EPISODE: ${{ inputs.episode }}
+          HISTORY_PUBLISHER_BUFFER_API_KEY: ${{ secrets.HISTORY_PUBLISHER_BUFFER_API_KEY }}
+        run: |
+          umask 077
+          git -C source remote set-url origin https://github.com/ashivam-dot/creature-receipts.git
+          uv run --frozen --no-dev python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          from control.orchestrate import GitHubState, current_draft
+          from control.publisher import BufferClient, PUBLISHER_PUBLIC_ID_PREFIX, _channel, _matching, copy_and_metadata
+          from control.release import EPISODE, SHA, digest, fetch_video, policy, require, utc
+
+          episode = os.environ['EPISODE']
+          require(bool(EPISODE.fullmatch(episode)), 'readback episode ID is malformed')
+          config = policy(Path('policy.json'))
+          state = GitHubState(os.environ['GITHUB_TOKEN'], os.environ['GITHUB_REPOSITORY'],
+                              os.environ['GITHUB_SHA'])
+          receipt = state.receipt(episode)
+          require(isinstance(receipt, dict) and receipt.get('phase') == 'scheduled',
+                  'exact episode is not scheduled in control state')
+          commit = receipt['source_commit']
+          media_hash = receipt['media_sha256']
+          require(bool(SHA.fullmatch(media_hash)), 'scheduled media hash is malformed')
+          current_draft(Path('source'), episode, commit, config)
+          publisher = receipt['publisher_receipt']
+          require((publisher.get('episode'), publisher.get('source_commit'),
+                   publisher.get('media_sha256')) == (episode, commit, media_hash),
+                  'publisher receipt does not bind the exact draft')
+          expected_url = (config['publisher_media_url_prefix'] + PUBLISHER_PUBLIC_ID_PREFIX +
+                          episode + '-' + media_hash + '.mp4')
+          require(publisher.get('control_media_url') == expected_url,
+                  'publisher media URL differs from exact draft')
+          post_id = publisher['youtube']['id']
+          due = utc(receipt['due_at_utc'], 'reserved due time')
+          require(utc(publisher['youtube']['due_at'], 'publisher due time') == due,
+                  'publisher due time differs from reservation')
+          copy, metadata = copy_and_metadata(Path('source'), commit, episode)
+          api = BufferClient(os.environ.get('HISTORY_PUBLISHER_BUFFER_API_KEY', ''))
+          organization = config['buffer_organization_id']
+          channel = config['youtube_channel_id']
+          api.organization(organization)
+          _channel(api.channels(organization), channel, 'youtube')
+          posts = api.posts(organization, channel)
+          post = _matching(posts, copy['youtube'], expected_url, api)
+          require(post is not None and post.get('id') == post_id and
+                  post.get('status') == 'scheduled' and
+                  utc(post.get('dueAt'), 'Buffer due time') == due,
+                  'Buffer readback differs in post, status, or due time')
+          require(digest(fetch_video(expected_url, {'media_url_prefix':
+                          config['publisher_media_url_prefix']})) == media_hash,
+                  'hosted Buffer asset bytes differ from reviewed draft')
+          proof = {'episode': episode, 'source_commit': commit,
+                   'media_sha256': media_hash, 'buffer_post_id': post_id,
+                   'buffer_organization_id': organization, 'youtube_channel_id': channel,
+                   'due_at_utc': due.isoformat(), 'status': post['status'],
+                   'approved_title': metadata['youtube']['title'],
+                   'approved_text_sha256': digest(copy['youtube'].encode()),
+                   'control_media_url': expected_url, 'exact_readback': True}
+          Path('scheduled-readback.json').write_text(json.dumps(proof, indent=2) + '\n')
+          print(json.dumps(proof, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-scheduled-readback-${{ inputs.episode }}-${{ github.run_id }}
+          path: scheduled-readback.json
+          retention-days: 14
+          if-no-files-found: error

@@ -1,0 +1,44 @@
+name: History control owner alerts
+
+on:
+  workflow_run:
+    workflows:
+      - Unattended private History control (policy gated)
+      - Verify History YouTube delivery after the due time
+    types: [completed]
+  schedule:
+    - cron: '45 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: history-control-owner-alerts
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    if: github.repository == 'ashivam-dot/history-last-hours-control' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Keep one private issue per failure or missed automatic slot
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HISTORY_CONTROL_AUTOMATION: ${{ vars.HISTORY_CONTROL_AUTOMATION }}
+          HISTORY_CONTROL_ALERTS_STARTED_AT: ${{ vars.HISTORY_CONTROL_ALERTS_STARTED_AT }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then
+            python -m control.ops_alerts workflow-run --event "$GITHUB_EVENT_PATH"
+          else
+            python -m control.ops_alerts missed
+          fi

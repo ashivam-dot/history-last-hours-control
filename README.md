@@ -3,9 +3,10 @@
 Private owner-controlled repository: `ashivam-dot/history-last-hours-control`.
 The producer is `ashivam-dot/creature-receipts`. Producer automation has no
 write access or deploy key here. The tracked [`policy.json`](policy.json) has
-`intake_enabled: true`, `signing_enabled: false`, and
-`publishing_enabled: false`. A real ep064 draft was ingested and held during
-independent QA. No real episode has been approved, signed, scheduled, or published.
+`intake_enabled: false`, `signing_enabled: false`, and
+`publishing_enabled: false`. Trial branch `trial/ep064-intake-20261004` ingested
+a real ep064 draft, which remains held during independent QA. No real episode
+has been approved, signed, scheduled, or published.
 
 ## Current cloud state
 
@@ -18,9 +19,9 @@ independent QA. No real episode has been approved, signed, scheduled, or publish
 - `unattended-control.yml` has four daily cloud slots after the Modal studio
   cycles. Scheduled jobs start only when the repository variable
   `HISTORY_CONTROL_AUTOMATION` is `1`; with it unset, they use no runner minutes.
-  Manual dispatch can resume a held pre-release receipt. The tracked intake
-  switch permits an exact private render to be ingested and independently
-  checked. Signing and publishing remain disabled in the control repository.
+  Manual dispatch can resume a held pre-release receipt. With the tracked
+  intake switch off on `main`, scheduled runs can discover and claim a draft;
+  intake, signing, and publishing require reviewed policy changes.
 - The Ed25519 private key exists only as the `HISTORY_REVIEW_SIGNING_KEY`
   secret in this repository's `history-review-signing` environment. The public
   half is [`reviewer.pub`](reviewer.pub); its SHA-256 fingerprint is pinned in
@@ -98,8 +99,8 @@ then reads that private MP4 from the History Modal workspace and checks every
 byte against the draft and manifest SHA-256 values. Before opening the volume,
 it verifies the Modal token belongs to the pinned `aksha-shivam18` workspace.
 
-The tracked `intake_enabled` switch is `true`. The control process uploads the
-verified bytes with `overwrite=false` to the pinned
+The tracked `intake_enabled` switch is `false` on `main`. When separately
+enabled, the control process uploads verified bytes with `overwrite=false` to the pinned
 `mw0oh0v8` Cloudinary cloud as an **authenticated** video under
 `history-last-hours/drafts/`. It re-downloads the asset through Cloudinary's
 signed asset-download API and checks every byte. The pre-QA asset's URL cannot
@@ -171,8 +172,8 @@ existing `HISTORY_PUBLISHER_CLOUDINARY_URL`; it never injects the Buffer key.
 The Modal token must access the History workspace and the Cloudinary credential
 must belong to `mw0oh0v8`. A read-only probe resolved the Modal token to the
 pinned `aksha-shivam18` workspace and found the outbox volume. The
-intake switch is enabled while signing and publishing remain off. The signing and
-publishing switches need separate live
+intake switch is disabled on `main` while signing and publishing remain off.
+The signing and publishing switches need separate live
 QA, signer, and publisher checks before use.
 
 The legacy `python -m control sign` re-downloads the hosted MP4 and recomputes every

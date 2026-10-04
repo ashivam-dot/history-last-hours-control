@@ -196,6 +196,7 @@ def test_failure_holds_receipt_and_alerts_even_when_policy_is_invalid(monkeypatc
 
 def test_transient_gemini_failure_retries_exact_receipt_then_holds_after_cap(
         monkeypatch, tmp_path, config):
+    config = {**config, "intake_enabled": True}
     state = MemoryState([_receipt("intake_verified")])
     monkeypatch.setattr(orch, "GitHubState", lambda *args: state)
     monkeypatch.setattr(orch, "policy", lambda path: config)
@@ -262,6 +263,7 @@ def test_editorial_or_unbound_qa_failure_never_auto_retries(monkeypatch, tmp_pat
 
 
 def test_passing_qa_removes_retry_wait_and_resolves_issue(monkeypatch, config):
+    config = {**config, "intake_enabled": True}
     old = {**_receipt("intake_verified"), "qa_operational_attempts": 1,
            "qa_retry_after_utc": "2026-10-05T00:00:00+00:00"}
     state = MemoryState([old])

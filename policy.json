@@ -2,7 +2,7 @@
   "version": 1,
   "signing_enabled": false,
   "publishing_enabled": false,
-  "intake_enabled": true,
+  "intake_enabled": false,
   "qa_model": "gemini-3.8-flash",
   "qa_provider": "gemini",
   "source_remote": "https://github.com/ashivam-dot/creature-receipts.git",

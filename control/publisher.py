@@ -241,8 +241,19 @@ class CloudinaryClient:
                           bool(re.fullmatch(re.escape(private_prefix) + r"(?:v[0-9]+/)?" +
                                             re.escape(public_id) + r"\.mp4", result["secure_url"])),
         }
-        require(all(checks.values()), "private draft upload identity, type, or size differs: " +
-                ", ".join(name for name, valid in checks.items() if not valid))
+        mismatches = ", ".join(name for name, valid in checks.items() if not valid)
+        if not checks["secure_url"] and isinstance(result.get("secure_url"), str):
+            url = result["secure_url"]
+            parsed = urlparse(url)
+            url_shape = (f" [authenticated_prefix={url.startswith(private_prefix)}, "
+                         f"public_id_path={parsed.path.endswith('/' + public_id + '.mp4')}, "
+                         f"format_mp4={result.get('format') == 'mp4'}, "
+                         f"has_query={bool(parsed.query)}, "
+                         f"path_segments={len(parsed.path.strip('/').split('/'))}]")
+        else:
+            url_shape = ""
+        require(all(checks.values()),
+                f"private draft upload identity, type, or size differs: {mismatches}{url_shape}")
 
     def _reconcile_private_draft(self, video: bytes, public_id: str) -> tuple[str, str, str]:
         """Recover only an exact authenticated asset after an ambiguous upload response."""

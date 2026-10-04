@@ -268,7 +268,9 @@ class GitHubState:
         require(isinstance(entry, dict) and entry.get("type") == "file" and
                 isinstance(entry.get("content"), str), "current control policy is unavailable")
         try:
-            live = read_object(base64.b64decode(entry["content"], validate=True),
+            # GitHub Contents API wraps base64 content at 76 columns.
+            encoded = entry["content"].replace("\n", "").replace("\r", "")
+            live = read_object(base64.b64decode(encoded, validate=True),
                                "current control policy")
         except (ValueError, UnicodeError) as exc:
             raise Hold("current control policy is invalid") from exc

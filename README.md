@@ -102,9 +102,10 @@ concurrent executors and ambiguous failures remain deployment risks.
    current policy prefix is empty, so the publisher holds even if its switch
    were enabled. Cloudinary [supports folder roles for API keys on all
    plans](https://cloudinary.com/documentation/permissions_assign_roles_api),
-   but the [existing Master Admin key can use every Upload API
+   but a [Master Admin key can use every Upload API
    endpoint](https://cloudinary.com/documentation/product_environment_settings).
-   A shared account would require revoking or narrowing every producer key and
+   The current producer key's role has not been verified. A shared account
+   would require revoking or narrowing every producer key and
    proving folder restrictions with live Upload API tests. That isolation has
    not been established.
 5. Verify the actual Buffer create and readback contract in a reviewed

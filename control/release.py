@@ -71,6 +71,7 @@ def policy(path: Path) -> dict:
     config = read_object(path.read_bytes(), "control policy")
     require(set(config) == {"version", "signing_enabled", "publishing_enabled", "source_remote",
                             "min_episode_id", "started_after_utc", "media_url_prefix",
+                            "publisher_media_url_prefix",
                             "reviewer_key_sha256", "buffer_organization_id", "youtube_channel_id"},
             "control policy has missing or unexpected fields")
     require(type(config["version"]) is int and config["version"] == 1 and
@@ -85,6 +86,12 @@ def policy(path: Path) -> dict:
     prefix = config["media_url_prefix"]
     require(isinstance(prefix, str) and prefix.startswith("https://res.cloudinary.com/") and
             prefix.endswith("/video/upload/"), "control policy media prefix is invalid")
+    publisher_prefix = config["publisher_media_url_prefix"]
+    require(publisher_prefix == "" or
+            (isinstance(publisher_prefix, str) and
+             publisher_prefix.startswith("https://res.cloudinary.com/") and
+             publisher_prefix.endswith("/video/upload/") and publisher_prefix != prefix),
+            "publisher media must use a different pinned Cloudinary account")
     require(config["reviewer_key_sha256"] == "" or bool(SHA.fullmatch(str(config["reviewer_key_sha256"]))),
             "control policy reviewer fingerprint is invalid")
     require(isinstance(config["youtube_channel_id"], str) and
@@ -315,6 +322,9 @@ def publisher_preflight(repo: Path, commit: str, episode: str, review: dict,
     require(config["publishing_enabled"] is True, "control publisher is disabled")
     require(bool(config["buffer_organization_id"]), "pinned Buffer organization is missing")
     require(bool(config["youtube_channel_id"]), "pinned YouTube destination is missing")
+    require(bool(config["publisher_media_url_prefix"]) and
+            config["publisher_media_url_prefix"] != config["media_url_prefix"],
+            "independent publisher media account is missing")
     root = episode_root(commit, episode)
     held = read_object(_blob(repo, commit, root + "hold.json"), "committed hold")
     video = fetch_video(held.get("media_url", ""), config)

@@ -16,9 +16,9 @@ reviewed, signed, scheduled, or published a real episode.
   half is [`reviewer.pub`](reviewer.pub); its SHA-256 fingerprint is pinned in
   the control policy. The private key was generated in memory and was never
   written to the producer repository or a local file.
-- The `history-publisher` environment exists but has **no Buffer credential**.
-  No publisher token was copied from the producer. The policy pins the exact
-  History Buffer organization and YouTube channel IDs, checked against the
+- The `history-publisher` environment exists but has **no Buffer or Cloudinary
+  credential**. No publisher token was copied from the producer. The policy
+  pins the exact History Buffer organization and YouTube channel IDs, checked against the
   current live Buffer API and the ep054 public readback. Buffer still shows the
   channel's older display name, “Creature Receipts”; the channel ID is the
   History destination.
@@ -57,20 +57,26 @@ the existing producer verifier accepts a synthetic review signed here.
 ## Isolated YouTube publisher
 
 `python -m control publish` is a real but dormant YouTube scheduling path.
-Before Buffer access, it rechecks the signed review, source commit, and all
-hosted video bytes. It verifies the pinned Buffer organization and YouTube
-channel service/status, builds title/text/credits from the signed Git blobs,
+Before Buffer access, it rechecks the signed review, source commit, and hosted
+producer video bytes. It uploads the exact reviewed MP4 to a separately pinned
+Cloudinary account using the control-only `HISTORY_PUBLISHER_CLOUDINARY_URL`
+environment secret, then downloads the control copy and verifies its SHA-256.
+The upload uses a content-addressed public ID and `overwrite=false`. The
+current single-request upload accepts MP4s up to 95 MiB; larger videos hold.
+The publisher verifies the pinned Buffer organization and YouTube channel
+service/status, builds title/text/credits from the signed Git blobs,
 searches complete post history for an exact duplicate, verifies an existing
 post's text/video/due time, and checks queue capacity. A new due time must be
-UTC and 30 minutes to 30 days ahead. It checks hosted bytes once more before
-the create mutation. Uncertain Buffer responses hold and require inspection;
+UTC and 30 minutes to 30 days ahead. It checks control-owned hosted bytes once
+more before the create mutation. Uncertain Buffer responses hold and require inspection;
 retries reconcile accepted posts rather than blindly creating another one.
 The manual workflow serializes publisher runs. The code has no Instagram
 destination, query, or mutation.
 
 The publisher has only synthetic and mocked API tests. It has never received
-a Buffer credential, queried Buffer with its own credential, or sent a create
-mutation. Buffer's create API has no client idempotency key, so external
+its own media or Buffer credential, uploaded a real control copy, queried
+Buffer with its own credential, or sent a create mutation. Buffer's create API
+has no client idempotency key, so external
 concurrent executors and ambiguous failures remain deployment risks.
 
 ## Work still required before activation
@@ -88,7 +94,20 @@ concurrent executors and ambiguous failures remain deployment risks.
    executors. The producer currently uses it for monitoring and legacy
    scheduling, so migrate those jobs first. Producer access to the old key
    means true credential isolation has **not** been achieved.
-4. Verify the actual Buffer create and readback contract in a reviewed
+4. Create a separate control-owned Cloudinary account, pin its exact
+   `https://res.cloudinary.com/<cloud>/video/upload/` prefix in
+   `publisher_media_url_prefix`, and put its API environment URL only in the
+   `history-publisher` environment as `HISTORY_PUBLISHER_CLOUDINARY_URL`.
+   Verify that producer automation has no key or account access to it. The
+   current policy prefix is empty, so the publisher holds even if its switch
+   were enabled. Cloudinary [supports folder roles for API keys on all
+   plans](https://cloudinary.com/documentation/permissions_assign_roles_api),
+   but the [existing Master Admin key can use every Upload API
+   endpoint](https://cloudinary.com/documentation/product_environment_settings).
+   A shared account would require revoking or narrowing every producer key and
+   proving folder restrictions with live Upload API tests. That isolation has
+   not been established.
+5. Verify the actual Buffer create and readback contract in a reviewed
    dry-run/staged integration, establish durable receipt transfer to History,
    and prevent producer-owned code from publishing independently. Keep the
    producer `status/scheduling_hold.json` and both release switches off until

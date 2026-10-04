@@ -74,7 +74,8 @@ def main(argv: list[str] | None = None) -> int:
             receipt = publish_reviewed(
                 args.source, args.commit, args.episode, review,
                 args.public_key.read_text(encoding="ascii").strip(), config,
-                os.environ.get("HISTORY_PUBLISHER_BUFFER_API_KEY", ""), args.due_at_utc)
+                os.environ.get("HISTORY_PUBLISHER_BUFFER_API_KEY", ""),
+                os.environ.get("HISTORY_PUBLISHER_CLOUDINARY_URL", ""), args.due_at_utc)
             write_new(args.output, (json.dumps(receipt, indent=2, ensure_ascii=False) + "\n").encode())
             print(f"Control publisher receipt in {args.output}")
         return 0

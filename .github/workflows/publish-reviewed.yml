@@ -63,6 +63,7 @@ jobs:
       - name: Exact-media release (policy remains disabled)
         env:
           HISTORY_PUBLISHER_BUFFER_API_KEY: ${{ secrets.HISTORY_PUBLISHER_BUFFER_API_KEY }}
+          HISTORY_PUBLISHER_CLOUDINARY_URL: ${{ secrets.HISTORY_PUBLISHER_CLOUDINARY_URL }}
           SOURCE_COMMIT: ${{ inputs.source_commit }}
           EPISODE: ${{ inputs.episode }}
           DUE_AT_UTC: ${{ inputs.due_at_utc }}

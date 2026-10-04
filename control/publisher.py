@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
+import requests
 import yaml
 
 from .release import Hold, _blob, digest, episode_root, fetch_video, publisher_preflight, read_object, require, utc
@@ -17,6 +20,7 @@ BUFFER_API = "https://api.buffer.com"
 QUEUE_LIMIT = 10
 MIN_LEAD = timedelta(minutes=30)
 MAX_HORIZON = timedelta(days=30)
+MAX_CLOUDINARY_UPLOAD = 95 * 1024 * 1024
 
 CHANNELS_QUERY = """query Channels($input: ChannelsInput!) {
   channels(input: $input) { id name service isDisconnected isLocked isQueuePaused }
@@ -117,6 +121,58 @@ class BufferClient:
                 isinstance(result.get("post"), dict),
                 "Buffer create response is uncertain; inspect remote posts before retrying")
         return result["post"]
+
+
+class CloudinaryClient:
+    """Upload to a separate account that producer automation cannot write or delete."""
+
+    def __init__(self, cloudinary_url: str, publisher_prefix: str):
+        parsed = urlparse(cloudinary_url)
+        cloud = parsed.hostname
+        require(parsed.scheme == "cloudinary" and bool(cloud) and
+                bool(parsed.username) and bool(parsed.password) and
+                not parsed.path and not parsed.query and not parsed.fragment,
+                "control Cloudinary credential is missing or invalid")
+        require(publisher_prefix == f"https://res.cloudinary.com/{cloud}/video/upload/",
+                "control Cloudinary account differs from pinned independent media account")
+        self._cloud = cloud
+        self._key = unquote(parsed.username)
+        self._secret = unquote(parsed.password)
+        self._prefix = publisher_prefix
+
+    def upload_exact(self, video: bytes, episode: str, media_sha256: str) -> tuple[str, str]:
+        require(len(video) >= 12 and video[4:8] == b"ftyp" and
+                len(video) <= MAX_CLOUDINARY_UPLOAD and digest(video) == media_sha256,
+                "control upload needs the exact bounded MP4")
+        public_id = f"history-control/{episode}-{media_sha256}"
+        params = {"public_id": public_id, "overwrite": "false", "timestamp": int(time.time())}
+        payload = "&".join(f"{key}={value}" for key, value in sorted(params.items()))
+        signature = hashlib.sha1((payload + self._secret).encode()).hexdigest()
+        try:
+            response = requests.post(
+                f"https://api.cloudinary.com/v1_1/{self._cloud}/video/upload",
+                data={**params, "signature": signature, "api_key": self._key},
+                files={"file": (f"{episode}.mp4", video, "video/mp4")},
+                timeout=(15, 600),
+            )
+        except requests.RequestException as exc:
+            raise Hold("control media upload response is uncertain; inspect account before retrying") from exc
+        if response.status_code in (200, 201):
+            try:
+                result = response.json()
+            except ValueError as exc:
+                raise Hold("control media upload response is invalid") from exc
+            require(isinstance(result, dict) and result.get("public_id") == public_id and
+                    result.get("resource_type") == "video" and result.get("bytes") == len(video) and
+                    isinstance(result.get("secure_url"), str) and
+                    result["secure_url"].startswith(self._prefix),
+                    "control media upload identity or size differs")
+        else:
+            # Existing immutable public_id is safe only when the caller re-downloads
+            # its deterministic URL and verifies every byte below.
+            require(response.status_code == 409,
+                    "control media upload failed; inspect account before retrying")
+        return self._prefix + public_id + ".mp4", public_id
 
 
 def _spec_and_manifest(repo, commit: str, episode: str) -> tuple[dict, dict]:
@@ -246,14 +302,27 @@ def _create_or_reconcile(api: BufferClient, channel: str, text: str,
 
 def publish_reviewed(repo, commit: str, episode: str, review: dict,
                      public_raw_b64: str, config: dict, buffer_token: str,
-                     due_at_utc: str, api: BufferClient | None = None) -> dict:
+                     cloudinary_url: str, due_at_utc: str, api: BufferClient | None = None,
+                     media_client: CloudinaryClient | None = None) -> dict:
     """One serialized exact-media release; disabled by tracked policy and absent credentials."""
     plan = publisher_preflight(repo, commit, episode, review, public_raw_b64, config)
     require(bool(buffer_token), "control publisher credential is missing")
+    require(bool(cloudinary_url), "independent control media credential is missing")
     due = utc(due_at_utc, "release due time")
     now = datetime.now(timezone.utc)
     require(now + MIN_LEAD < due <= now + MAX_HORIZON,
             "release due time is outside the safe scheduling window")
+    source_video = fetch_video(plan["subject"]["media_url"], config)
+    require(digest(source_video) == plan["subject"]["media_sha256"],
+            "producer hosted media changed before control copy")
+    media_client = media_client or CloudinaryClient(cloudinary_url, config["publisher_media_url_prefix"])
+    media_url, media_public_id = media_client.upload_exact(
+        source_video, episode, plan["subject"]["media_sha256"])
+    require(media_url.startswith(config["publisher_media_url_prefix"]) and
+            media_url != plan["subject"]["media_url"] and
+            digest(fetch_video(media_url, {"media_url_prefix": config["publisher_media_url_prefix"]})) ==
+            plan["subject"]["media_sha256"],
+            "control-owned hosted media differs from signed video")
     api = api or BufferClient(buffer_token)
     org = config["buffer_organization_id"]
     api.organization(org)
@@ -261,7 +330,7 @@ def publish_reviewed(repo, commit: str, episode: str, review: dict,
     _channel(channels, config["youtube_channel_id"], "youtube")
     copy, metadata = copy_and_metadata(repo, commit, episode)
     youtube_posts = api.posts(org, config["youtube_channel_id"])
-    youtube_existing = _matching(youtube_posts, copy["youtube"], plan["subject"]["media_url"], api)
+    youtube_existing = _matching(youtube_posts, copy["youtube"], media_url, api)
     if youtube_existing:
         require(utc(youtube_existing.get("dueAt"), "existing YouTube due time") == due,
                 "existing YouTube post has a different due time")
@@ -269,11 +338,12 @@ def publish_reviewed(repo, commit: str, episode: str, review: dict,
         require(sum(post.get("status") not in ("sent", "error", "draft") for post in youtube_posts) < QUEUE_LIMIT,
                 "YouTube Buffer queue is full")
     if not youtube_existing:
-        require(digest(fetch_video(plan["subject"]["media_url"], config)) ==
+        require(digest(fetch_video(media_url, {"media_url_prefix": config["publisher_media_url_prefix"]})) ==
                 plan["subject"]["media_sha256"],
-                "hosted media changed before Buffer mutation")
+                "control-owned media changed before Buffer mutation")
     youtube = _create_or_reconcile(api, config["youtube_channel_id"],
                                    copy["youtube"], {"youtube": metadata["youtube"]},
-                                   plan["subject"]["media_url"], due, youtube_posts)
+                                   media_url, due, youtube_posts)
     return {"episode": episode, "media_sha256": plan["subject"]["media_sha256"],
-            "source_commit": commit, "youtube": youtube}
+            "source_commit": commit, "control_media_url": media_url,
+            "control_media_public_id": media_public_id, "youtube": youtube}

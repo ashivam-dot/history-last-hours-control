@@ -192,6 +192,7 @@ def monitor_due(state: GitHubState, source: Path, config: dict, now: datetime,
             checked += 1
             counted = True
             proof = verify_due(receipt, source, config, api, public_reader, media_reader)
+            proof = state.record_delivery_proof(receipt, proof)
             state.resolve_delivery(episode)
             state.put({**advance(receipt, "published"), "post_due_verification": proof})
             verified += 1

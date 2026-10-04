@@ -24,6 +24,7 @@ from .release import COMMIT, EPISODE, SHA, Hold, policy, read_object, require, u
 
 STATE_BRANCH = "unattended-state"
 RECEIPT_DIR = "receipts"
+DELIVERY_PROOF_DIR = "delivery-proofs"
 PHASES = ("claimed", "intake_verified", "qa_approved", "signed", "release_planned",
           "scheduled", "published")
 NEXT = dict(zip(PHASES, PHASES[1:]))
@@ -305,6 +306,47 @@ class GitHubState:
         if old is not None:
             body["sha"] = old["sha"]
         self.request("PUT", f"/contents/{path}", allowed=(200, 201), json=body)
+
+    def record_delivery_proof(self, receipt: dict, proof: dict) -> dict:
+        """Create a separate exact delivery record once; never replace its bytes."""
+        episode = receipt.get("episode")
+        require(isinstance(episode, str) and bool(EPISODE.fullmatch(episode)) and
+                receipt.get("phase") == "scheduled" and isinstance(proof, dict) and
+                proof.get("control_media_sha256") == receipt.get("media_sha256") and
+                isinstance(proof.get("youtube_video_id"), str),
+                "delivery proof is not bound to a scheduled receipt")
+        path = f"{DELIVERY_PROOF_DIR}/{episode}.json"
+        record = {"version": 1, "episode": episode,
+                  "source_commit": receipt["source_commit"],
+                  "draft_sha256": receipt["draft_sha256"],
+                  "media_sha256": receipt["media_sha256"],
+                  "post_due_verification": proof}
+        content = (json.dumps(record, indent=2, sort_keys=True) + "\n").encode()
+        old = self.file(path)
+        if old is not None:
+            require(old.get("type") == "file" and isinstance(old.get("content"), str),
+                    "existing delivery proof is malformed")
+            try:
+                existing = json.loads(base64.b64decode(old["content"]).decode("utf-8"))
+            except (ValueError, UnicodeError) as exc:
+                raise Hold("existing delivery proof cannot be decoded") from exc
+            require(isinstance(existing, dict), "existing delivery proof is malformed")
+            existing_proof = existing.get("post_due_verification")
+            current_stable = {key: value for key, value in proof.items() if key != "verified_at_utc"}
+            existing_stable = ({key: value for key, value in existing_proof.items()
+                                if key != "verified_at_utc"}
+                               if isinstance(existing_proof, dict) else None)
+            require({key: value for key, value in existing.items()
+                     if key != "post_due_verification"} ==
+                    {key: value for key, value in record.items()
+                     if key != "post_due_verification"} and
+                    existing_stable == current_stable,
+                    "existing delivery proof differs from exact public proof")
+            return existing_proof
+        self.request("PUT", f"/contents/{path}", allowed=(201,), json={
+            "message": f"Record immutable public delivery proof for {episode}",
+            "content": base64.b64encode(content).decode(), "branch": STATE_BRANCH})
+        return proof
 
     def _run_url(self) -> str:
         return (f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/"

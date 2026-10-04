@@ -396,6 +396,34 @@ def test_contents_write_uses_prior_sha_for_compare_and_swap(monkeypatch):
     assert kwargs["json"]["sha"] == "old-blob"
 
 
+def test_delivery_proof_is_create_only_and_retry_keeps_first_verified_time(monkeypatch):
+    state = orch.GitHubState("test-token", "owner/control", "a" * 40)
+    stored = []
+    calls = []
+
+    def request(method, path, **kwargs):
+        calls.append((method, path, kwargs))
+        stored.append({"type": "file", "content": kwargs["json"]["content"]})
+        return {}
+
+    monkeypatch.setattr(state, "file", lambda path: stored[0] if stored else None)
+    monkeypatch.setattr(state, "request", request)
+    receipt = _receipt("scheduled")
+    proof = {"control_media_sha256": "c" * 64,
+             "youtube_video_id": "AbCdEfGhI12",
+             "verified_at_utc": "2026-10-04T19:05:00+00:00"}
+    assert state.record_delivery_proof(receipt, proof) == proof
+    assert calls[0][0:2] == ("PUT", "/contents/delivery-proofs/ep063.json")
+    assert calls[0][2]["allowed"] == (201,)
+    assert "sha" not in calls[0][2]["json"]
+    later = {**proof, "verified_at_utc": "2026-10-04T19:10:00+00:00"}
+    assert state.record_delivery_proof(receipt, later) == proof
+    assert len(calls) == 1
+    with pytest.raises(Hold, match="differs"):
+        state.record_delivery_proof(receipt, {**later, "youtube_video_id": "ZZZZZZZZZZZ"})
+    assert len(calls) == 1
+
+
 def test_receipt_listing_holds_on_disappeared_or_malformed_entry(monkeypatch):
     state = orch.GitHubState("test-token", "owner/control", "a" * 40)
     monkeypatch.setattr(state, "file", lambda path: [{"type": "file", "name": "ep063.json"}])

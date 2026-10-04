@@ -45,12 +45,22 @@ class FakeState:
         self.item = receipt
         self.alerts = []
         self.resolved = []
+        self.proofs = {}
 
     def receipts(self) -> list[dict]:
         return [self.item]
 
     def put(self, receipt: dict) -> None:
         self.item = receipt
+
+    def record_delivery_proof(self, receipt: dict, proof: dict) -> dict:
+        episode = receipt["episode"]
+        if episode in self.proofs:
+            assert {k: v for k, v in self.proofs[episode].items() if k != "verified_at_utc"} == {
+                k: v for k, v in proof.items() if k != "verified_at_utc"}
+            return self.proofs[episode]
+        self.proofs[episode] = proof
+        return proof
 
     def alert_delivery(self, episode: str, reason: str) -> None:
         self.alerts.append((episode, reason))
@@ -260,6 +270,7 @@ def test_early_exact_episode_alert_is_retryable_and_later_proof_is_recorded(deli
     assert state.item["phase"] == "published"
     assert proof["youtube_video_id"] == page["video_id"]
     assert proof["control_media_sha256"] == receipt["media_sha256"]
+    assert state.proofs["ep063"] == proof
     assert monitor.monitor_due(state, source, config, due + timedelta(days=1),
                                api, lambda _: page, media_reader,
                                only_episode="ep063")["checked"] == 0

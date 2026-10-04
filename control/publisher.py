@@ -224,36 +224,43 @@ class CloudinaryClient:
             result = response.json()
         except ValueError as exc:
             raise Hold("private draft upload response is invalid") from exc
-        self._require_private_identity(result, public_id, len(video))
-        return result["secure_url"], public_id, result["asset_id"]
+        private_url = self._require_private_identity(result, public_id, len(video))
+        self._require_private_not_public(private_url)
+        return private_url, public_id, result["asset_id"]
 
-    def _require_private_identity(self, result: dict, public_id: str, size: int) -> None:
+    def _require_private_identity(self, result: dict, public_id: str, size: int) -> str:
         private_prefix = f"https://res.cloudinary.com/{self._cloud}/video/authenticated/"
         require(isinstance(result, dict), "private draft upload response is not an object")
+        secure_url = result.get("secure_url")
+        parsed = urlparse(secure_url) if isinstance(secure_url, str) else None
         checks = {
             "public_id": result.get("public_id") == public_id,
             "resource_type": result.get("resource_type") == "video",
             "type": result.get("type") == "authenticated",
             "bytes": result.get("bytes") == size,
+            "format": result.get("format") == "mp4",
             "asset_id": isinstance(result.get("asset_id"), str) and
                         bool(re.fullmatch(r"[A-Za-z0-9_-]{8,128}", result["asset_id"])),
-            "secure_url": isinstance(result.get("secure_url"), str) and
-                          bool(re.fullmatch(re.escape(private_prefix) + r"(?:v[0-9]+/)?" +
-                                            re.escape(public_id) + r"\.mp4", result["secure_url"])),
+            "secure_url": isinstance(secure_url, str) and secure_url.startswith(private_prefix) and
+                          parsed.path.endswith("/" + public_id + ".mp4") and
+                          not parsed.query and not parsed.fragment,
         }
         mismatches = ", ".join(name for name, valid in checks.items() if not valid)
-        if not checks["secure_url"] and isinstance(result.get("secure_url"), str):
-            url = result["secure_url"]
-            parsed = urlparse(url)
-            url_shape = (f" [authenticated_prefix={url.startswith(private_prefix)}, "
-                         f"public_id_path={parsed.path.endswith('/' + public_id + '.mp4')}, "
-                         f"format_mp4={result.get('format') == 'mp4'}, "
-                         f"has_query={bool(parsed.query)}, "
-                         f"path_segments={len(parsed.path.strip('/').split('/'))}]")
-        else:
-            url_shape = ""
         require(all(checks.values()),
-                f"private draft upload identity, type, or size differs: {mismatches}{url_shape}")
+                f"private draft upload identity, type, or size differs: {mismatches}")
+        # Cloudinary may put signed delivery segments in secure_url. Do not
+        # persist that bearer-like URL in a review packet. This unsigned URL
+        # names the same authenticated asset and must remain inaccessible.
+        return private_prefix + public_id + ".mp4"
+
+    @staticmethod
+    def _require_private_not_public(private_url: str) -> None:
+        try:
+            with requests.get(private_url, stream=True, timeout=(15, 30)) as response:
+                require(response.status_code in (401, 403, 404),
+                        "unsigned private draft URL is publicly readable or unavailable")
+        except requests.RequestException as exc:
+            raise Hold("unsigned private draft URL could not be checked") from exc
 
     def _reconcile_private_draft(self, video: bytes, public_id: str) -> tuple[str, str, str]:
         """Recover only an exact authenticated asset after an ambiguous upload response."""
@@ -273,10 +280,11 @@ class CloudinaryClient:
                 result = response.json()
             except ValueError as exc:
                 raise Hold("private draft asset lookup response is invalid") from exc
-            self._require_private_identity(result, public_id, len(video))
+            private_url = self._require_private_identity(result, public_id, len(video))
             require(self.download_private_asset(result["asset_id"]) == video,
                     "existing authenticated draft differs from exact private render")
-            return result["secure_url"], public_id, result["asset_id"]
+            self._require_private_not_public(private_url)
+            return private_url, public_id, result["asset_id"]
         raise Hold("private draft asset lookup exhausted")
 
     def download_private_asset(self, asset_id: str) -> bytes:

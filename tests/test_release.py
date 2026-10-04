@@ -411,7 +411,9 @@ def test_control_cloudinary_private_draft_upload_and_authenticated_readback(monk
     video = b"\x00\x00\x00\x18ftypisom" + b"private draft"
     media_hash = digest(video)
     public_id = f"{PUBLISHER_PUBLIC_ID_PREFIX}drafts/ep063-{media_hash}"
-    private_url = f"https://res.cloudinary.com/mw0oh0v8/video/authenticated/v123/{public_id}.mp4"
+    private_url = f"https://res.cloudinary.com/mw0oh0v8/video/authenticated/{public_id}.mp4"
+    signed_url = (f"https://res.cloudinary.com/mw0oh0v8/video/authenticated/"
+                  f"s--signed--/v123/{public_id}.mp4")
     calls = []
 
     class UploadResponse:
@@ -419,7 +421,17 @@ def test_control_cloudinary_private_draft_upload_and_authenticated_readback(monk
 
         def json(self):
             return {"public_id": public_id, "resource_type": "video", "type": "authenticated",
-                    "bytes": len(video), "asset_id": "asset-12345678", "secure_url": private_url}
+                    "format": "mp4", "bytes": len(video), "asset_id": "asset-12345678",
+                    "secure_url": signed_url}
+
+    class AnonymousResponse:
+        status_code = 401
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return None
 
     class DownloadResponse:
         status_code = 200
@@ -438,8 +450,17 @@ def test_control_cloudinary_private_draft_upload_and_authenticated_readback(monk
         return UploadResponse() if url.endswith("/video/upload") else DownloadResponse()
 
     monkeypatch.setattr("control.publisher.requests.post", post)
+    anonymous_calls = []
+
+    def deny_unsigned(url, **kwargs):
+        anonymous_calls.append((url, kwargs))
+        return AnonymousResponse()
+
+    monkeypatch.setattr("control.publisher.requests.get", deny_unsigned)
     assert client.upload_private_draft(video, "ep063", media_hash) == (
         private_url, public_id, "asset-12345678")
+    assert anonymous_calls[0][0] == private_url
+    assert anonymous_calls[0][1]["stream"] is True
     assert client.download_private_asset("asset-12345678") == video
     assert calls[0][1]["data"]["type"] == "authenticated"
     assert calls[0][1]["data"]["overwrite"] == "false"
@@ -459,7 +480,7 @@ def test_control_cloudinary_rejects_public_pre_qa_draft_url(monkeypatch):
 
         def json(self):
             return {"public_id": public_id, "resource_type": "video", "type": "upload",
-                    "bytes": len(video), "asset_id": "asset-12345678",
+                    "format": "mp4", "bytes": len(video), "asset_id": "asset-12345678",
                     "secure_url": prefix + public_id + ".mp4"}
 
     monkeypatch.setattr("control.publisher.requests.post", lambda *args, **kwargs: Response())
@@ -484,13 +505,23 @@ def test_private_draft_upload_reconciles_only_identical_authenticated_asset(monk
 
         def json(self):
             return {"public_id": public_id, "resource_type": "video", "type": "authenticated",
-                    "bytes": len(video), "asset_id": "asset-12345678", "secure_url": private_url}
+                    "format": "mp4", "bytes": len(video), "asset_id": "asset-12345678",
+                    "secure_url": private_url}
+
+    class AnonymousResponse:
+        status_code = 401
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return None
 
     lookups = []
 
     def get(url, **kwargs):
         lookups.append((url, kwargs))
-        return Lookup()
+        return Lookup() if url.startswith("https://api.cloudinary.com/") else AnonymousResponse()
 
     def post(*args, **kwargs):
         if response_mode == "uncertain":
@@ -508,6 +539,23 @@ def test_private_draft_upload_reconciles_only_identical_authenticated_asset(monk
     monkeypatch.setattr(client, "download_private_asset", lambda asset_id: video + b"changed")
     with pytest.raises(Hold, match="existing authenticated draft differs"):
         client.upload_private_draft(video, "ep063", media_hash)
+
+
+@pytest.mark.parametrize("status", [200, 500])
+def test_private_draft_unsigned_url_must_be_inaccessible(monkeypatch, status):
+    class Response:
+        status_code = status
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return None
+
+    monkeypatch.setattr("control.publisher.requests.get", lambda *args, **kwargs: Response())
+    with pytest.raises(Hold, match="publicly readable or unavailable"):
+        CloudinaryClient._require_private_not_public(
+            "https://res.cloudinary.com/mw0oh0v8/video/authenticated/draft.mp4")
 
 
 def draft_fixture(fixture):
@@ -539,7 +587,8 @@ def draft_fixture(fixture):
 def test_private_draft_intake_disabled_before_modal_or_media(fixture, tmp_path):
     source, commit, _, _, config = fixture
     with pytest.raises(Hold, match="intake is disabled"):
-        intake_draft(source, commit, "ep063", config, "", tmp_path / "packet",
+        intake_draft(source, commit, "ep063", {**config, "intake_enabled": False},
+                     "", tmp_path / "packet",
                      lambda _: pytest.fail("Modal read under disabled policy"))
 
 

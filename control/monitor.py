@@ -45,44 +45,59 @@ def video_id_from_buffer(link: object) -> str:
 
 
 def read_public_video(video_id: str, getter=requests.get) -> dict:
-    """Read bounded anonymous YouTube watch HTML; challenges remain unverified."""
+    """Read bounded anonymous YouTube player HTML from two fixed routes."""
     require(bool(VIDEO_ID.fullmatch(video_id)), "public YouTube video ID is malformed")
-    url = f"https://www.youtube.com/watch?v={video_id}"
-    try:
-        with getter(url, stream=True, allow_redirects=False, timeout=(15, 60),
-                    headers={"Accept": "text/html", "User-Agent": "Mozilla/5.0"}) as response:
-            require(response.status_code == 200 and
-                    response.headers.get("Content-Type", "").lower().startswith("text/html"),
-                    "public YouTube watch page is unavailable")
-            chunks = []
-            count = 0
-            for chunk in response.iter_content(1 << 20):
-                count += len(chunk)
-                require(count <= MAX_WATCH_HTML, "public YouTube watch page is oversized")
-                chunks.append(chunk)
-    except requests.RequestException as exc:
-        raise Hold("public YouTube watch page could not be read") from exc
-    html = b"".join(chunks).decode("utf-8", errors="replace")
-    marker = PLAYER_MARKER.search(html)
-    require(marker is not None, "public YouTube player could not be verified")
-    try:
-        player, _ = json.JSONDecoder().raw_decode(html[marker.end():])
-    except ValueError as exc:
-        raise Hold("public YouTube player response is malformed") from exc
-    require(isinstance(player, dict), "public YouTube player response is incomplete")
-    details = player.get("videoDetails")
-    microformat = player.get("microformat")
-    playability = player.get("playabilityStatus")
-    details_meta = microformat.get("playerMicroformatRenderer") if isinstance(microformat, dict) else None
-    status = playability.get("status") if isinstance(playability, dict) else None
-    require(isinstance(details, dict) and isinstance(details_meta, dict),
-            f"public YouTube video details are unavailable (player status: {status or 'missing'})")
-    return {"playability": status,
-            "video_id": details.get("videoId"), "channel_id": details.get("channelId"),
-            "title": details.get("title"), "description": details.get("shortDescription"),
-            "is_private": details.get("isPrivate"),
-            "is_unlisted": details_meta.get("isUnlisted"),
-            "external_channel_id": details_meta.get("externalChannelId")}
+    failures = []
+    for url in (f"https://www.youtube.com/watch?v={video_id}",
+                f"https://www.youtube.com/shorts/{video_id}"):
+        try:
+            try:
+                with getter(url, stream=True, allow_redirects=False, timeout=(15, 60),
+                            headers={"Accept": "text/html", "User-Agent": "Mozilla/5.0"}) as response:
+                    require(response.status_code == 200 and
+                            response.headers.get("Content-Type", "").lower().startswith("text/html"),
+                            "public YouTube player page is unavailable")
+                    chunks = []
+                    count = 0
+                    for chunk in response.iter_content(1 << 20):
+                        count += len(chunk)
+                        require(count <= MAX_WATCH_HTML, "public YouTube player page is oversized")
+                        chunks.append(chunk)
+            except requests.RequestException as exc:
+                raise Hold("public YouTube player page could not be read") from exc
+            html = b"".join(chunks).decode("utf-8", errors="replace")
+            marker = PLAYER_MARKER.search(html)
+            require(marker is not None, "public YouTube player could not be verified")
+            try:
+                player, _ = json.JSONDecoder().raw_decode(html[marker.end():])
+            except ValueError as exc:
+                raise Hold("public YouTube player response is malformed") from exc
+            require(isinstance(player, dict), "public YouTube player response is incomplete")
+            details = player.get("videoDetails")
+            microformat = player.get("microformat")
+            playability = player.get("playabilityStatus")
+            details_meta = (microformat.get("playerMicroformatRenderer")
+                            if isinstance(microformat, dict) else None)
+            status = playability.get("status") if isinstance(playability, dict) else None
+            require(status == "OK" and isinstance(details, dict) and
+                    isinstance(details_meta, dict) and details.get("videoId") == video_id,
+                    f"public YouTube video details are unavailable (player status: {status or 'missing'})")
+            result = {"playability": status,
+                      "video_id": details.get("videoId"), "channel_id": details.get("channelId"),
+                      "title": details.get("title"), "description": details.get("shortDescription"),
+                      "is_private": details.get("isPrivate"),
+                      "is_unlisted": details_meta.get("isUnlisted"),
+                      "external_channel_id": details_meta.get("externalChannelId")}
+            require(isinstance(result["channel_id"], str) and
+                    isinstance(result["external_channel_id"], str) and
+                    isinstance(result["title"], str) and
+                    isinstance(result["description"], str) and
+                    type(result["is_private"]) is bool and type(result["is_unlisted"]) is bool,
+                    "public YouTube video metadata is incomplete")
+            return result
+        except Hold as exc:
+            failures.append(str(exc))
+    raise Hold("public YouTube readback failed on both fixed routes: " + "; ".join(failures))
 
 
 def verify_due(receipt: dict, source: Path, config: dict, api: BufferClient,

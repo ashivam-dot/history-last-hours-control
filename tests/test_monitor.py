@@ -281,3 +281,52 @@ def test_public_watch_parser_reads_bounded_anonymous_player(delivery):
         return Response()
 
     assert monitor.read_public_video(page["video_id"], get) == page
+
+
+@pytest.mark.parametrize("shorts_status,should_pass", [("OK", True), ("LOGIN_REQUIRED", False)])
+def test_public_readback_uses_shorts_when_watch_requires_login(delivery, shorts_status, should_pass):
+    config, _, _, _, _, _, page = delivery
+    calls = []
+
+    class Response:
+        status_code = 200
+        headers = {"Content-Type": "text/html"}
+
+        def __init__(self, player):
+            self.player = player
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return None
+
+        def iter_content(self, _):
+            yield ("<script>var ytInitialPlayerResponse = " +
+                   json.dumps(self.player) + ";</script>").encode()
+
+    public_player = {
+        "playabilityStatus": {"status": shorts_status},
+        "videoDetails": {"videoId": page["video_id"],
+                         "channelId": config["youtube_public_channel_id"],
+                         "title": page["title"],
+                         "shortDescription": page["description"],
+                         "isPrivate": False},
+        "microformat": {"playerMicroformatRenderer": {
+            "externalChannelId": config["youtube_public_channel_id"],
+            "isUnlisted": False}},
+    }
+
+    def get(url, **kwargs):
+        calls.append(url)
+        assert kwargs["allow_redirects"] is False
+        return Response({"playabilityStatus": {"status": "LOGIN_REQUIRED"}} if
+                        "/watch?" in url else public_player)
+
+    if should_pass:
+        assert monitor.read_public_video(page["video_id"], get) == page
+    else:
+        with pytest.raises(Hold, match="both fixed routes"):
+            monitor.read_public_video(page["video_id"], get)
+    assert calls == [f"https://www.youtube.com/watch?v={page['video_id']}",
+                     f"https://www.youtube.com/shorts/{page['video_id']}"]

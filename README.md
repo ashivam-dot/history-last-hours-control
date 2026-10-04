@@ -73,15 +73,19 @@ commit that last changed each draft, validates it in a detached read-only
 checkout, and stores one receipt per episode on the private
 `unattended-state` branch. A changed draft, disappeared claimed draft, new
 producer release record, or failed stage holds the receipt and opens or
-updates a private issue with the
-Actions run. It processes one eligible episode per run. Separate jobs use the
+updates a private issue with the Actions run; discovery holds fail the run.
+It processes one eligible episode per run and waits while the switch needed
+for the next phase is off. Once that switch is enabled, it rebuilds the
+short-lived private artifacts before advancing. Separate jobs use the
 publisher, QA, and signing environments, with private one-day artifacts for
 the exact packet and passing review. The publisher uses the same concurrency
 group as the manual publisher. It reserves an unused 17:00 UTC slot more than
-two hours ahead before a Buffer mutation and reuses that time on a retry.
-An expired reservation or a held release attempt requires manual Buffer
-inspection; the dispatch resume path only accepts holds before release
-planning. No local Mac or running workstation is required.
+two hours ahead before a Buffer mutation. A planned release never retries
+automatically after an uncertain outcome; it requires external Buffer post
+inspection. The dispatch resume path only accepts holds before release
+planning. Signing and publishing check the current control `main` policy
+immediately before their mutation. No local Mac or running workstation is
+required.
 
 `intake-private-draft.yml` takes one exact producer `main` commit and episode.
 It checks the committed `draft.json`, spec, manifest, research, rights, and

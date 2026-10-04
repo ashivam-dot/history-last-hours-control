@@ -49,6 +49,7 @@ jobs:
                   "Buffer sent-post readback contract is incomplete")
           utc(detail.get("sentAt"), "Buffer sent time")
           video_id = video_id_from_buffer(detail.get("externalLink"))
+          print(json.dumps({"sample_public_video_id": video_id}))
           public = read_public_video(video_id)
           require(public.get("playability") == "OK" and public.get("video_id") == video_id and
                   public.get("channel_id") == config["youtube_public_channel_id"] and

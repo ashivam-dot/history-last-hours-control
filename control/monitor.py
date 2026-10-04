@@ -74,9 +74,10 @@ def read_public_video(video_id: str, getter=requests.get) -> dict:
     microformat = player.get("microformat")
     playability = player.get("playabilityStatus")
     details_meta = microformat.get("playerMicroformatRenderer") if isinstance(microformat, dict) else None
+    status = playability.get("status") if isinstance(playability, dict) else None
     require(isinstance(details, dict) and isinstance(details_meta, dict),
-            "public YouTube video details are unavailable")
-    return {"playability": playability.get("status") if isinstance(playability, dict) else None,
+            f"public YouTube video details are unavailable (player status: {status or 'missing'})")
+    return {"playability": status,
             "video_id": details.get("videoId"), "channel_id": details.get("channelId"),
             "title": details.get("title"), "description": details.get("shortDescription"),
             "is_private": details.get("isPrivate"),

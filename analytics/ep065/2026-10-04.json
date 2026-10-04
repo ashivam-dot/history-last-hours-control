@@ -1,0 +1,19 @@
+{
+  "buffer_post_id": "6ac2467f6f5f5d018da0f9c0",
+  "buffer_sent_at_utc": "2026-10-04T17:00:41.570000+00:00",
+  "collected_at_utc": "2026-10-04T21:26:11.356254+00:00",
+  "episode": "ep065",
+  "like_count": 0,
+  "like_count_status": "present",
+  "media_sha256": "a9db4b64870336122c7b00a7c6a0a584d503bb4d7636bc4175569997d3975bb1",
+  "metric_source": "playerMicroformatRenderer",
+  "post_due_verified_at_utc": "2026-10-04T21:05:46.481865+00:00",
+  "source_commit": "1f3597a946220c71dc0c79490b4d8b22bbe9d939",
+  "version": 1,
+  "video_age_seconds": 15929,
+  "view_count": 0,
+  "view_count_status": "present",
+  "youtube_channel_id": "UC6e6OB3iw3yp8JnnBYxLItA",
+  "youtube_shorts_url": "https://www.youtube.com/shorts/gbhhEU5wfZk",
+  "youtube_video_id": "gbhhEU5wfZk"
+}

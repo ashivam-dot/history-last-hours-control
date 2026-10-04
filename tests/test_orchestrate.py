@@ -1,5 +1,6 @@
 """Unattended orchestration invariants without live credentials or mutations."""
 
+import base64
 import json
 import subprocess
 from datetime import datetime, timedelta, timezone
@@ -88,8 +89,8 @@ def test_changed_draft_holds_claim_and_opens_private_alert(monkeypatch, tmp_path
     monkeypatch.setattr(orch, "draft_candidates", lambda repo, config: iter([("ep063", "d" * 40)]))
     monkeypatch.setattr(orch, "exact_draft", lambda *args: _source())
     monkeypatch.setattr(orch, "producer_unreleased", lambda *args: None)
-    result = orch.discover(SimpleNamespace(source=tmp_path, resume_episode=""), config, state)
-    assert result == {}
+    with pytest.raises(Hold, match="draft changed"):
+        orch.discover(SimpleNamespace(source=tmp_path, resume_episode=""), config, state)
     assert state.items["ep063"]["phase"] == "held"
     assert state.items["ep063"]["source_commit"] == old["source_commit"]
     assert state.alerts[0][:2] == ("ep063", "discovery")
@@ -101,8 +102,7 @@ def test_disabled_policy_claims_only_and_blocks_later_phases(monkeypatch, tmp_pa
     monkeypatch.setattr(orch, "exact_draft", lambda *args: _source())
     monkeypatch.setattr(orch, "producer_unreleased", lambda *args: None)
     selected = orch.discover(SimpleNamespace(source=tmp_path, resume_episode=""), config, state)
-    assert selected["episode"] == "ep063"
-    assert not any(selected[key] for key in ("intake_enabled", "signing_enabled", "publishing_enabled"))
+    assert selected == {}
     assert state.receipt("ep063")["phase"] == "claimed"
     for action in orch.SWITCHES:
         assert not orch.enabled(config, action)
@@ -149,7 +149,7 @@ def test_failure_holds_receipt_and_alerts_even_when_policy_is_invalid(monkeypatc
     assert state.alerts == [("ep063", "sign", "Actions job failed; inspect the linked run and private artifacts")]
 
 
-def test_release_reservation_is_durable_and_retry_uses_same_slot(monkeypatch, tmp_path, config):
+def test_release_reservation_is_durable_and_blocks_automatic_retry(monkeypatch, tmp_path, config):
     state = MemoryState([_receipt("signed")])
     live = {**config, "intake_enabled": True, "signing_enabled": True, "publishing_enabled": True}
     monkeypatch.setattr(orch, "policy", lambda path: live)
@@ -160,11 +160,35 @@ def test_release_reservation_is_durable_and_retry_uses_same_slot(monkeypatch, tm
     orch.run(args)
     first = json.loads(output.read_text())["due_at_utc"]
     assert state.receipt("ep063")["phase"] == "release_planned"
-    orch.run(args)
-    assert json.loads(output.read_text())["due_at_utc"] == first
-    state.items["ep063"]["due_at_utc"] = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
-    with pytest.raises(Hold, match="expired"):
+    with pytest.raises(Hold, match="inspect Buffer"):
         orch.run(args)
+    assert state.receipt("ep063")["due_at_utc"] == first
+
+
+def test_existing_phases_wait_for_their_next_policy_switch(monkeypatch, tmp_path, config):
+    state = MemoryState([_receipt("qa_approved")])
+    monkeypatch.setattr(orch, "draft_candidates", lambda repo, config: iter([("ep063", "a" * 40)]))
+    monkeypatch.setattr(orch, "producer_unreleased", lambda *args: None)
+    monkeypatch.setattr(orch, "exact_draft", lambda *args: _source())
+    args = SimpleNamespace(source=tmp_path, resume_episode="")
+    intake_only = {**config, "intake_enabled": True}
+    assert orch.discover(args, intake_only, state) == {}
+    signing = {**intake_only, "signing_enabled": True}
+    assert orch.discover(args, signing, state)["episode"] == "ep063"
+    state.put(_receipt("signed"))
+    assert orch.discover(args, signing, state) == {}
+    publishing = {**signing, "publishing_enabled": True}
+    assert orch.discover(args, publishing, state)["publishing_enabled"] is True
+
+
+def test_release_planned_reentry_holds_and_alerts_before_second_attempt(monkeypatch, tmp_path, config):
+    state = MemoryState([{**_receipt("release_planned"), "due_at_utc": "2026-10-06T17:00:00+00:00"}])
+    monkeypatch.setattr(orch, "draft_candidates", lambda repo, config: iter([("ep063", "a" * 40)]))
+    with pytest.raises(Hold, match="inspect the external Buffer post"):
+        orch.discover(SimpleNamespace(source=tmp_path, resume_episode=""), config, state)
+    assert state.receipt("ep063")["phase"] == "held"
+    assert state.receipt("ep063")["resume_phase"] == "release_planned"
+    assert state.alerts[0][:2] == ("ep063", "discovery")
 
 
 def test_publisher_receipt_must_match_reserved_identity_and_time(monkeypatch, tmp_path, config):
@@ -222,6 +246,21 @@ def test_failure_alert_opens_then_updates_one_private_issue(monkeypatch):
     assert calls[-1][0:2] == ("PATCH", "/issues/7")
 
 
+@pytest.mark.parametrize("operation", ["sign", "publish"])
+def test_inflight_run_holds_when_main_policy_switch_is_turned_off(monkeypatch, config, operation):
+    state = orch.GitHubState("test-token", "owner/control", "a" * 40)
+    local = {**config, "intake_enabled": True, "signing_enabled": True,
+             "publishing_enabled": True}
+    live = {**local, **({"signing_enabled": False} if operation == "sign" else
+                       {"publishing_enabled": False})}
+    entry = {"type": "file", "content": base64.b64encode(json.dumps(live).encode()).decode()}
+    monkeypatch.setattr(state, "request", lambda *args, **kwargs: entry)
+    with pytest.raises(Hold, match="main policy changed"):
+        state.require_live_policy(local, operation)
+    entry["content"] = base64.b64encode(json.dumps(local).encode()).decode()
+    state.require_live_policy(local, operation)
+
+
 def test_workflow_separates_credentials_and_gates_release():
     path = Path(__file__).resolve().parents[1] / ".github/workflows/unattended-control.yml"
     workflow = yaml.safe_load(path.read_text())
@@ -243,3 +282,9 @@ def test_workflow_separates_credentials_and_gates_release():
     assert "HISTORY_PUBLISHER_BUFFER_API_KEY" not in qa_text + sign_text
     assert "HISTORY_REVIEW_SIGNING_KEY" not in qa_text
     assert "HISTORY_QA_GEMINI_API_KEY" not in sign_text
+    for stage, command in (("sign", "sign-qa-draft"), ("publish", "publish-draft")):
+        steps = jobs[stage]["steps"]
+        mutation = next(index for index, step in enumerate(steps) if command in step.get("run", ""))
+        script = steps[mutation]["run"]
+        assert script.index(f"live-policy --operation {stage}") < script.index(f"control {command}")
+        assert "env -u GITHUB_TOKEN uv run" in script

@@ -20,7 +20,7 @@ from pathlib import Path
 import requests
 
 from .intake import committed_draft
-from .release import COMMIT, EPISODE, SHA, Hold, policy, require, utc
+from .release import COMMIT, EPISODE, SHA, Hold, policy, read_object, require, utc
 
 STATE_BRANCH = "unattended-state"
 RECEIPT_DIR = "receipts"
@@ -196,6 +196,19 @@ class GitHubState:
                 "private receipt identity or phase is invalid")
         return value
 
+    def require_live_policy(self, config: dict, operation: str) -> None:
+        """A running job cannot use a policy superseded on control main."""
+        entry = self.request("GET", "/contents/policy.json?ref=main", allowed=(200, 404))
+        require(isinstance(entry, dict) and entry.get("type") == "file" and
+                isinstance(entry.get("content"), str), "current control policy is unavailable")
+        try:
+            live = read_object(base64.b64decode(entry["content"], validate=True),
+                               "current control policy")
+        except (ValueError, UnicodeError) as exc:
+            raise Hold("current control policy is invalid") from exc
+        require(live == config, "control main policy changed after this run started")
+        require(enabled(live, operation), f"current {operation} policy is disabled")
+
     def receipts(self) -> list[dict]:
         listing = self.file(RECEIPT_DIR)
         if listing is None:
@@ -258,6 +271,7 @@ def discover(args, config: dict, state: GitHubState) -> dict:
                     "updated_at_utc": datetime.now(timezone.utc).isoformat()}
             state.put(held)
             state.alert(episode, "discovery", held["held_reason"])
+            raise Hold(held["held_reason"])
     resume = args.resume_episode
     if resume:
         require(bool(EPISODE.fullmatch(resume)), "resume episode is malformed")
@@ -271,6 +285,13 @@ def discover(args, config: dict, state: GitHubState) -> dict:
         old = receipts.get(episode)
         if old and old["phase"] == "held" and not resume:
             continue
+        if old and old["phase"] == "release_planned":
+            held = {**old, "phase": "held", "resume_phase": "release_planned",
+                    "held_reason": "release outcome is uncertain; inspect the external Buffer post before resume",
+                    "updated_at_utc": datetime.now(timezone.utc).isoformat()}
+            state.put(held)
+            state.alert(episode, "discovery", held["held_reason"])
+            raise Hold(held["held_reason"])
         if old and old["phase"] == "published" and old["source_commit"] == commit:
             # The exact Git commit is immutable. A changed draft has a new commit.
             continue
@@ -284,7 +305,7 @@ def discover(args, config: dict, state: GitHubState) -> dict:
                         "updated_at_utc": datetime.now(timezone.utc).isoformat()}
                 state.put(held)
             state.alert(episode, "discovery", "producer draft failed immutable validation")
-            continue
+            raise Hold("producer draft failed immutable validation")
         draft_hash = source["draft_sha256"]
         media_hash = source["draft"]["media_sha256"]
         if old and not bound(old, episode, commit, draft_hash, media_hash):
@@ -292,7 +313,7 @@ def discover(args, config: dict, state: GitHubState) -> dict:
                     "resume_phase": old["phase"], "updated_at_utc": datetime.now(timezone.utc).isoformat()}
             state.put(held)
             state.alert(episode, "discovery", held["held_reason"])
-            continue
+            raise Hold(held["held_reason"])
         if old and old["phase"] == "published":
             continue
         if resume:
@@ -305,6 +326,11 @@ def discover(args, config: dict, state: GitHubState) -> dict:
                    "draft_sha256": draft_hash, "media_sha256": media_hash,
                    "phase": "claimed", "updated_at_utc": datetime.now(timezone.utc).isoformat()}
             state.put(old)
+        phase = old["phase"]
+        if (phase in ("claimed", "intake_verified") and not enabled(config, "intake") or
+                phase == "qa_approved" and not enabled(config, "sign") or
+                phase == "signed" and not enabled(config, "publish")):
+            continue
         return {"episode": episode, "source_commit": commit,
                 "intake_enabled": enabled(config, "intake"),
                 "signing_enabled": enabled(config, "sign"),
@@ -336,6 +362,10 @@ def run(args) -> dict | None:
         result = discover(args, config, state)
         args.output.write_text(json.dumps(result, sort_keys=True) + "\n")
         return result
+    if args.command == "live-policy":
+        require(enabled(config, args.operation), f"{args.operation} policy is disabled in this run")
+        state.require_live_policy(config, args.operation)
+        return None
     receipt = _identity(args, state)
     if args.command == "gate":
         require(enabled(config, args.operation), f"{args.operation} policy is disabled")
@@ -351,17 +381,12 @@ def run(args) -> dict | None:
         return updated
     if args.command == "reserve":
         require(enabled(config, "publish"), "publishing policy is disabled")
-        require(receipt["phase"] in ("signed", "release_planned"),
-                "release has not been signed or is held")
+        require(receipt["phase"] == "signed",
+                "release is already planned or held; inspect Buffer before another attempt")
         now = datetime.now(timezone.utc)
-        if receipt["phase"] == "release_planned":
-            due = utc(receipt["due_at_utc"], "reserved release time")
-            require(due > now + timedelta(minutes=30),
-                    "reserved release time expired; inspect Buffer before rescheduling")
-        else:
-            due = next_due(state.receipts(), now)
-            receipt = {**advance(receipt, "release_planned"), "due_at_utc": due}
-            state.put(receipt)
+        due = next_due(state.receipts(), now)
+        receipt = {**advance(receipt, "release_planned"), "due_at_utc": due}
+        state.put(receipt)
         args.output.write_text(json.dumps({"due_at_utc": receipt["due_at_utc"]}) + "\n")
         return receipt
     if args.command == "complete":
@@ -397,6 +422,8 @@ def main(argv: list[str] | None = None) -> int:
     current.add_argument("--source", type=Path, required=True)
     current.add_argument("--episode", required=True)
     current.add_argument("--commit", required=True)
+    live_policy = commands.add_parser("live-policy")
+    live_policy.add_argument("--operation", choices=("sign", "publish"), required=True)
     for name in ("gate", "advance", "reserve", "complete"):
         command = commands.add_parser(name)
         command.add_argument("--episode", required=True)

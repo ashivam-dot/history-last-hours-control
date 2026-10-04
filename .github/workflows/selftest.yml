@@ -17,7 +17,7 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install locked control dependencies
         run: uv sync --frozen --python 3.12
-      - name: Verify policy stays disabled and run synthetic tests
+      - name: Verify release stays disabled and run synthetic tests
         run: |
           uv run --frozen python - <<'PY'
           import json
@@ -25,7 +25,7 @@ jobs:
           config = json.loads(Path('policy.json').read_text())
           assert config['signing_enabled'] is False
           assert config['publishing_enabled'] is False
-          assert config['intake_enabled'] is False
+          assert config['intake_enabled'] is True
           assert 'instagram_channel_id' not in config
           PY
           uv run --frozen python -m pytest -q tests

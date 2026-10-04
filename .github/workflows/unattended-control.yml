@@ -183,6 +183,12 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - run: uv sync --frozen --python 3.12 --no-dev
+      - name: Install and verify full-media decoders
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          command -v ffmpeg
+          command -v ffprobe
       - name: Confirm producer main still has the pinned unreleased draft
         env:
           EPISODE: ${{ needs.discover.outputs.episode }}

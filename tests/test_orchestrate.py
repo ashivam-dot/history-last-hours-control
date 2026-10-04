@@ -119,6 +119,8 @@ def test_changed_draft_holds_claim_and_opens_private_alert(monkeypatch, tmp_path
 
 
 def test_disabled_policy_claims_only_and_blocks_later_phases(monkeypatch, tmp_path, config):
+    config = {**config, "intake_enabled": False, "signing_enabled": False,
+              "publishing_enabled": False}
     state = MemoryState()
     monkeypatch.setattr(orch, "draft_candidates", lambda repo, config: iter([("ep063", "a" * 40)]))
     monkeypatch.setattr(orch, "exact_draft", lambda *args: _source())

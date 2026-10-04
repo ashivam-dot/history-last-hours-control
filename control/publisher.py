@@ -229,14 +229,20 @@ class CloudinaryClient:
 
     def _require_private_identity(self, result: dict, public_id: str, size: int) -> None:
         private_prefix = f"https://res.cloudinary.com/{self._cloud}/video/authenticated/"
-        require(isinstance(result, dict) and result.get("public_id") == public_id and
-                result.get("resource_type") == "video" and result.get("type") == "authenticated" and
-                result.get("bytes") == size and isinstance(result.get("asset_id"), str) and
-                bool(re.fullmatch(r"[A-Za-z0-9_-]{8,128}", result["asset_id"])) and
-                isinstance(result.get("secure_url"), str) and
-                bool(re.fullmatch(re.escape(private_prefix) + r"(?:v[0-9]+/)?" +
-                                  re.escape(public_id) + r"\.mp4", result["secure_url"])),
-                "private draft upload identity, type, or size differs")
+        require(isinstance(result, dict), "private draft upload response is not an object")
+        checks = {
+            "public_id": result.get("public_id") == public_id,
+            "resource_type": result.get("resource_type") == "video",
+            "type": result.get("type") == "authenticated",
+            "bytes": result.get("bytes") == size,
+            "asset_id": isinstance(result.get("asset_id"), str) and
+                        bool(re.fullmatch(r"[A-Za-z0-9_-]{8,128}", result["asset_id"])),
+            "secure_url": isinstance(result.get("secure_url"), str) and
+                          bool(re.fullmatch(re.escape(private_prefix) + r"(?:v[0-9]+/)?" +
+                                            re.escape(public_id) + r"\.mp4", result["secure_url"])),
+        }
+        require(all(checks.values()), "private draft upload identity, type, or size differs: " +
+                ", ".join(name for name, valid in checks.items() if not valid))
 
     def _reconcile_private_draft(self, video: bytes, public_id: str) -> tuple[str, str, str]:
         """Recover only an exact authenticated asset after an ambiguous upload response."""

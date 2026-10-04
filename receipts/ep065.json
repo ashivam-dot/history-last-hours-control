@@ -3,7 +3,20 @@
   "due_at_utc": "2026-10-04T17:00:00+00:00",
   "episode": "ep065",
   "media_sha256": "a9db4b64870336122c7b00a7c6a0a584d503bb4d7636bc4175569997d3975bb1",
-  "phase": "scheduled",
+  "phase": "published",
+  "post_due_verification": {
+    "buffer_post_id": "6ac2467f6f5f5d018da0f9c0",
+    "buffer_sent_at_utc": "2026-10-04T17:00:41.570000+00:00",
+    "buffer_status": "sent",
+    "control_media_sha256": "a9db4b64870336122c7b00a7c6a0a584d503bb4d7636bc4175569997d3975bb1",
+    "verified_at_utc": "2026-10-04T21:05:46.481865+00:00",
+    "version": 1,
+    "youtube_channel_id": "UC6e6OB3iw3yp8JnnBYxLItA",
+    "youtube_description_sha256": "c165e3309ce5417e6e15553f18535f9c066104cb392086603ba19bea7e686a6f",
+    "youtube_title": "The Bend Measured Before Quebec Bridge Fell",
+    "youtube_url": "https://www.youtube.com/watch?v=gbhhEU5wfZk",
+    "youtube_video_id": "gbhhEU5wfZk"
+  },
   "publisher_receipt": {
     "control_media_public_id": "history-last-hours/ep065-a9db4b64870336122c7b00a7c6a0a584d503bb4d7636bc4175569997d3975bb1",
     "control_media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/history-last-hours/ep065-a9db4b64870336122c7b00a7c6a0a584d503bb4d7636bc4175569997d3975bb1.mp4",
@@ -18,6 +31,6 @@
     }
   },
   "source_commit": "1f3597a946220c71dc0c79490b4d8b22bbe9d939",
-  "updated_at_utc": "2026-10-04T12:28:48.329181+00:00",
+  "updated_at_utc": "2026-10-04T21:05:48.078330+00:00",
   "version": 1
 }

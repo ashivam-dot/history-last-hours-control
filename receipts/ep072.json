@@ -3,11 +3,12 @@
   "episode": "ep072",
   "media_sha256": "89a20c607f4152d517b992cd6d6ce61f3c91a1cde632ad657c4e4d5f8d1572ca",
   "phase": "intake_verified",
-  "qa_daily_quota_waits": 1,
-  "qa_last_failure_reason": "independent Gemini QA quota or capacity exhausted after bounded retries (gemini-3-flash-preview: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier)",
-  "qa_last_failure_run": "37297980561/1",
+  "qa_daily_quota_waits": 2,
+  "qa_last_failure_reason": "independent Gemini QA quota or capacity exhausted after bounded retries (gemini-3.8-flash: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier; gemini-3.7-flash: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier; gemini-3.6-flash: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier; gemini-3.5-flash: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier; gemini-3-flash-preview: HTTP 429 RESOUR",
+  "qa_last_failure_run": "37321004517/1",
   "qa_operational_attempts": 1,
+  "qa_retry_after_utc": "2026-10-06T07:15:00+00:00",
   "source_commit": "8adbb386844a79a4755f7c1dac816efba2e3946f",
-  "updated_at_utc": "2026-10-05T13:58:30.810635+00:00",
+  "updated_at_utc": "2026-10-05T14:04:40.165511+00:00",
   "version": 1
 }

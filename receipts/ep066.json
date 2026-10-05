@@ -1,13 +1,14 @@
 {
   "draft_sha256": "28941d0ab9531f198dbd9071f69a355df0be76e09e284c9e1958989e7e38da99",
   "episode": "ep066",
+  "held_reason": "graphic hook and gore beats (prisoners' heads fired from cannons, decapitated knights) break SCRIPT-RULES: YouTube shows graphic Shorts to fewer people; not for release",
   "media_sha256": "d40a2910b1dd66fad76bea8ce15594542e018c63731487f52867e4a67bd5a108",
-  "phase": "intake_verified",
+  "phase": "held",
   "qa_last_failure_reason": "independent Gemini QA quota or capacity exhausted after bounded retries (gemini-3-flash-preview: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier)",
   "qa_last_failure_run": "37293504265/1",
   "qa_operational_attempts": 2,
-  "qa_retry_after_utc": "2026-10-06T07:15:00+00:00",
+  "resume_phase": "intake_verified",
   "source_commit": "62ee7ede1976f610651c770754b7c574bbc36e93",
-  "updated_at_utc": "2026-10-05T10:00:27.358910+00:00",
+  "updated_at_utc": "2026-10-05T13:58:30.810635+00:00",
   "version": 1
 }

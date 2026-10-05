@@ -585,3 +585,21 @@ def test_spent_daily_quota_waits_for_the_next_reset():
     assert orch.qa_retry_after(morning, daily) == datetime(2026, 10, 5, 7, 15, tzinfo=timezone.utc)
     assert orch.qa_retry_after(evening, daily) == datetime(2026, 10, 6, 7, 15, tzinfo=timezone.utc)
     assert orch.qa_retry_after(evening, "independent Gemini QA quota or capacity exhausted") == evening + timedelta(hours=2)
+
+
+def test_spent_daily_quota_waits_for_reset_without_using_an_attempt():
+    config = {"qa_provider": "gemini", "qa_model": "gemini-3.8-flash"}
+    daily = ("independent Gemini QA quota or capacity exhausted after bounded retries "
+             "(m: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier)")
+    now = datetime(2026, 10, 5, 10, 0, tzinfo=timezone.utc)
+    receipt = {**_receipt("intake_verified"), "qa_operational_attempts": 2}
+    for day in range(orch.MAX_DAILY_QUOTA_WAITS):
+        key = f"{200 + day}/1"
+        receipt = orch.qa_retry_update(receipt, _qa_transient_report(config, reason=daily, actions_run_key=key),
+                                       config, now, key)
+        assert receipt["phase"] == "intake_verified" and receipt["qa_operational_attempts"] == 2
+        assert receipt["qa_retry_after_utc"] == "2026-10-06T07:15:00+00:00"
+    assert receipt["qa_daily_quota_waits"] == orch.MAX_DAILY_QUOTA_WAITS
+    final = orch.qa_retry_update(receipt, _qa_transient_report(config, reason=daily, actions_run_key="300/1"),
+                                 config, now, "300/1")
+    assert final["phase"] == "held" and final["qa_operational_attempts"] == 3

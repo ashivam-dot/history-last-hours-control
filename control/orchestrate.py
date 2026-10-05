@@ -39,6 +39,9 @@ FORBIDDEN_PRODUCER_RECORDS = ("hold.json", "publish.json", "release_certificate.
                               "independent_review.json")
 QA_RETRY_COOLDOWN = timedelta(hours=2)
 MAX_OPERATIONAL_QA_ATTEMPTS = 3
+# A spent free-tier daily quota says nothing about the draft, so it waits for the reset
+# without using one of the three attempts; a key that stays spent for a week still holds.
+MAX_DAILY_QUOTA_WAITS = 7
 QA_RETRY_STAGES = ("full_audio_transcription", "independent_multimodal_review")
 QUEUE_ISSUE_TITLE = "[queue] History has no eligible draft"
 
@@ -180,6 +183,14 @@ def qa_retry_update(receipt: dict, report: dict, config: dict,
         return None
     if receipt.get("qa_last_failure_run") == run_key:
         return receipt
+    if "PerDay" in report["reason"]:
+        waits = receipt.get("qa_daily_quota_waits", 0)
+        if type(waits) is int and 0 <= waits < MAX_DAILY_QUOTA_WAITS:
+            return {**receipt, "qa_daily_quota_waits": waits + 1,
+                    "qa_last_failure_run": run_key,
+                    "qa_last_failure_reason": report["reason"][:500],
+                    "qa_retry_after_utc": qa_retry_after(now, report["reason"]).isoformat(),
+                    "updated_at_utc": now.isoformat()}
     attempts += 1
     updated = {**receipt, "qa_operational_attempts": attempts,
                "qa_last_failure_run": run_key,

@@ -405,6 +405,17 @@ class OpenAIQA:
         return read_object(texts[0].encode(), "independent vision verdict")
 
 
+def _gemini_quota(response) -> str:
+    """Gemini's error status and quota IDs, which name the exhausted limit and carry no secret."""
+    try:
+        error = response.json().get("error", {})
+        quotas = [violation.get("quotaId", "") for detail in error.get("details", [])
+                  for violation in detail.get("violations", []) if isinstance(violation, dict)]
+        return " ".join([str(error.get("status", ""))] + [q for q in quotas if q])[:200]
+    except (ValueError, AttributeError, TypeError):
+        return ""
+
+
 GEMINI_FALLBACK_MODELS = ("gemini-3.8-flash", "gemini-3.5-flash", "gemini-3-flash-preview")
 
 
@@ -452,13 +463,15 @@ class GeminiQA:
             except requests.RequestException as exc:
                 raise Hold("independent Gemini QA request is unavailable") from exc
             if response.status_code in (429, 503):
-                if attempt == 3:
+                quota = _gemini_quota(response)
+                if attempt == 3 or "PerDay" in quota:
                     raise GeminiTransientHold(
-                        "independent Gemini QA quota or capacity exhausted after bounded retries")
+                        "independent Gemini QA quota or capacity exhausted after bounded retries "
+                        f"({model}: HTTP {response.status_code} {quota})".rstrip())
                 self.sleeper((10, 30, 60)[attempt])
                 continue
-            require(response.status_code == 200,
-                    "independent Gemini QA request was rejected")
+            detail = f"{model}: HTTP {response.status_code} {_gemini_quota(response)}".rstrip()
+            require(response.status_code == 200, f"independent Gemini QA request was rejected ({detail})")
             try:
                 result = response.json()
                 candidates = result["candidates"]

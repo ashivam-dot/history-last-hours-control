@@ -251,9 +251,9 @@ def test_transient_gemini_failure_retries_exact_receipt_then_holds_after_cap(
     first = state.receipt("ep063")
     assert first["phase"] == "intake_verified"
     assert first["qa_operational_attempts"] == 1
-    assert timedelta(hours=11, minutes=59) < (
+    assert timedelta(hours=1, minutes=59) < (
         datetime.fromisoformat(first["qa_retry_after_utc"]) - datetime.now(timezone.utc)
-    ) <= timedelta(hours=12)
+    ) <= timedelta(hours=2)
     assert state.qa_retry_alerts[-1][:2] == ("ep063", 1)
     assert state.alerts == []
     orch.run(args)
@@ -576,3 +576,12 @@ def test_schedule_is_bounded_and_disabled_without_repository_variable():
     assert preflight < install
     assert "publishing_enabled" in steps[preflight]["run"]
     assert steps[install]["if"] == "steps.preflight.outputs.skip != 'true'"
+
+
+def test_spent_daily_quota_waits_for_the_next_reset():
+    morning = datetime(2026, 10, 5, 6, 0, tzinfo=timezone.utc)
+    evening = datetime(2026, 10, 5, 9, 0, tzinfo=timezone.utc)
+    daily = "independent Gemini QA quota or capacity exhausted (m: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier)"
+    assert orch.qa_retry_after(morning, daily) == datetime(2026, 10, 5, 7, 15, tzinfo=timezone.utc)
+    assert orch.qa_retry_after(evening, daily) == datetime(2026, 10, 6, 7, 15, tzinfo=timezone.utc)
+    assert orch.qa_retry_after(evening, "independent Gemini QA quota or capacity exhausted") == evening + timedelta(hours=2)

@@ -37,7 +37,7 @@ SWITCHES = {
 SOURCE_PATH = re.compile(r"content/episodes/(ep[0-9]{3,})/draft\.json\Z")
 FORBIDDEN_PRODUCER_RECORDS = ("hold.json", "publish.json", "release_certificate.json",
                               "independent_review.json")
-QA_RETRY_COOLDOWN = timedelta(hours=12)
+QA_RETRY_COOLDOWN = timedelta(hours=2)
 MAX_OPERATIONAL_QA_ATTEMPTS = 3
 QA_RETRY_STAGES = ("full_audio_transcription", "independent_multimodal_review")
 QUEUE_ISSUE_TITLE = "[queue] History has no eligible draft"
@@ -148,6 +148,14 @@ def qa_retry_waiting(receipt: dict, now: datetime) -> bool:
     return now < utc(after, "QA retry time")
 
 
+def qa_retry_after(now: datetime, reason: str) -> datetime:
+    """A spent daily quota waits for Gemini's 07:00 UTC reset; a busy or per-minute limit, two hours."""
+    if "PerDay" not in reason:
+        return now + QA_RETRY_COOLDOWN
+    reset = now.astimezone(timezone.utc).replace(hour=7, minute=15, second=0, microsecond=0)
+    return reset if reset > now else reset + timedelta(days=1)
+
+
 def qa_retry_update(receipt: dict, report: dict, config: dict,
                     now: datetime, run_key: str) -> dict | None:
     """Schedule only a trusted same-media Gemini 429/503 hold for bounded retries."""
@@ -178,7 +186,7 @@ def qa_retry_update(receipt: dict, report: dict, config: dict,
                "qa_last_failure_reason": report["reason"][:500],
                "updated_at_utc": now.isoformat()}
     if attempts < MAX_OPERATIONAL_QA_ATTEMPTS:
-        updated["qa_retry_after_utc"] = (now + QA_RETRY_COOLDOWN).isoformat()
+        updated["qa_retry_after_utc"] = qa_retry_after(now, report["reason"]).isoformat()
     else:
         updated.pop("qa_retry_after_utc", None)
         updated.update({"phase": "held", "resume_phase": "intake_verified",

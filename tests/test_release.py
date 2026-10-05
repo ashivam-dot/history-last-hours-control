@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
+import requests
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -1414,6 +1415,22 @@ def test_gemini_qa_falls_back_across_every_flash_model_and_names_each_limit(monk
     api = GeminiQA("test-key", "gemini-3.8-flash", lambda _: None)
     assert api._call([{"text": "review"}]) == "ok"
     assert api.answered_by == ["gemini-flash-latest"]
+
+    def timeouts_then_answer(url, **kwargs):
+        if "gemini-3.6-flash" not in url:
+            raise requests.Timeout("slow model")
+        return last_answers(url.replace("gemini-3.6-flash", "gemini-flash-latest"), **kwargs)
+
+    monkeypatch.setattr("control.qa.requests.post", timeouts_then_answer)
+    api = GeminiQA("test-key", "gemini-3.8-flash", lambda _: None)
+    assert api._call([{"text": "review"}]) == "ok"
+    assert api.answered_by == ["gemini-3.6-flash"]
+
+    monkeypatch.setattr("control.qa.requests.post",
+                        lambda url, **kwargs: (_ for _ in ()).throw(requests.ConnectionError("down")))
+    with pytest.raises(GeminiTransientHold, match="request unavailable") as down:
+        GeminiQA("test-key", "gemini-3.8-flash", lambda _: None)._call([{"text": "review"}])
+    assert "PerDay" not in str(down.value)
 
 
 def test_gemini_transcribes_full_mixed_audio_inline(monkeypatch, tmp_path):

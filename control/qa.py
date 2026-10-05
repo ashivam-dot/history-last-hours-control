@@ -473,7 +473,9 @@ class GeminiQA:
                                                   "Content-Type": "application/json"},
                                          json=body, timeout=(15, 300))
             except requests.RequestException as exc:
-                raise Hold("independent Gemini QA request is unavailable") from exc
+                # A timeout or dropped connection is capacity, not a verdict: the next model may answer.
+                detail = f"{model}: request unavailable ({type(exc).__name__})"
+                raise GeminiTransientHold(f"{TRANSIENT_PREFIX} ({detail})", detail) from exc
             if response.status_code in (429, 503):
                 quota = _gemini_quota(response)
                 if attempt == 3 or "PerDay" in quota:

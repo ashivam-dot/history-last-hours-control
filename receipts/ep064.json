@@ -1,11 +1,11 @@
 {
   "draft_sha256": "b32f8c721404e35372e810f94619995b5106b5ef71c55a5b9554bafa0873aed0",
   "episode": "ep064",
-  "held_reason": "Actions job failed; inspect the linked run and private artifacts",
+  "held_reason": "producer locked this draft (editorial_hold.json, release_locked): the drowning hook lacks checked specialist support and beat 4's art has weak provenance; first held by run 37191082431 on Gemini quota",
   "media_sha256": "7ee8c3c2079c790ff2a9cf08e54fef891f6166902551266b10ff6d136f5798ef",
   "phase": "held",
   "resume_phase": "intake_verified",
   "source_commit": "fb0fff5af5989e34284c81ff7066c651a48462e6",
-  "updated_at_utc": "2026-10-04T09:09:45.998124+00:00",
+  "updated_at_utc": "2026-10-05T14:05:45.608055+00:00",
   "version": 1
 }

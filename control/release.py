@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import difflib
 import hashlib
 import json
 import os
@@ -28,15 +29,45 @@ SHA = re.compile(r"[0-9a-f]{64}\Z")
 COMMIT = re.compile(r"[0-9a-f]{40}\Z")
 MAX_VIDEO_BYTES = 300 * 1024 * 1024
 PASS_SCORES = ("hook", "clarity", "payoff", "visuals", "loop")
-# The producer passes a render whose recognizer slips its judge heard as correct speech (studio.MINOR_ASR_DIFFERENCES);
-# QA's own transcript match still has to pass.
-MINOR_ASR_DIFFERENCES = 2
+# The producer passes a render whose recognizer slips its judge heard as correct speech (check.minor_differences);
+# this is an independent copy of that rule, and QA's own transcript match still has to pass.
+ASR_FINDING = re.compile(r"""^(?:[\w.-]+: )?(['"])(.*?)\1 heard as (['"])(.*?)\3(?: after .*)?$""", re.S)
+ASR_SMALL_WORDS = {"(nothing)", "a", "an", "the", "s", "of", "to", "in", "on", "at", "and", "his", "her", "its",
+                   "their", "was", "is", "it", "that", "by", "for", "as", "from", "with"}
+MATERIAL_ASR_DIFFERENCES = 2
+MAX_ASR_DIFFERENCES = 8
 OPEN_LICENSES = {"CC0", "Public domain", "Pexels License", "Pixabay Content License"}
 ORIGINAL_ASSETS = {"designed card", "AI generated", "Royal Commission report / authored graphic"}
 
 
 class Hold(RuntimeError):
     """An incomplete or changed candidate must stay held."""
+
+
+def _asr_skeleton(text: str) -> str:
+    letters = re.sub(r"[^a-z]", "", text.lower())
+    return re.sub(r"(.)\1+", r"\1", re.sub(r"[aeiouy]", "", letters))
+
+
+def _asr_noise(finding: str) -> bool:
+    match = ASR_FINDING.match(finding)
+    if not match or re.search(r"\d", match[2] + match[4]):
+        return False
+    wrote, heard = match[2], match[4]
+    if all(word in ASR_SMALL_WORDS for word in wrote.split() + heard.split()):
+        return True
+    if len(wrote.split()) != 1 or len(heard.split()) != 1 or "(nothing)" in (wrote, heard):
+        return False
+    return (_asr_skeleton(wrote) == _asr_skeleton(heard) or
+            difflib.SequenceMatcher(a=wrote.lower(), b=heard.lower()).ratio() >= 0.85)
+
+
+def minor_asr_differences(differences: list) -> bool:
+    if not 0 < len(differences) <= MAX_ASR_DIFFERENCES or not all(isinstance(d, str) for d in differences):
+        return False
+    material = [d for d in differences if not _asr_noise(d)]
+    numbers = [m for m in map(ASR_FINDING.match, material) if m and re.search(r"\d", m[2] + m[4])]
+    return not numbers and len(material) <= MATERIAL_ASR_DIFFERENCES
 
 
 def require(condition: bool, reason: str) -> None:
@@ -227,10 +258,11 @@ def _check_editorial_evidence(blobs: dict[str, bytes], episode: str, media_hash:
     differences = checks.get("speech_differences")
     require(final.get("media_sha256") == media_hash and final.get("passed") is True and
             checks.get("warnings") == [] and isinstance(differences, list) and
-            len(differences) <= MINOR_ASR_DIFFERENCES and
+            (not differences or minor_asr_differences(differences)) and
             not checks.get("speech_error") and final.get("frames") == [] and
             final.get("speech") == [] and
-            all(type(scores.get(name)) is int and scores[name] >= 4 for name in PASS_SCORES),
+            all(type(scores.get(name)) is int and scores[name] >= 4 for name in PASS_SCORES) and
+            ("accuracy" not in scores or (type(scores["accuracy"]) is int and scores["accuracy"] >= 4)),
             "producer final-media review is not clean for exact video")
 
 

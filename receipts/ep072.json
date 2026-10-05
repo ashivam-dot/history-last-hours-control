@@ -6,7 +6,7 @@
   "qa_last_failure_reason": "independent Gemini QA quota or capacity exhausted after bounded retries",
   "qa_last_failure_run": "37287116773/1",
   "qa_operational_attempts": 1,
-  "qa_retry_after_utc": "2026-10-05T21:10:29.469486+00:00",
+  "qa_retry_after_utc": "2026-10-05T09:57:07.243939+00:00",
   "source_commit": "8adbb386844a79a4755f7c1dac816efba2e3946f",
   "updated_at_utc": "2026-10-05T09:10:29.469486+00:00",
   "version": 1

@@ -1,4 +1,4 @@
-name: Check pinned History QA provider (one request)
+name: Check History QA provider models (one request each)
 
 on:
   workflow_dispatch:
@@ -14,12 +14,12 @@ jobs:
   check:
     environment: history-independent-qa
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - name: Check the exact policy model with one small request
+      - name: Send one small request to the policy model and each QA fallback model
         env:
           HISTORY_QA_GEMINI_API_KEY: ${{ secrets.HISTORY_QA_GEMINI_API_KEY }}
         run: |
@@ -35,6 +35,13 @@ jobs:
           model = config.get('qa_model')
           if config.get('qa_provider') != 'gemini' or not isinstance(model, str) or not re.fullmatch(r'[A-Za-z0-9._-]+', model):
               raise SystemExit('Pinned QA provider policy is invalid')
+          # Read the fallback list as text, without importing control code or installing its dependencies.
+          source = Path('control/qa.py').read_text(encoding='utf-8')
+          block = re.search(r'^GEMINI_FALLBACK_MODELS = \(([^)]*)\)', source, re.M)
+          if not block:
+              raise SystemExit('QA fallback model list is missing')
+          fallback = re.findall(r'"([A-Za-z0-9._-]+)"', block.group(1))
+          models = [model] + [name for name in fallback if name != model]
           key = os.environ.get('HISTORY_QA_GEMINI_API_KEY')
           if not key:
               raise SystemExit('Independent QA provider credential is unavailable')
@@ -42,28 +49,41 @@ jobs:
               'contents': [{'role': 'user', 'parts': [{'text': 'Reply OK.'}]}],
               'generationConfig': {'maxOutputTokens': 16, 'temperature': 0},
           }).encode('utf-8')
-          request = urllib.request.Request(
-              f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
-              data=payload, method='POST', headers={
-                  'Content-Type': 'application/json', 'x-goog-api-key': key,
-              })
-          try:
-              with urllib.request.urlopen(request, timeout=25) as response:
-                  status = response.status
-                  body = json.load(response)
-          except urllib.error.HTTPError as exc:
-              print(f'provider_http={exc.code}')
-              raise SystemExit(2) from None
-          except (urllib.error.URLError, TimeoutError, ValueError):
-              print('provider_network_or_response_error')
-              raise SystemExit(2) from None
-          candidates = body.get('candidates') if isinstance(body, dict) else None
-          if not isinstance(candidates, list) or not candidates or not isinstance(candidates[0], dict):
-              print(f'provider_http={status} no_candidate')
+
+          def quota_ids(raw):
+              try:
+                  error = json.loads(raw).get('error', {})
+                  ids = [v.get('quotaId', '') for d in error.get('details', []) for v in d.get('violations', [])]
+                  return ' '.join([str(error.get('status', ''))] + [i for i in ids if re.fullmatch(r'[A-Za-z0-9-]+', i)])[:200]
+              except (ValueError, AttributeError, TypeError):
+                  return ''
+
+          answered = 0
+          for name in models:
+              request = urllib.request.Request(
+                  f'https://generativelanguage.googleapis.com/v1beta/models/{name}:generateContent',
+                  data=payload, method='POST', headers={
+                      'Content-Type': 'application/json', 'x-goog-api-key': key,
+                  })
+              try:
+                  with urllib.request.urlopen(request, timeout=25) as response:
+                      status = response.status
+                      body = json.load(response)
+              except urllib.error.HTTPError as exc:
+                  print(f'{name}: provider_http={exc.code} {quota_ids(exc.read())}'.rstrip())
+                  continue
+              except (urllib.error.URLError, TimeoutError, ValueError):
+                  print(f'{name}: provider_network_or_response_error')
+                  continue
+              candidates = body.get('candidates') if isinstance(body, dict) else None
+              first = candidates[0] if isinstance(candidates, list) and candidates and isinstance(candidates[0], dict) else {}
+              finish = first.get('finishReason')
+              if not isinstance(finish, str) or not re.fullmatch(r'[A-Z_]+', finish):
+                  print(f'{name}: provider_http={status} no_valid_candidate')
+                  continue
+              answered += 1
+              print(f'{name}: provider_http={status} finish_reason={finish}')
+          print(f'models_answering={answered}/{len(models)}')
+          if not answered:
               raise SystemExit(2)
-          finish = candidates[0].get('finishReason')
-          if not isinstance(finish, str) or not re.fullmatch(r'[A-Z_]+', finish):
-              print(f'provider_http={status} invalid_finish_reason')
-              raise SystemExit(2)
-          print(f'provider_http={status} finish_reason={finish}')
           PY

@@ -1024,6 +1024,17 @@ def test_automated_qa_approves_only_exact_live_sources_and_complete_media(fixtur
     with pytest.raises(Hold, match="does not bind"):
         verified_qa_report({**report, "qa_model": "other-model"}, approval,
                            approval["subject"], config, packet_dir)
+    # QA reviews only the claims the script cites, and the signer expects exactly that scope.
+    packet_research = packet_dir / "evidence" / "research.json"
+    original_research = packet_research.read_bytes()
+    widened = json.loads(original_research)
+    widened["claims"].append({"claim": "An uncited aside.", "evidence": []})
+    packet_research.write_text(json.dumps(widened))
+    verified_qa_report(report, approval, approval["subject"], config, packet_dir)
+    missing = {**report, "verdict": {**report["verdict"], "claims": []}}
+    with pytest.raises(Hold, match="held check or missed item"):
+        verified_qa_report(missing, approval, approval["subject"], config, packet_dir)
+    packet_research.write_bytes(original_research)
 
     class TransientQA(FakeQA):
         def assess(self, claims, visuals, script, transcript, media):
@@ -1344,6 +1355,65 @@ def test_gemini_quota_exhaustion_holds_after_bounded_retries(monkeypatch):
     assert len(calls) == 4 * models and delays == [10, 30, 60] * models
     assert calls[0].split("/models/")[1].startswith("test-vision-model:")
     assert calls[-1].split("/models/")[1].startswith(GEMINI_FALLBACK_MODELS[-1] + ":")
+
+
+def _quota_response(status, quota=None):
+    class Response:
+        status_code = status
+
+        def json(self):
+            violations = [{"quotaId": quota}] if quota else []
+            return {"error": {"status": "RESOURCE_EXHAUSTED" if status == 429 else "UNAVAILABLE",
+                              "details": [{"violations": violations}]}}
+    return Response()
+
+
+def test_gemini_qa_falls_back_across_every_flash_model_and_names_each_limit(monkeypatch):
+    assert GEMINI_FALLBACK_MODELS == ("gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash",
+                                      "gemini-3.5-flash", "gemini-3-flash-preview", "gemini-flash-latest")
+    daily = "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+    calls = []
+
+    def all_spent(url, **kwargs):
+        calls.append(url.split("/models/")[1].split(":")[0])
+        return _quota_response(429, daily)
+
+    monkeypatch.setattr("control.qa.requests.post", all_spent)
+    api = GeminiQA("test-key", "gemini-3.8-flash", lambda _: None)
+    with pytest.raises(GeminiTransientHold) as spent:
+        api._call([{"text": "review"}])
+    assert calls == list(GEMINI_FALLBACK_MODELS)
+    assert all(f"{model}: HTTP 429 RESOURCE_EXHAUSTED {daily}" in str(spent.value)
+               for model in GEMINI_FALLBACK_MODELS)
+
+    def one_busy(url, **kwargs):
+        model = url.split("/models/")[1].split(":")[0]
+        return _quota_response(503) if model == "gemini-flash-latest" else _quota_response(429, daily)
+
+    monkeypatch.setattr("control.qa.requests.post", one_busy)
+    with pytest.raises(GeminiTransientHold) as busy:
+        GeminiQA("test-key", "gemini-3.8-flash", lambda _: None)._call([{"text": "review"}])
+    # A model that was only busy may answer within hours, so the reason must not claim a spent day.
+    assert "PerDay" not in str(busy.value)
+    assert "gemini-3.7-flash: daily quota spent" in str(busy.value)
+    assert "gemini-flash-latest: HTTP 503 UNAVAILABLE" in str(busy.value)
+
+    def last_answers(url, **kwargs):
+        model = url.split("/models/")[1].split(":")[0]
+        if model != "gemini-flash-latest":
+            return _quota_response(429, daily)
+
+        class Answer:
+            status_code = 200
+
+            def json(self):
+                return {"candidates": [{"finishReason": "STOP", "content": {"parts": [{"text": "ok"}]}}]}
+        return Answer()
+
+    monkeypatch.setattr("control.qa.requests.post", last_answers)
+    api = GeminiQA("test-key", "gemini-3.8-flash", lambda _: None)
+    assert api._call([{"text": "review"}]) == "ok"
+    assert api.answered_by == ["gemini-flash-latest"]
 
 
 def test_gemini_transcribes_full_mixed_audio_inline(monkeypatch, tmp_path):

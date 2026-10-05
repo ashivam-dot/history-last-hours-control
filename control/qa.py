@@ -39,6 +39,10 @@ _SKIP = {"script", "style", "noscript", "svg"}
 class GeminiTransientHold(Hold):
     """The pinned Gemini model returned only retryable quota/capacity states."""
 
+    def __init__(self, message: str, detail: str = ""):
+        super().__init__(message)
+        self.detail = detail
+
 
 class _HTMLText(HTMLParser):
     def __init__(self) -> None:
@@ -416,7 +420,10 @@ def _gemini_quota(response) -> str:
         return ""
 
 
-GEMINI_FALLBACK_MODELS = ("gemini-3.8-flash", "gemini-3.5-flash", "gemini-3-flash-preview")
+# Only full Flash models: each reads the audio and every frame against the same instructions and schema.
+GEMINI_FALLBACK_MODELS = ("gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash",
+                          "gemini-3-flash-preview", "gemini-flash-latest")
+TRANSIENT_PREFIX = "independent Gemini QA quota or capacity exhausted after bounded retries"
 
 
 class GeminiQA:
@@ -435,16 +442,21 @@ class GeminiQA:
     def _call(self, parts: list[dict], schema: dict | None = None) -> str:
         # The free tier limits each model separately, so a spent model hands the same request to the next.
         models = [self.model] + [name for name in GEMINI_FALLBACK_MODELS if name != self.model]
-        for number, model in enumerate(models):
+        failures = []
+        for model in models:
             try:
                 text = self._call_model(model, parts, schema)
-            except GeminiTransientHold:
-                if number == len(models) - 1:
-                    raise
+            except GeminiTransientHold as exc:
+                failures.append(exc.detail or model)
                 continue
             self.answered_by.append(model)
             return text
-        raise Hold("independent Gemini QA has no model to call")
+        # "PerDay" in the reason makes control wait for the daily reset, so it names a spent
+        # daily quota only when every model is spent; otherwise the shorter cooldown applies.
+        if not all("PerDay" in failure for failure in failures):
+            failures = [failure.split(":", 1)[0] + ": daily quota spent" if "PerDay" in failure
+                        else failure for failure in failures]
+        raise GeminiTransientHold(f"{TRANSIENT_PREFIX} ({'; '.join(failures)})")
 
     def _call_model(self, model: str, parts: list[dict], schema: dict | None) -> str:
         endpoint = ("https://generativelanguage.googleapis.com/v1beta/models/" +
@@ -465,9 +477,8 @@ class GeminiQA:
             if response.status_code in (429, 503):
                 quota = _gemini_quota(response)
                 if attempt == 3 or "PerDay" in quota:
-                    raise GeminiTransientHold(
-                        "independent Gemini QA quota or capacity exhausted after bounded retries "
-                        f"({model}: HTTP {response.status_code} {quota})".rstrip())
+                    detail = f"{model}: HTTP {response.status_code} {quota}".rstrip()
+                    raise GeminiTransientHold(f"{TRANSIENT_PREFIX} ({detail})", detail)
                 self.sleeper((10, 30, 60)[attempt])
                 continue
             detail = f"{model}: HTTP {response.status_code} {_gemini_quota(response)}".rstrip()
@@ -665,9 +676,15 @@ def verified_qa_report(report: dict, approval: dict, subject: dict, config: dict
             isinstance(research.get("claims"), list) and
             isinstance(manifest.get("beats"), list),
             "private QA verdict has incomplete coverage")
-    require([item.get("index") for item in verdict["claims"] if isinstance(item, dict)] ==
-            list(range(1, len(research["claims"]) + 1)) and
-            len(verdict["claims"]) == len(research["claims"]) and
+    # The same claim scope qa_draft reviewed: the claims the script cites, else every claim.
+    script_path = packet_dir / "evidence" / "script.json"
+    cited = (cited_claims(read_object(script_path.read_bytes(), "QA script claims"))
+             if script_path.is_file() else set())
+    require(not cited or max(cited) <= len(research["claims"]),
+            "script cites a claim the research does not have")
+    expected = sorted(cited) if cited else list(range(1, len(research["claims"]) + 1))
+    require([item.get("index") for item in verdict["claims"] if isinstance(item, dict)] == expected and
+            len(verdict["claims"]) == len(expected) and
             [item.get("beat") for item in verdict["visuals"] if isinstance(item, dict)] ==
             list(range(1, len(manifest["beats"]) + 1)) and
             len(verdict["visuals"]) == len(manifest["beats"]) and

@@ -70,6 +70,15 @@ def test_discovery_pins_last_draft_change_not_unrelated_main_commit(tmp_path, co
     assert list(orch.draft_candidates(repo, config)) == [("ep063", exact)]
     with pytest.raises(Hold, match="release or hosted-media"):
         orch.producer_unreleased(repo, "HEAD", "ep063")
+    for name in ("editorial_hold.json", "withdrawal.json"):
+        for extra in draft.parent.iterdir():
+            if extra.name != "draft.json":
+                extra.unlink()
+        (draft.parent / name).write_text('{}')
+        git(repo, "add", "-A")
+        git(repo, "commit", "-m", f"producer {name}")
+        with pytest.raises(Hold, match="release or hosted-media"):
+            orch.producer_unreleased(repo, "HEAD", "ep063")
     git(repo, "remote", "set-url", "origin", "https://github.com/other/producer.git")
     with pytest.raises(Hold, match="origin"):
         list(orch.draft_candidates(repo, config))
@@ -585,6 +594,9 @@ def test_spent_daily_quota_waits_for_the_next_reset():
     assert orch.qa_retry_after(morning, daily) == datetime(2026, 10, 5, 7, 15, tzinfo=timezone.utc)
     assert orch.qa_retry_after(evening, daily) == datetime(2026, 10, 6, 7, 15, tzinfo=timezone.utc)
     assert orch.qa_retry_after(evening, "independent Gemini QA quota or capacity exhausted") == evening + timedelta(hours=2)
+    # Google resets the free tier at midnight Pacific, an hour later in UTC once daylight time ends.
+    winter = datetime(2026, 11, 10, 10, 0, tzinfo=timezone.utc)
+    assert orch.qa_retry_after(winter, daily) == datetime(2026, 11, 11, 8, 15, tzinfo=timezone.utc)
 
 
 def test_spent_daily_quota_waits_for_reset_without_using_an_attempt():

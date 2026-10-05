@@ -16,6 +16,7 @@ import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import requests
 
@@ -36,13 +37,14 @@ SWITCHES = {
 }
 SOURCE_PATH = re.compile(r"content/episodes/(ep[0-9]{3,})/draft\.json\Z")
 FORBIDDEN_PRODUCER_RECORDS = ("hold.json", "publish.json", "release_certificate.json",
-                              "independent_review.json")
+                              "independent_review.json", "editorial_hold.json", "withdrawal.json")
 QA_RETRY_COOLDOWN = timedelta(hours=2)
 MAX_OPERATIONAL_QA_ATTEMPTS = 3
 # A spent free-tier daily quota says nothing about the draft, so it waits for the reset
 # without using one of the three attempts; a key that stays spent for a week still holds.
 MAX_DAILY_QUOTA_WAITS = 7
 QA_RETRY_STAGES = ("full_audio_transcription", "independent_multimodal_review")
+PACIFIC = ZoneInfo("America/Los_Angeles")
 QUEUE_ISSUE_TITLE = "[queue] History has no eligible draft"
 
 
@@ -152,11 +154,13 @@ def qa_retry_waiting(receipt: dict, now: datetime) -> bool:
 
 
 def qa_retry_after(now: datetime, reason: str) -> datetime:
-    """A spent daily quota waits for Gemini's 07:00 UTC reset; a busy or per-minute limit, two hours."""
+    """A spent daily quota waits until 15 minutes after Gemini's midnight-Pacific reset; a busy
+    or per-minute limit, two hours."""
     if "PerDay" not in reason:
         return now + QA_RETRY_COOLDOWN
-    reset = now.astimezone(timezone.utc).replace(hour=7, minute=15, second=0, microsecond=0)
-    return reset if reset > now else reset + timedelta(days=1)
+    local = now.astimezone(PACIFIC)
+    reset = datetime(local.year, local.month, local.day, tzinfo=PACIFIC) + timedelta(days=1, minutes=15)
+    return reset.astimezone(timezone.utc)
 
 
 def qa_retry_update(receipt: dict, report: dict, config: dict,

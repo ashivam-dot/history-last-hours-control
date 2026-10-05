@@ -7,8 +7,7 @@
   "qa_last_failure_reason": "independent Gemini QA quota or capacity exhausted after bounded retries (gemini-3-flash-preview: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier)",
   "qa_last_failure_run": "37297980561/1",
   "qa_operational_attempts": 1,
-  "qa_retry_after_utc": "2026-10-06T07:15:00+00:00",
   "source_commit": "8adbb386844a79a4755f7c1dac816efba2e3946f",
-  "updated_at_utc": "2026-10-05T10:42:22.677913+00:00",
+  "updated_at_utc": "2026-10-05T13:58:30.810635+00:00",
   "version": 1
 }

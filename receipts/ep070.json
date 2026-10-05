@@ -1,11 +1,11 @@
 {
   "draft_sha256": "327e84dd8ae52578c3fb532d92a76a6543e20e4177514db3e92d2de36e7e1c1b",
   "episode": "ep070",
-  "held_reason": "Actions job failed; inspect the linked run and private artifacts",
+  "held_reason": "independent QA (run 37285214022) found unsupported claims: 'over 400 total fatalities' is in no quote, 'heavy rains' has one site, and the script says 'over two hundred froze to death' where sources say about 200 killed; needs a revised producer draft",
   "media_sha256": "0d54ccf0a4a951f0359577e6f6209500d185fca380bdc1a29692d78fb3c98b49",
   "phase": "held",
   "resume_phase": "intake_verified",
   "source_commit": "8adbb386844a79a4755f7c1dac816efba2e3946f",
-  "updated_at_utc": "2026-10-05T08:49:44.536058+00:00",
+  "updated_at_utc": "2026-10-05T14:05:45.608055+00:00",
   "version": 1
 }

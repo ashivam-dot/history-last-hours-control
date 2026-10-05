@@ -28,6 +28,9 @@ SHA = re.compile(r"[0-9a-f]{64}\Z")
 COMMIT = re.compile(r"[0-9a-f]{40}\Z")
 MAX_VIDEO_BYTES = 300 * 1024 * 1024
 PASS_SCORES = ("hook", "clarity", "payoff", "visuals", "loop")
+# The producer passes a render whose recognizer slips its judge heard as correct speech (studio.MINOR_ASR_DIFFERENCES);
+# QA's own transcript match still has to pass.
+MINOR_ASR_DIFFERENCES = 2
 OPEN_LICENSES = {"CC0", "Public domain", "Pexels License", "Pixabay Content License"}
 ORIGINAL_ASSETS = {"designed card", "AI generated", "Royal Commission report / authored graphic"}
 
@@ -221,8 +224,10 @@ def _check_editorial_evidence(blobs: dict[str, bytes], episode: str, media_hash:
             isinstance(final.get("scores"), dict), "producer final-media review is malformed")
     checks = final["check"]
     scores = final["scores"]
+    differences = checks.get("speech_differences")
     require(final.get("media_sha256") == media_hash and final.get("passed") is True and
-            checks.get("warnings") == [] and checks.get("speech_differences") == [] and
+            checks.get("warnings") == [] and isinstance(differences, list) and
+            len(differences) <= MINOR_ASR_DIFFERENCES and
             not checks.get("speech_error") and final.get("frames") == [] and
             final.get("speech") == [] and
             all(type(scores.get(name)) is int and scores[name] >= 4 for name in PASS_SCORES),

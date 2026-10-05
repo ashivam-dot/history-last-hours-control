@@ -565,7 +565,7 @@ def test_schedule_is_bounded_and_disabled_without_repository_variable():
     assert len(entries) == 1
     minute, hours, day, month, weekday = entries[0]["cron"].split()
     assert minute == "30" and (day, month, weekday) == ("*", "*", "*")
-    assert hours.split(",") == ["4", "10", "16", "22"]
+    assert hours == "*/2"
     discover = workflow["jobs"]["discover"]
     assert "vars.HISTORY_CONTROL_AUTOMATION == '1'" in discover["if"]
     assert "github.event_name == 'workflow_dispatch'" in discover["if"]

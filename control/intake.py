@@ -31,7 +31,8 @@ def committed_draft(repo: Path, commit: str, episode: str, config: dict) -> dict
     require(_git(repo, "rev-parse", "HEAD").decode("ascii").strip() == commit,
             "draft source checkout HEAD differs")
     root = episode_root(commit, episode)
-    forbidden = ("hold.json", "publish.json", "release_certificate.json", "independent_review.json")
+    forbidden = ("hold.json", "publish.json", "release_certificate.json", "independent_review.json",
+                 "editorial_hold.json", "withdrawal.json")
     existing = _git(repo, "ls-tree", "-r", "--name-only", commit, "--",
                     *(root + name for name in forbidden)).decode("utf-8").strip()
     require(not existing, "draft already has a producer release or hosted-media record")

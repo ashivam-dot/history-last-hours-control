@@ -473,14 +473,16 @@ def discover(args, config: dict, state: GitHubState) -> dict:
         try:
             producer_unreleased(args.source, "HEAD", episode)
             source = exact_draft(args.source, commit, episode, config)
-        except Hold:
-            if old:
-                held = {**old, "phase": "held", "resume_phase": old["phase"],
-                        "held_reason": "producer draft failed immutable validation",
-                        "updated_at_utc": datetime.now(timezone.utc).isoformat()}
-                state.put(held)
-            state.alert(episode, "discovery", "producer draft failed immutable validation")
-            raise Hold("producer draft failed immutable validation")
+        except Hold as err:
+            # Hold this draft only, so the next one can still be released in this run.
+            base = old or {"version": 1, "episode": episode, "source_commit": commit,
+                           "draft_sha256": "0" * 64, "media_sha256": "0" * 64, "phase": "claimed"}
+            held = {**base, "phase": "held", "resume_phase": base["phase"],
+                    "held_reason": f"producer draft failed immutable validation: {err}"[:300],
+                    "updated_at_utc": datetime.now(timezone.utc).isoformat()}
+            state.put(held)
+            state.alert(episode, "discovery", held["held_reason"])
+            continue
         draft_hash = source["draft_sha256"]
         media_hash = source["draft"]["media_sha256"]
         if old and not bound(old, episode, commit, draft_hash, media_hash):

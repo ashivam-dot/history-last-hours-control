@@ -3,7 +3,7 @@ name: Unattended private History control (policy gated)
 on:
   schedule:
     # About five hours after each 05:05/11:05/17:05/23:05 IST Modal studio cycle.
-    - cron: '30 4,10,16,22 * * *'
+    - cron: '30 */2 * * *'
   workflow_dispatch:
     inputs:
       resume_episode:

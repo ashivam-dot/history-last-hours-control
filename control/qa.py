@@ -172,7 +172,15 @@ def fetch_public_document(url: str, *, _archive_redirected: bool = False) -> str
     return text[:500_000]
 
 
-def verify_sources(research: dict, fetcher=fetch_public_document) -> list[dict]:
+def cited_claims(script: dict) -> set[int]:
+    """The 1-based research claims the narration actually rests on."""
+    beats = script.get("beats") if isinstance(script, dict) else None
+    return {n for beat in beats or [] if isinstance(beat, dict)
+            for n in beat.get("claims") or [] if type(n) is int and n >= 1}
+
+
+def verify_sources(research: dict, fetcher=fetch_public_document, cited: set[int] | None = None) -> list[dict]:
+    """Each claim the Short uses (every claim when none are cited) needs quotes on two live sites."""
     sources = research.get("sources")
     claims = research.get("claims")
     require(isinstance(sources, list) and isinstance(claims, list) and claims,
@@ -180,9 +188,22 @@ def verify_sources(research: dict, fetcher=fetch_public_document) -> list[dict]:
     by_label = {item["label"]: item for item in sources if isinstance(item, dict) and
                 isinstance(item.get("label"), str) and isinstance(item.get("url"), str)}
     require(len(by_label) == len(sources), "independent source labels are ambiguous")
-    pages = {label: fetcher(item["url"]) for label, item in by_label.items()}
+    pages: dict[str, str | None] = {}
+
+    def page(label: str) -> str | None:
+        if label not in pages:
+            try:
+                pages[label] = fetcher(by_label[label]["url"])
+            except Hold:
+                pages[label] = None
+        return pages[label]
+
     bound: list[dict] = []
+    if cited:
+        require(max(cited) <= len(claims), "script cites a claim the research does not have")
     for index, claim in enumerate(claims, 1):
+        if cited and index not in cited:
+            continue
         require(isinstance(claim, dict) and isinstance(claim.get("claim"), str) and
                 bool(claim["claim"].strip()) and isinstance(claim.get("evidence"), list),
                 f"claim {index} has no reviewable text or evidence")
@@ -193,7 +214,8 @@ def verify_sources(research: dict, fetcher=fetch_public_document) -> list[dict]:
             label, quote = item.get("source"), item.get("quote")
             if label not in by_label or not isinstance(quote, str) or len(_words(quote).split()) < 5:
                 continue
-            if _words(quote) not in _words(pages[label]):
+            text = page(label)
+            if text is None or _words(quote) not in _words(text):
                 continue
             url = by_label[label]["url"]
             matches.append({"label": label, "url": url, "site": _site(urlparse(url).hostname),
@@ -528,7 +550,10 @@ def qa_draft(repo: Path, commit: str, episode: str, packet_dir: Path, config: di
                 "review script is incomplete")
         script = " ".join(beat["text"] for beat in spec["beats"])
         report["stage"] = "independent_sources"
-        claims = verify_sources(research, fetcher)
+        script_path = root / "script.json"
+        cited = (cited_claims(read_object(script_path.read_bytes(), "review script claims"))
+                 if script_path.is_file() else set())
+        claims = verify_sources(research, fetcher, cited)
         report["source_sites"] = sorted({source["site"] for claim in claims for source in claim["sources"]})
         report["stage"] = "independent_visual_rights"
         visuals = verify_visual_rights(manifest, fetcher)

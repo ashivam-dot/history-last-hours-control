@@ -1087,6 +1087,30 @@ def test_independent_claim_quotes_require_distinct_live_sites():
     assert len(verify_sources(research, lambda url: pages[url])[0]["sources"]) == 2
 
 
+def test_only_claims_the_script_cites_need_two_live_sites():
+    research = {"sources": [{"label": "A", "url": "https://one.example.org/story"},
+                            {"label": "B", "url": "https://archive.example.net/story"},
+                            {"label": "C", "url": "https://down.example.com/story"}],
+                "claims": [{"claim": "A vessel sank.", "evidence": [
+                    {"source": "A", "quote": "The vessel sank at sea during the voyage."},
+                    {"source": "B", "quote": "The vessel sank at sea on the voyage."}]},
+                           {"claim": "An unused aside.", "evidence": [
+                    {"source": "C", "quote": "An aside that the narration never says."}]}]}
+    pages = {"https://one.example.org/story": "The vessel sank at sea during the voyage.",
+             "https://archive.example.net/story": "The vessel sank at sea on the voyage."}
+
+    def fetch(url):
+        if url not in pages:
+            raise Hold("independent evidence fetch failed at vetted public addresses")
+        return pages[url]
+
+    assert [claim["index"] for claim in verify_sources(research, fetch, {1})] == [1]
+    with pytest.raises(Hold, match="claim 2 lacks"):
+        verify_sources(research, fetch, {1, 2})
+    with pytest.raises(Hold, match="does not have"):
+        verify_sources(research, fetch, {3})
+
+
 def test_independent_evidence_fetch_rejects_private_addresses_before_request(monkeypatch):
     monkeypatch.setattr("control.qa.urllib3.HTTPSConnectionPool", lambda *args, **kwargs:
                         pytest.fail("private network request attempted"))

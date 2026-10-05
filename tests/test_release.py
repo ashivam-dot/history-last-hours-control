@@ -16,7 +16,7 @@ from control.publisher import (CloudinaryClient, PUBLISHER_PUBLIC_ID_PREFIX, _cr
                                publish_draft_reviewed, publish_reviewed)
 from control.intake import committed_draft, intake_draft, read_private_video, validated_packet
 from control import orchestrate as orch
-from control.qa import (MAX_PAGE_BYTES, GeminiQA, GeminiTransientHold, OpenAIQA,
+from control.qa import (GEMINI_FALLBACK_MODELS, MAX_PAGE_BYTES, GeminiQA, GeminiTransientHold, OpenAIQA,
                         fetch_public_document, inspect_media,
                         qa_draft, verified_qa_report,
                         verify_sources, verify_visual_rights)
@@ -1315,7 +1315,8 @@ def test_gemini_qa_retries_quota_then_returns_schema_verdict_without_key_in_url(
     api = GeminiQA("test-key", "test-vision-model", delays.append)
     result = api.assess([], [], "The ship was lost", "The ship was lost",
                         {"duration_seconds": 20, "audio_path": tmp_path / "audio.mp3", "frames": [frame]})
-    assert result == verdict and delays == [5, 15]
+    assert result == verdict and delays == [10, 30]
+    assert api.answered_by == ["test-vision-model"]
     assert all("test-key" not in url for url, _ in calls)
     assert all(kwargs["headers"]["x-goog-api-key"] == "test-key" for _, kwargs in calls)
     body = calls[-1][1]["json"]
@@ -1339,7 +1340,10 @@ def test_gemini_quota_exhaustion_holds_after_bounded_retries(monkeypatch):
     api = GeminiQA("test-key", "test-vision-model", delays.append)
     with pytest.raises(GeminiTransientHold, match="quota or capacity exhausted"):
         api._call([{"text": "review"}])
-    assert len(calls) == 4 and delays == [5, 15, 30]
+    models = 1 + len(GEMINI_FALLBACK_MODELS)
+    assert len(calls) == 4 * models and delays == [10, 30, 60] * models
+    assert calls[0].split("/models/")[1].startswith("test-vision-model:")
+    assert calls[-1].split("/models/")[1].startswith(GEMINI_FALLBACK_MODELS[-1] + ":")
 
 
 def test_gemini_transcribes_full_mixed_audio_inline(monkeypatch, tmp_path):

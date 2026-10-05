@@ -405,6 +405,9 @@ class OpenAIQA:
         return read_object(texts[0].encode(), "independent vision verdict")
 
 
+GEMINI_FALLBACK_MODELS = ("gemini-3.8-flash", "gemini-3.5-flash", "gemini-3-flash-preview")
+
+
 class GeminiQA:
     """Independent Gemini audio and vision review; never imports producer code."""
 
@@ -416,10 +419,25 @@ class GeminiQA:
         self.key = key
         self.model = model
         self.sleeper = sleeper
+        self.answered_by: list[str] = []
 
     def _call(self, parts: list[dict], schema: dict | None = None) -> str:
+        # The free tier limits each model separately, so a spent model hands the same request to the next.
+        models = [self.model] + [name for name in GEMINI_FALLBACK_MODELS if name != self.model]
+        for number, model in enumerate(models):
+            try:
+                text = self._call_model(model, parts, schema)
+            except GeminiTransientHold:
+                if number == len(models) - 1:
+                    raise
+                continue
+            self.answered_by.append(model)
+            return text
+        raise Hold("independent Gemini QA has no model to call")
+
+    def _call_model(self, model: str, parts: list[dict], schema: dict | None) -> str:
         endpoint = ("https://generativelanguage.googleapis.com/v1beta/models/" +
-                    self.model + ":generateContent")
+                    model + ":generateContent")
         body = {"contents": [{"role": "user", "parts": parts}],
                 "generationConfig": {"temperature": 0}}
         if schema is not None:
@@ -437,7 +455,7 @@ class GeminiQA:
                 if attempt == 3:
                     raise GeminiTransientHold(
                         "independent Gemini QA quota or capacity exhausted after bounded retries")
-                self.sleeper((5, 15, 30)[attempt])
+                self.sleeper((10, 30, 60)[attempt])
                 continue
             require(response.status_code == 200,
                     "independent Gemini QA request was rejected")
@@ -497,7 +515,7 @@ def check_verdict(verdict: dict, claims: list[dict], visuals: list[dict],
             len(claim_items) == len(claims) and len(visual_items) == len(visuals) and
             all(isinstance(item, dict) and type(item.get("index")) is int for item in claim_items) and
             all(isinstance(item, dict) and type(item.get("beat")) is int for item in visual_items) and
-            [item["index"] for item in claim_items] == list(range(1, len(claims) + 1)) and
+            [item["index"] for item in claim_items] == [claim["index"] for claim in claims] and
             [item["beat"] for item in visual_items] == list(range(1, len(visuals) + 1)),
             "independent QA did not cover every claim and visual")
     for item in claim_items:
@@ -580,6 +598,8 @@ def qa_draft(repo: Path, commit: str, episode: str, packet_dir: Path, config: di
             report["transcript_sha256"] = digest(transcript.encode())
             report["stage"] = "independent_multimodal_review"
             verdict = api.assess(claims, visuals, script, transcript, media)
+            if getattr(api, "answered_by", None):
+                report["qa_answered_by"] = list(api.answered_by)
         report["verdict"] = verdict
         checks = check_verdict(verdict, claims, visuals, script, transcript)
         report["checks"] = checks

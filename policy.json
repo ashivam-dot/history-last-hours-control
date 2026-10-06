@@ -3,7 +3,7 @@
   "signing_enabled": true,
   "publishing_enabled": true,
   "intake_enabled": true,
-  "qa_model": "gemini-3.8-flash",
+  "qa_model": "gemini-3.5-flash",
   "qa_provider": "gemini",
   "source_remote": "https://github.com/ashivam-dot/creature-receipts.git",
   "min_episode_id": "ep063",

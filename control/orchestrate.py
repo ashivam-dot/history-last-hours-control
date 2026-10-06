@@ -40,9 +40,10 @@ FORBIDDEN_PRODUCER_RECORDS = ("hold.json", "publish.json", "release_certificate.
                               "independent_review.json", "editorial_hold.json", "withdrawal.json")
 QA_RETRY_COOLDOWN = timedelta(hours=2)
 MAX_OPERATIONAL_QA_ATTEMPTS = 3
-# A spent free-tier daily quota says nothing about the draft, so it waits for the reset
-# without using one of the three attempts; a key that stays spent for a week still holds.
-MAX_DAILY_QUOTA_WAITS = 7
+# A spent free-tier daily quota says nothing about the draft, so it waits without using one
+# of the three attempts; a key that stays spent for a week of four-hour waits still holds.
+DAILY_QUOTA_RECHECK = timedelta(hours=4)
+MAX_DAILY_QUOTA_WAITS = 42
 QA_RETRY_STAGES = ("full_audio_transcription", "independent_multimodal_review")
 PACIFIC = ZoneInfo("America/Los_Angeles")
 QUEUE_ISSUE_TITLE = "[queue] History has no eligible draft"
@@ -154,13 +155,14 @@ def qa_retry_waiting(receipt: dict, now: datetime) -> bool:
 
 
 def qa_retry_after(now: datetime, reason: str) -> datetime:
-    """A spent daily quota waits until 15 minutes after Gemini's midnight-Pacific reset; a busy
-    or per-minute limit, two hours."""
+    """A spent daily quota waits until 15 minutes after Gemini's midnight-Pacific reset, but
+    rechecks within four hours because spent free-tier models have returned well before it; a
+    busy or per-minute limit waits two hours."""
     if "PerDay" not in reason:
         return now + QA_RETRY_COOLDOWN
     local = now.astimezone(PACIFIC)
     reset = datetime(local.year, local.month, local.day, tzinfo=PACIFIC) + timedelta(days=1, minutes=15)
-    return reset.astimezone(timezone.utc)
+    return min(reset.astimezone(timezone.utc), now + DAILY_QUOTA_RECHECK)
 
 
 def qa_retry_update(receipt: dict, report: dict, config: dict,
@@ -476,6 +478,8 @@ def discover(args, config: dict, state: GitHubState) -> dict:
         require(receipts[resume].get("resume_phase") in PHASES[:4],
                 "release attempts require manual Buffer inspection; automatic resume is disabled")
     waiting_for_qa_retry = False
+    # A manual dispatch is an operator asking to retry now, so it does not wait out a QA cooldown.
+    manual = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
     for episode, commit in candidates:
         if resume and episode != resume:
             continue
@@ -514,7 +518,7 @@ def discover(args, config: dict, state: GitHubState) -> dict:
             state.put(held)
             state.alert(episode, "discovery", held["held_reason"])
             raise Hold(held["held_reason"])
-        if old and qa_retry_waiting(old, datetime.now(timezone.utc)):
+        if old and qa_retry_waiting(old, datetime.now(timezone.utc)) and not manual:
             waiting_for_qa_retry = True
             continue
         if resume:

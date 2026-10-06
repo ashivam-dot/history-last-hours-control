@@ -200,6 +200,20 @@ def test_live_qa_cooldown_does_not_claim_queue_exhaustion(monkeypatch, tmp_path,
     assert state.queue_alerts == 0
 
 
+def test_manual_dispatch_retries_waiting_qa_now(monkeypatch, tmp_path, config):
+    live = {**config, "intake_enabled": True, "signing_enabled": True,
+            "publishing_enabled": True}
+    retry = {**_receipt("intake_verified"),
+             "qa_operational_attempts": 1,
+             "qa_retry_after_utc": (datetime.now(timezone.utc) + timedelta(hours=4)).isoformat()}
+    state = MemoryState([retry])
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    monkeypatch.setattr(orch, "draft_candidates", lambda repo, config: iter([("ep063", "a" * 40)]))
+    monkeypatch.setattr(orch, "exact_draft", lambda *args: _source())
+    monkeypatch.setattr(orch, "producer_unreleased", lambda *args: None)
+    assert orch.discover(SimpleNamespace(source=tmp_path, resume_episode=""), live, state)["episode"] == "ep063"
+
+
 def test_ordered_idempotent_transitions_and_fixed_due_reservation():
     receipt = _receipt()
     with pytest.raises(Hold, match="out of order"):
@@ -587,15 +601,17 @@ def test_schedule_is_bounded_and_disabled_without_repository_variable():
     assert steps[install]["if"] == "steps.preflight.outputs.skip != 'true'"
 
 
-def test_spent_daily_quota_waits_for_the_next_reset():
+def test_spent_daily_quota_waits_for_the_next_reset_or_four_hours():
     morning = datetime(2026, 10, 5, 6, 0, tzinfo=timezone.utc)
     evening = datetime(2026, 10, 5, 9, 0, tzinfo=timezone.utc)
+    late = datetime(2026, 10, 6, 4, 0, tzinfo=timezone.utc)
     daily = "independent Gemini QA quota or capacity exhausted (m: HTTP 429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier)"
     assert orch.qa_retry_after(morning, daily) == datetime(2026, 10, 5, 7, 15, tzinfo=timezone.utc)
-    assert orch.qa_retry_after(evening, daily) == datetime(2026, 10, 6, 7, 15, tzinfo=timezone.utc)
+    assert orch.qa_retry_after(evening, daily) == evening + timedelta(hours=4)
+    assert orch.qa_retry_after(late, daily) == datetime(2026, 10, 6, 7, 15, tzinfo=timezone.utc)
     assert orch.qa_retry_after(evening, "independent Gemini QA quota or capacity exhausted") == evening + timedelta(hours=2)
     # Google resets the free tier at midnight Pacific, an hour later in UTC once daylight time ends.
-    winter = datetime(2026, 11, 10, 10, 0, tzinfo=timezone.utc)
+    winter = datetime(2026, 11, 11, 5, 0, tzinfo=timezone.utc)
     assert orch.qa_retry_after(winter, daily) == datetime(2026, 11, 11, 8, 15, tzinfo=timezone.utc)
 
 
@@ -610,7 +626,7 @@ def test_spent_daily_quota_waits_for_reset_without_using_an_attempt():
         receipt = orch.qa_retry_update(receipt, _qa_transient_report(config, reason=daily, actions_run_key=key),
                                        config, now, key)
         assert receipt["phase"] == "intake_verified" and receipt["qa_operational_attempts"] == 2
-        assert receipt["qa_retry_after_utc"] == "2026-10-06T07:15:00+00:00"
+        assert receipt["qa_retry_after_utc"] == "2026-10-05T14:00:00+00:00"
     assert receipt["qa_daily_quota_waits"] == orch.MAX_DAILY_QUOTA_WAITS
     final = orch.qa_retry_update(receipt, _qa_transient_report(config, reason=daily, actions_run_key="300/1"),
                                  config, now, "300/1")

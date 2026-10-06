@@ -1,0 +1,20 @@
+{
+  "draft_sha256": "a124470fcbcebd4fad0b877208a3374884635913dc38570750f773d1b9b320ab",
+  "episode": "ep096",
+  "media_sha256": "45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a",
+  "post_due_verification": {
+    "buffer_post_id": "6ac4b4d898f02d7aaa348b6e",
+    "buffer_sent_at_utc": "2026-10-06T17:01:10.406000+00:00",
+    "buffer_status": "sent",
+    "control_media_sha256": "45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a",
+    "verified_at_utc": "2026-10-06T19:14:31.062552+00:00",
+    "version": 1,
+    "youtube_channel_id": "UC6e6OB3iw3yp8JnnBYxLItA",
+    "youtube_description_sha256": "aedc320b21276e9c9543b62cb58052b5aa865e8ec095562762973dcdec6214f2",
+    "youtube_title": "Why Did Everyone Think Herculaneum Escaped Vesuvius? \ud83d\ude33",
+    "youtube_url": "https://www.youtube.com/watch?v=nsIV96pvg_0",
+    "youtube_video_id": "nsIV96pvg_0"
+  },
+  "source_commit": "ea6438fb537a75cff93154112581114f60e32628",
+  "version": 1
+}

@@ -148,13 +148,15 @@ Gemini calls use the documented
 [generateContent API](https://ai.google.dev/api/generate-content) with inline
 audio and frames and a JSON schema. The free tier limits each model
 separately, so a request that a model cannot answer for quota or capacity goes,
-unchanged, to the next full Flash model in `GEMINI_FALLBACK_MODELS`
-(3.8, 3.7, 3.6, 3.5, 3 preview, then Google's `gemini-flash-latest` alias);
+unchanged, to the next model in `GEMINI_FALLBACK_MODELS`
+(Flash 3.8, 3.7, 3.6, 3.5, 3 preview, Google's `gemini-flash-latest` alias, then
+Flash-Lite 3.5, 3.1 and `gemini-flash-lite-latest`, whose daily quota is larger);
 each model gets three bounded retries. For unattended QA, a trusted
 report that identifies only Gemini 429/503 exhaustion and binds the exact
 episode, source commit, draft hash, media hash, provider, and model schedules
 another complete QA run: after 2 hours, or, when every model's daily quota is
-spent, 15 minutes after the midnight-Pacific reset. At most three complete QA
+spent, 15 minutes after the midnight-Pacific reset or within 4 hours, whichever
+is sooner. A manual `workflow_dispatch` retries a waiting QA at once. At most three complete QA
 runs are permitted; the third operational failure holds the receipt. Missing
 reports, source/media failures, and negative factual or visual verdicts remain
 held without automatic retry. The OpenAI path uses documented

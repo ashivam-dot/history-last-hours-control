@@ -420,9 +420,12 @@ def _gemini_quota(response) -> str:
         return ""
 
 
-# Only full Flash models: each reads the audio and every frame against the same instructions and schema.
+# Full Flash models first, then Flash-Lite (its own, larger free quota, which the producer's six-Flash
+# ladder doesn't reach first): each reads the audio and every frame against the same instructions and schema,
+# and the strict all-true verdict check applies whichever model answers (the report names it).
 GEMINI_FALLBACK_MODELS = ("gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash",
-                          "gemini-3-flash-preview", "gemini-flash-latest")
+                          "gemini-3-flash-preview", "gemini-flash-latest",
+                          "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-lite-latest")
 TRANSIENT_PREFIX = "independent Gemini QA quota or capacity exhausted after bounded retries"
 
 

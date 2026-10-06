@@ -1371,7 +1371,8 @@ def _quota_response(status, quota=None):
 
 def test_gemini_qa_falls_back_across_every_flash_model_and_names_each_limit(monkeypatch):
     assert GEMINI_FALLBACK_MODELS == ("gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash",
-                                      "gemini-3.5-flash", "gemini-3-flash-preview", "gemini-flash-latest")
+                                      "gemini-3.5-flash", "gemini-3-flash-preview", "gemini-flash-latest",
+                                      "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-lite-latest")
     daily = "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
     calls = []
 

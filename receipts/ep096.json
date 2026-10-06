@@ -3,7 +3,20 @@
   "due_at_utc": "2026-10-06T17:00:00+00:00",
   "episode": "ep096",
   "media_sha256": "45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a",
-  "phase": "scheduled",
+  "phase": "published",
+  "post_due_verification": {
+    "buffer_post_id": "6ac4b4d898f02d7aaa348b6e",
+    "buffer_sent_at_utc": "2026-10-06T17:01:10.406000+00:00",
+    "buffer_status": "sent",
+    "control_media_sha256": "45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a",
+    "verified_at_utc": "2026-10-06T19:14:31.062552+00:00",
+    "version": 1,
+    "youtube_channel_id": "UC6e6OB3iw3yp8JnnBYxLItA",
+    "youtube_description_sha256": "aedc320b21276e9c9543b62cb58052b5aa865e8ec095562762973dcdec6214f2",
+    "youtube_title": "Why Did Everyone Think Herculaneum Escaped Vesuvius? \ud83d\ude33",
+    "youtube_url": "https://www.youtube.com/watch?v=nsIV96pvg_0",
+    "youtube_video_id": "nsIV96pvg_0"
+  },
   "publisher_receipt": {
     "control_media_public_id": "history-last-hours/ep096-45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a",
     "control_media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/history-last-hours/ep096-45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a.mp4",
@@ -18,6 +31,6 @@
     }
   },
   "source_commit": "ea6438fb537a75cff93154112581114f60e32628",
-  "updated_at_utc": "2026-10-06T08:44:09.417613+00:00",
+  "updated_at_utc": "2026-10-06T19:14:34.446160+00:00",
   "version": 1
 }

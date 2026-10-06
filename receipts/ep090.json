@@ -1,0 +1,11 @@
+{
+  "draft_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "episode": "ep090",
+  "held_reason": "producer draft failed immutable validation: rendered visual license is missing or ambiguous",
+  "media_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "phase": "held",
+  "resume_phase": "claimed",
+  "source_commit": "c7a7f98fdb574cb23c24c4d661782f5108340787",
+  "updated_at_utc": "2026-10-06T04:38:54.142049+00:00",
+  "version": 1
+}

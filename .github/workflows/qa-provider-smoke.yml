@@ -2,6 +2,11 @@ name: Check History QA provider models (one request each)
 
 on:
   workflow_dispatch:
+    inputs:
+      extra_models:
+        description: Space-separated extra Gemini API model names to probe
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -22,6 +27,7 @@ jobs:
       - name: Send one small request to the policy model and each QA fallback model
         env:
           HISTORY_QA_GEMINI_API_KEY: ${{ secrets.HISTORY_QA_GEMINI_API_KEY }}
+          EXTRA_MODELS: ${{ inputs.extra_models }}
         run: |
           python3 - <<'PY'
           import json
@@ -42,6 +48,8 @@ jobs:
               raise SystemExit('QA fallback model list is missing')
           fallback = re.findall(r'"([A-Za-z0-9._-]+)"', block.group(1))
           models = [model] + [name for name in fallback if name != model]
+          models += [name for name in os.environ.get('EXTRA_MODELS', '').split()
+                     if re.fullmatch(r'[A-Za-z0-9._-]+', name) and name not in models]
           key = os.environ.get('HISTORY_QA_GEMINI_API_KEY')
           if not key:
               raise SystemExit('Independent QA provider credential is unavailable')

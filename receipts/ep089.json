@@ -1,9 +1,11 @@
 {
   "draft_sha256": "3c85b489b0a755f171f83e14a028d936b5fb2b4b86babee88b4addb1263154a6",
   "episode": "ep089",
+  "held_reason": "Actions job failed; inspect the linked run and private artifacts",
   "media_sha256": "a6a90f678e2f017cf8df5ec0de74ef34f6dbd19fef5f3edca214c7cbcda72b97",
-  "phase": "intake_verified",
+  "phase": "held",
+  "resume_phase": "intake_verified",
   "source_commit": "ea6438fb537a75cff93154112581114f60e32628",
-  "updated_at_utc": "2026-10-06T06:45:57.146561+00:00",
+  "updated_at_utc": "2026-10-06T06:46:58.006813+00:00",
   "version": 1
 }

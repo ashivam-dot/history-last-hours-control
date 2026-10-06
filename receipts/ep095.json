@@ -3,7 +3,20 @@
   "due_at_utc": "2026-10-06T13:00:00+00:00",
   "episode": "ep095",
   "media_sha256": "fba0b5d6923132c26826747d8ce7a1b4d6f92ee31f369b296783c6639117fb12",
-  "phase": "scheduled",
+  "phase": "published",
+  "post_due_verification": {
+    "buffer_post_id": "6ac49dcdae999c0b7f02c7e1",
+    "buffer_sent_at_utc": "2026-10-06T13:00:58.654000+00:00",
+    "buffer_status": "sent",
+    "control_media_sha256": "fba0b5d6923132c26826747d8ce7a1b4d6f92ee31f369b296783c6639117fb12",
+    "verified_at_utc": "2026-10-06T19:14:23.899817+00:00",
+    "version": 1,
+    "youtube_channel_id": "UC6e6OB3iw3yp8JnnBYxLItA",
+    "youtube_description_sha256": "7940b4e5e6260333e0c51ad41acf8eddb39f487d7b71a7ac5e016dafb915b5d0",
+    "youtube_title": "Why Did a Wealthy Texas School Use Free Waste Gas? \u26a0\ufe0f",
+    "youtube_url": "https://www.youtube.com/watch?v=fG5iWshCAOM",
+    "youtube_video_id": "fG5iWshCAOM"
+  },
   "publisher_receipt": {
     "control_media_public_id": "history-last-hours/ep095-fba0b5d6923132c26826747d8ce7a1b4d6f92ee31f369b296783c6639117fb12",
     "control_media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/history-last-hours/ep095-fba0b5d6923132c26826747d8ce7a1b4d6f92ee31f369b296783c6639117fb12.mp4",
@@ -18,6 +31,6 @@
     }
   },
   "source_commit": "198bb97d5d9efb5afff215088273cd647ca0545b",
-  "updated_at_utc": "2026-10-06T07:05:50.404860+00:00",
+  "updated_at_utc": "2026-10-06T19:14:26.710888+00:00",
   "version": 1
 }

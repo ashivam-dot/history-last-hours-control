@@ -3,8 +3,21 @@
   "due_at_utc": "2026-10-06T17:00:00+00:00",
   "episode": "ep096",
   "media_sha256": "45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a",
-  "phase": "release_planned",
+  "phase": "scheduled",
+  "publisher_receipt": {
+    "control_media_public_id": "history-last-hours/ep096-45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a",
+    "control_media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/history-last-hours/ep096-45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a.mp4",
+    "episode": "ep096",
+    "media_sha256": "45e20a93a6e41f4b5a7724a07ef2690952230a312ebce6f074eefeb55c5bd79a",
+    "source_commit": "ea6438fb537a75cff93154112581114f60e32628",
+    "youtube": {
+      "due_at": "2026-10-06T17:00:00.000Z",
+      "id": "6ac4b4d898f02d7aaa348b6e",
+      "reconciled": false,
+      "status": "scheduled"
+    }
+  },
   "source_commit": "ea6438fb537a75cff93154112581114f60e32628",
-  "updated_at_utc": "2026-10-06T08:44:00.978329+00:00",
+  "updated_at_utc": "2026-10-06T08:44:09.417613+00:00",
   "version": 1
 }

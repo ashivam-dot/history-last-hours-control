@@ -1,0 +1,53 @@
+name: Atlas in Numbers publisher
+
+# Schedules the producer's parked Shorts (ashivam-dot/creature-receipts, content/atlas/*/ready.json) on Buffer,
+# keeping control/atlas.AHEAD posts queued. The producer on Modal never holds these keys.
+on:
+  schedule:
+    - cron: "25 */2 * * *"
+  workflow_dispatch:
+    inputs:
+      list:
+        description: "Only list the Buffer queue"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atlas-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    environment: history-publisher
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ashivam-dot/creature-receipts
+          path: producer
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install
+        run: uv sync --frozen --python 3.12 --no-dev
+      - name: Schedule parked Shorts
+        env:
+          BUFFER_API_KEY: ${{ secrets.HISTORY_PUBLISHER_BUFFER_API_KEY }}
+          CLOUDINARY_URL: ${{ secrets.HISTORY_PUBLISHER_CLOUDINARY_URL }}
+          MODAL_TOKEN_ID: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.HISTORY_INTAKE_MODAL_TOKEN_SECRET }}
+          LIST_ONLY: ${{ inputs.list && '--list' || '' }}
+        run: uv run --frozen --no-dev --with pydantic --with imageio-ffmpeg python -m control.atlas producer $LIST_ONLY
+      - name: Record what was scheduled
+        if: always()
+        run: |
+          git add atlas/published.json 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git -c user.name="atlas-publisher" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "atlas: record scheduled Shorts"
+          for i in 1 2 3; do git pull -q --rebase && git push -q && exit 0; sleep 5; done
+          exit 1

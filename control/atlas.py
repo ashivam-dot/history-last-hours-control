@@ -58,11 +58,44 @@ def _video(path: str, sha: str) -> bytes:
     return bytes(data)
 
 
+def quality_record(ready: dict, accepted: dict) -> dict:
+    return {"qa_sha256": ready["qa_sha256"], "version": accepted["version"],
+            "checked_at": accepted["checked_at"], "claims_sha256": accepted["claims_sha256"],
+            "quality_module_sha256": accepted["quality_module_sha256"]}
+
+
+def confirm_delivery(record: dict, getter=None) -> dict:
+    """Confirm the reported video through YouTube's official oEmbed API, without website scraping.
+
+    oEmbed does not establish public vs unlisted visibility or processing status; record that limit explicitly.
+    """
+    import re
+    import requests
+    getter = getter or requests.get
+    url = record.get("youtube_url") or ""
+    match = re.fullmatch(r"https://(?:www\.)?youtube\.com/(?:shorts/([\w-]{11})|watch\?v=([\w-]{11}))", url)
+    if not match:
+        return {"confirmed": False, "reason": "Buffer has no valid exact YouTube video URL"}
+    video_id = match.group(1) or match.group(2)
+    try:
+        response = getter("https://www.youtube.com/oembed", params={"url": f"https://www.youtube.com/watch?v={video_id}", "format": "json"}, timeout=20)
+        response.raise_for_status()
+        data = response.json()
+    except (requests.RequestException, ValueError):
+        return {"confirmed": False, "video_id": video_id, "reason": "YouTube oEmbed not yet available"}
+    expected_author = "https://www.youtube.com/@atlasinnumbers"
+    if data.get("title") != record.get("title") or data.get("author_url", "").rstrip("/").lower() != expected_author:
+        return {"confirmed": False, "video_id": video_id, "reason": "YouTube title/channel identity mismatch"}
+    return {"confirmed": True, "video_id": video_id, "checked_at": datetime.now(timezone.utc).isoformat(),
+            "method": "official-oembed", "visibility": "public-or-unlisted; authenticated API needed to distinguish"}
+
+
 def main(argv: list[str]) -> int:
     producer = Path(argv[0]).resolve()
     sys.path.insert(0, str(producer / "pipeline" / "src"))
     from ytc import publish as pub
     from ytc.atlas import publish as atlas
+    from ytc.atlas import receipt as quality
     from ytc.atlas.data import Dataset
     from ytc.atlas.episode import AtlasEpisode
 
@@ -85,6 +118,11 @@ def main(argv: list[str]) -> int:
         record.update({"status": post["status"], "youtube_url": post.get("externalLink") or record.get("youtube_url")})
         if post.get("sentAt"):
             record["sent_at"] = post["sentAt"]
+        if post["status"] == "sent" and not record.get("delivery", {}).get("confirmed"):
+            record["delivery"] = confirm_delivery(record)
+            sent_at = record.get("sent_at")
+            if sent_at and not record["delivery"]["confirmed"] and now - datetime.fromisoformat(sent_at.replace("Z", "+00:00")) > timedelta(hours=4):
+                errors.append({"id": episode_id, "error": "Sent post remains unconfirmed on YouTube: " + record["delivery"]["reason"]})
         if post["status"] == "error":
             message = (post.get("error") or {}).get("message") or "unknown"
             if retries.get(episode_id, 0) < MAX_RETRIES:
@@ -96,14 +134,48 @@ def main(argv: list[str]) -> int:
     _save(STATE, state)
     _save(RETRIES, retries)
 
+    report["replaced"] = []
+    for episode_id, record in list(state.items()):
+        folder = producer / "content" / "atlas" / episode_id
+        post = posts.get(record.get("buffer_post_id"))
+        if not post or post["status"] not in ("scheduled", "pending") or not (folder / "qa.json").exists():
+            continue
+        try:
+            ready = _load(folder / "ready.json")
+            if record.get("quality", {}).get("qa_sha256") == ready.get("qa_sha256"):
+                continue
+            if ready.get("id") != episode_id or ready.get("modal_volume") != VOLUME:
+                raise RuntimeError("replacement ready.json identity mismatch")
+            if quality.digest(folder / "qa.json") != ready.get("qa_sha256"):
+                raise RuntimeError("replacement lacks a bound QA receipt")
+            accepted = quality.verify(folder, ready["media_sha256"])
+            ep, ds = AtlasEpisode.load(folder / "atlas.yaml"), Dataset.load(folder / "data.json")
+            with tempfile.TemporaryDirectory() as tmp:
+                video = Path(tmp) / "short.mp4"
+                video.write_bytes(_video(ready["modal_path"], ready["media_sha256"]))
+                updated = atlas.replace_queued(ep, Path(tmp), ds, video, record)
+            state[episode_id] = updated | {"media_sha256": ready["media_sha256"],
+                "quality": quality_record(ready, accepted), "replaced_from": {
+                    "media_sha256": record.get("media_sha256"), "title": record["title"],
+                    "replaced_at": now.isoformat()}}
+            _save(STATE, state)
+            report["replaced"].append({"id": episode_id, "title": updated["title"], "due_at": updated["due_at"]})
+        except Exception as err:
+            errors.append({"id": episode_id, "error": "checked queued replacement: " + str(err)[:300]})
+
     waiting = [p.parent for p in sorted((producer / "content" / "atlas").glob("atlas*/ready.json"))
                if p.parent.name not in state]
     report |= {"future_posts": len(future), "waiting": [w.name for w in waiting], "scheduled": [], "failed": []}
-    for folder in waiting[:max(AHEAD - len(future), 0)]:
-        ready = json.loads((folder / "ready.json").read_text(encoding="utf-8"))
+    for folder in waiting:
+        if len(report["scheduled"]) >= max(AHEAD - len(future), 0):
+            break
         try:
+            ready = json.loads((folder / "ready.json").read_text(encoding="utf-8"))
             if ready["id"] != folder.name or ready["modal_volume"] != VOLUME:
                 raise RuntimeError("ready.json doesn't match its folder")
+            if quality.digest(folder / "qa.json") != ready.get("qa_sha256"):
+                raise RuntimeError("ready record does not bind the quality receipt")
+            accepted = quality.verify(folder, ready["media_sha256"])
             ep = AtlasEpisode.load(folder / "atlas.yaml")
             ds = Dataset.load(folder / "data.json")
             with tempfile.TemporaryDirectory() as tmp:
@@ -113,7 +185,7 @@ def main(argv: list[str]) -> int:
         except Exception as err:  # one bad Short mustn't stop the rest
             report["failed"].append({"id": folder.name, "error": f"{type(err).__name__}: {str(err)[:300]}"})
             continue
-        state[folder.name] = record | {"media_sha256": ready["media_sha256"]}
+        state[folder.name] = record | {"media_sha256": ready["media_sha256"], "quality": quality_record(ready, accepted)}
         _save(STATE, state)
         report["scheduled"].append({"id": folder.name, "title": record["title"], "due_at": record["due_at"]})
 
@@ -124,7 +196,7 @@ def main(argv: list[str]) -> int:
     _save(HEALTH, {"checked_at": now.isoformat(timespec="seconds"), "future_posts": len(future) + len(report["scheduled"]),
                    "waiting": len(waiting) - len(report["scheduled"]), "errors": errors, "problem": problem})
     print(json.dumps(report | {"problem": problem, "errors": errors}, indent=2))
-    return 1 if starving or (report["failed"] and not report["scheduled"]) else 0
+    return 1 if starving or errors else 0
 
 
 if __name__ == "__main__":

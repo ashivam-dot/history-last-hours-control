@@ -50,6 +50,13 @@
   },
   "atlas003": {
     "buffer_post_id": "6ac7887be63932e2c59f649c",
+    "delivery": {
+      "checked_at": "2026-10-08T20:41:59.600237+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "KJTp3bEA2aw",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-08T20:00:00.000Z",
     "id": "atlas003",
     "media_public_id": "atlasinnumbers/atlas003-qa-5d8fc027f6f7",
@@ -67,9 +74,10 @@
       "replaced_at": "2026-10-08T18:40:11.878126+00:00",
       "title": "Most of the world is now below replacement fertility"
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-08T20:00:43.224Z",
+    "status": "sent",
     "title": "Below the fertility benchmark in 2024",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/KJTp3bEA2aw"
   },
   "atlas004": {
     "buffer_post_id": "6ac78880e63932e2c59f656f",
@@ -92,6 +100,24 @@
     },
     "status": "scheduled",
     "title": "47 places Where Life Expectancy Reaches 80",
+    "youtube_url": null
+  },
+  "atlas006": {
+    "buffer_post_id": "6ac8001d74384ca756da74b5",
+    "due_at": "2026-10-09T16:00:00-04:00",
+    "id": "atlas006",
+    "media_public_id": "atlasinnumbers/atlas006",
+    "media_sha256": "7394238f2f304f2846029728342a95fb0db2920c29fdbc49eb451ec5d8f08cdc",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791492123/atlasinnumbers/atlas006.mp4",
+    "quality": {
+      "checked_at": "2026-10-08T18:50:58.255403+00:00",
+      "claims_sha256": "287b6338da7c825ba2a736b4661084821daebeaf6c2a2e2c20fbee8220151242",
+      "qa_sha256": "3275f3084f8cbe83d6260da4fa0a0d6b2dd221c62df0aad15e4c51da71007983",
+      "quality_module_sha256": "e186d1a61ae527e7767ec8aea60694871c4a909f14b5bfdc4bf8489721c85f84",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Forest cover across the world in 207 places",
     "youtube_url": null
   }
 }

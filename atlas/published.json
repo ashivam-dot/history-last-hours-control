@@ -2,20 +2,27 @@
   "atlas001": {
     "buffer_post_id": "6ac7887682db5af660c24e77",
     "delivery": {
-      "checked_at": "2026-10-08T18:40:12.590042+00:00",
+      "checked_at": "2026-10-08T19:01:11.073225+00:00",
       "confirmed": true,
       "method": "official-oembed",
       "video_id": "BCmvNfA7VnM",
-      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+      "visibility": "public; authenticated Studio confirmed"
     },
     "due_at": "2026-10-08T12:00:00-04:00",
     "id": "atlas001",
     "media_public_id": "atlasinnumbers/atlas001",
     "media_sha256": "19a9e91e020f7ce7e33f9ef0a3a67c5da74ec44a9fa07e54e65202ce491cedd6",
     "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791461492/atlasinnumbers/atlas001.mp4",
+    "metadata_correction": {
+      "corrected_at": "2026-10-08T19:01:11.073225+00:00",
+      "method": "authenticated-youtube-studio",
+      "previous_title": "More Phones Than People: 137 Countries Already Are",
+      "reason": "Mobile subscriptions are not physical devices; source observations span 2022-2024.",
+      "video_bytes_unchanged": true
+    },
     "sent_at": "2026-10-08T16:00:55.841Z",
     "status": "sent",
-    "title": "More Phones Than People: 137 Countries Already Are",
+    "title": "137 Places Have More Mobile Subscriptions Than People",
     "youtube_url": "https://www.youtube.com/shorts/BCmvNfA7VnM"
   },
   "atlas002": {

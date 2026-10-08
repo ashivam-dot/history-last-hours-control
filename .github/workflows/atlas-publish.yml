@@ -45,7 +45,7 @@ jobs:
       - name: Record what was scheduled
         if: always()
         run: |
-          git add atlas/published.json 2>/dev/null || exit 0
+          git add atlas/ 2>/dev/null || exit 0
           git diff --cached --quiet && exit 0
           git -c user.name="atlas-publisher" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
             commit -q -m "atlas: record scheduled Shorts"

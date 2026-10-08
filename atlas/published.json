@@ -1,6 +1,13 @@
 {
   "atlas001": {
     "buffer_post_id": "6ac7887682db5af660c24e77",
+    "delivery": {
+      "checked_at": "2026-10-08T18:40:12.590042+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "BCmvNfA7VnM",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-08T12:00:00-04:00",
     "id": "atlas001",
     "media_public_id": "atlasinnumbers/atlas001",
@@ -13,35 +20,71 @@
   },
   "atlas002": {
     "buffer_post_id": "6ac7c8606d8b6991f804eebd",
-    "due_at": "2026-10-09T12:00:00-04:00",
+    "due_at": "2026-10-09T16:00:00.000Z",
     "id": "atlas002",
-    "media_public_id": "atlasinnumbers/atlas002",
-    "media_sha256": "6c9ee08123f0a53838832db641b6282148d23c25ff7c2569d1a01aa7e651363c",
-    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791477853/atlasinnumbers/atlas002.mp4",
+    "media_public_id": "atlasinnumbers/atlas002-qa-008a923e4a26",
+    "media_sha256": "008a923e4a2611b3562ad402009d52ac09fdbdbfe246986bf5c1816e73e3787b",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791484816/atlasinnumbers/atlas002-qa-008a923e4a26.mp4",
+    "quality": {
+      "checked_at": "2026-10-08T18:20:26.899144+00:00",
+      "claims_sha256": "10f6cd2ccaf2ecb8e8a7b8e3fb2aa9782310f4811bd72b5c32383da54a843332",
+      "qa_sha256": "6f22d7277688483ec0706426a949e73f35d1a7f2aaa4c33b8b00885d163662c4",
+      "quality_module_sha256": "650d112f3aff01e85a5035543f84c2bbcef432d2b29a3d2719af2d6487620fd8",
+      "version": 1
+    },
+    "replaced_from": {
+      "media_sha256": "6c9ee08123f0a53838832db641b6282148d23c25ff7c2569d1a01aa7e651363c",
+      "replaced_at": "2026-10-08T18:40:11.878126+00:00",
+      "title": "45 countries are shrinking in 2025"
+    },
     "status": "scheduled",
-    "title": "45 countries are shrinking in 2025",
+    "title": "45 places with Falling Populations",
     "youtube_url": null
   },
   "atlas003": {
     "buffer_post_id": "6ac7887be63932e2c59f649c",
-    "due_at": "2026-10-08T16:00:00-04:00",
+    "due_at": "2026-10-08T20:00:00.000Z",
     "id": "atlas003",
-    "media_public_id": "atlasinnumbers/atlas003",
-    "media_sha256": "d71d8cad41355c7fc47040abd3fc26abaf9cfea686c93806ef519605378b5bfa",
-    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791461497/atlasinnumbers/atlas003.mp4",
+    "media_public_id": "atlasinnumbers/atlas003-qa-5d8fc027f6f7",
+    "media_sha256": "5d8fc027f6f7f5cd6bc731be2d2ab25dfb77863ecb3a823ffec1d662920e452c",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791484819/atlasinnumbers/atlas003-qa-5d8fc027f6f7.mp4",
+    "quality": {
+      "checked_at": "2026-10-08T18:30:54.488988+00:00",
+      "claims_sha256": "d9d1dfe5d358cdd6ee5ae165c6e1dcf0e4e32ca7437c7c333db1e536f559a503",
+      "qa_sha256": "48c3454f37b0467005b1576df359ecee9e4f9a1caf46e506254d1a80db87f608",
+      "quality_module_sha256": "650d112f3aff01e85a5035543f84c2bbcef432d2b29a3d2719af2d6487620fd8",
+      "version": 1
+    },
+    "replaced_from": {
+      "media_sha256": "d71d8cad41355c7fc47040abd3fc26abaf9cfea686c93806ef519605378b5bfa",
+      "replaced_at": "2026-10-08T18:40:11.878126+00:00",
+      "title": "Most of the world is now below replacement fertility"
+    },
     "status": "scheduled",
-    "title": "Most of the world is now below replacement fertility",
+    "title": "Below the fertility benchmark in 2024",
     "youtube_url": null
   },
   "atlas004": {
     "buffer_post_id": "6ac78880e63932e2c59f656f",
-    "due_at": "2026-10-08T19:00:00-04:00",
+    "due_at": "2026-10-08T23:00:00.000Z",
     "id": "atlas004",
-    "media_public_id": "atlasinnumbers/atlas004",
-    "media_sha256": "17b2a981131f843e00e9b49e2ef7ac2ac30ae66f4aeaa43c4ecb16645009f226",
-    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791461502/atlasinnumbers/atlas004.mp4",
+    "media_public_id": "atlasinnumbers/atlas004-qa-5ff6f0ab3b51",
+    "media_sha256": "5ff6f0ab3b518796fe43e378f2eea5eb0664c89bc086ddbd0799e1e88cb26079",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791484824/atlasinnumbers/atlas004-qa-5ff6f0ab3b51.mp4",
+    "quality": {
+      "checked_at": "2026-10-08T18:19:00.822241+00:00",
+      "claims_sha256": "de147ba9060cd1fa53e6020550674f3e14a0bcf7edd70657874f8fc7f80a761f",
+      "qa_sha256": "7a9c2887832c19cc94ac97484ddf2ebdb13fafa18d8794aba0a22b3afd2af462",
+      "quality_module_sha256": "650d112f3aff01e85a5035543f84c2bbcef432d2b29a3d2719af2d6487620fd8",
+      "version": 1
+    },
+    "replaced_from": {
+      "media_sha256": "17b2a981131f843e00e9b49e2ef7ac2ac30ae66f4aeaa43c4ecb16645009f226",
+      "replaced_at": "2026-10-08T18:40:11.878126+00:00",
+      "title": "Only 47 countries reach a life expectancy of 80"
+    },
     "status": "scheduled",
-    "title": "Only 47 countries reach a life expectancy of 80",
+    "title": "47 places Where Life Expectancy Reaches 80",
     "youtube_url": null
   }
 }

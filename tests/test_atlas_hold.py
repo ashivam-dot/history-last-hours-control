@@ -59,3 +59,22 @@ def test_hold_withdraws_future_posts_and_schedules_nothing(tmp_path, monkeypatch
     assert list(state) == ["atlas006"]
     assert withdrawn["atlas007"]["status"] == "withdrawn"
     assert health["held"] == "format rework" and health["problem"] == "" and not health["errors"]
+
+
+def test_old_format_shorts_wait_for_their_re_render(tmp_path, monkeypatch, capsys):
+    here = tmp_path / "atlas"
+    here.mkdir()
+    for name in ("STATE", "HEALTH", "RETRIES", "HOLD", "WITHDRAWN"):
+        monkeypatch.setattr(control, name, here / getattr(control, name).name)
+    monkeypatch.setenv("ATLAS_TEST_POSTS", "[]")
+    monkeypatch.setenv("ATLAS_TEST_LOG", str(tmp_path / "deleted.txt"))
+    producer = _producer(tmp_path)
+    (producer / "pipeline" / "src" / "ytc" / "atlas" / "receipt.py").write_text('FORMAT = "cinema-v2"\n')
+    for mod in [m for m in sys.modules if m == "ytc" or m.startswith("ytc.")]:
+        monkeypatch.delitem(sys.modules, mod)
+
+    control.main([str(producer)])
+
+    report = json.loads(capsys.readouterr().out)
+    assert report["old_format"] == ["atlas009"] and report["failed"] == [] and report["scheduled"] == []
+    assert json.loads(control.HEALTH.read_text())["errors"] == []

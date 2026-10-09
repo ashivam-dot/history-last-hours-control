@@ -190,12 +190,17 @@ def main(argv: list[str]) -> int:
 
     waiting = [p.parent for p in sorted((producer / "content" / "atlas").glob("atlas*/ready.json"))
                if p.parent.name not in state and p.parent.name not in withdrawn]
-    report |= {"future_posts": len(future), "waiting": [w.name for w in waiting], "scheduled": [], "failed": []}
+    report |= {"future_posts": len(future), "waiting": [w.name for w in waiting], "scheduled": [], "failed": [],
+               "old_format": []}
     for folder in waiting:
         if len(report["scheduled"]) >= max(AHEAD - len(future), 0):
             break
         try:
             ready = json.loads((folder / "ready.json").read_text(encoding="utf-8"))
+            # The producer re-renders a Short in an older visual format before it may post; skip it until then.
+            if ready.get("format") != getattr(quality, "FORMAT", None):
+                report["old_format"].append(folder.name)
+                continue
             if ready["id"] != folder.name or ready["modal_volume"] != VOLUME:
                 raise RuntimeError("ready.json doesn't match its folder")
             if quality.digest(folder / "qa.json") != ready.get("qa_sha256"):

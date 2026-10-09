@@ -25,6 +25,10 @@ HERE = Path(__file__).resolve().parents[1] / "atlas"
 STATE = HERE / "published.json"
 HEALTH = HERE / "health.json"
 RETRIES = HERE / "retries.json"
+# While hold.json ({"reason": ...}) exists, queued Atlas posts are taken off Buffer into withdrawn.json and nothing new
+# is scheduled. A withdrawn Short is never scheduled again by this job.
+HOLD = HERE / "hold.json"
+WITHDRAWN = HERE / "withdrawn.json"
 WORKSPACE = "aksha-shivam18"
 VOLUME = "creature-receipts-outbox"
 # Future Atlas posts kept in Buffer: a day of the producer's SLOTS, so a missed run costs no post.
@@ -134,6 +138,27 @@ def main(argv: list[str]) -> int:
     _save(STATE, state)
     _save(RETRIES, retries)
 
+    withdrawn = _load(WITHDRAWN)
+    if HOLD.exists():
+        reason = _load(HOLD).get("reason") or "held"
+        report["withdrawn"] = []
+        for episode_id, record in list(state.items()):
+            post = posts.get(record.get("buffer_post_id"))
+            if not post or post["status"] not in ("scheduled", "pending") or not post.get("dueAt"):
+                continue
+            if datetime.fromisoformat(post["dueAt"]) <= now:
+                continue
+            pub.delete_post(post["id"])
+            withdrawn[episode_id] = record | {"status": "withdrawn", "withdrawn_at": now.isoformat(), "reason": reason}
+            del state[episode_id]
+            _save(STATE, state)
+            _save(WITHDRAWN, withdrawn)
+            report["withdrawn"].append({"id": episode_id, "title": record.get("title"), "due_at": record.get("due_at")})
+        _save(HEALTH, {"checked_at": now.isoformat(timespec="seconds"), "future_posts": 0, "waiting": 0,
+                       "errors": errors, "problem": "", "held": reason})
+        print(json.dumps(report | {"held": reason, "errors": errors}, indent=2))
+        return 1 if errors else 0
+
     report["replaced"] = []
     for episode_id, record in list(state.items()):
         folder = producer / "content" / "atlas" / episode_id
@@ -164,7 +189,7 @@ def main(argv: list[str]) -> int:
             errors.append({"id": episode_id, "error": "checked queued replacement: " + str(err)[:300]})
 
     waiting = [p.parent for p in sorted((producer / "content" / "atlas").glob("atlas*/ready.json"))
-               if p.parent.name not in state]
+               if p.parent.name not in state and p.parent.name not in withdrawn]
     report |= {"future_posts": len(future), "waiting": [w.name for w in waiting], "scheduled": [], "failed": []}
     for folder in waiting:
         if len(report["scheduled"]) >= max(AHEAD - len(future), 0):

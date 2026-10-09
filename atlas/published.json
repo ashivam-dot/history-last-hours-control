@@ -117,59 +117,5 @@
     "status": "sent",
     "title": "47 places Where Life Expectancy Reaches 80",
     "youtube_url": "https://www.youtube.com/shorts/oyRjLx6KkNw"
-  },
-  "atlas006": {
-    "buffer_post_id": "6ac8001d74384ca756da74b5",
-    "due_at": "2026-10-09T16:00:00-04:00",
-    "id": "atlas006",
-    "media_public_id": "atlasinnumbers/atlas006",
-    "media_sha256": "7394238f2f304f2846029728342a95fb0db2920c29fdbc49eb451ec5d8f08cdc",
-    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791492123/atlasinnumbers/atlas006.mp4",
-    "quality": {
-      "checked_at": "2026-10-08T18:50:58.255403+00:00",
-      "claims_sha256": "287b6338da7c825ba2a736b4661084821daebeaf6c2a2e2c20fbee8220151242",
-      "qa_sha256": "3275f3084f8cbe83d6260da4fa0a0d6b2dd221c62df0aad15e4c51da71007983",
-      "quality_module_sha256": "e186d1a61ae527e7767ec8aea60694871c4a909f14b5bfdc4bf8489721c85f84",
-      "version": 1
-    },
-    "status": "scheduled",
-    "title": "Forest cover across the world in 207 places",
-    "youtube_url": null
-  },
-  "atlas007": {
-    "buffer_post_id": "6ac83af19db755aaaabcd1eb",
-    "due_at": "2026-10-09T19:00:00-04:00",
-    "id": "atlas007",
-    "media_public_id": "atlasinnumbers/atlas007",
-    "media_sha256": "bee17ea1d0fb4fca53ab6ac8f198bab630ccea080a4bef4bc69dc9ab2837c426",
-    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791507182/atlasinnumbers/atlas007.mp4",
-    "quality": {
-      "checked_at": "2026-10-08T18:54:32.448616+00:00",
-      "claims_sha256": "64e34796bd83fccfcbb31caa412b9904f781c50bbe3a754171a64c7408b28815",
-      "qa_sha256": "a6a4b030f552e9c551df0983af2df4c8ce2babeb5e1fa2ceefc0ffd0275387ac",
-      "quality_module_sha256": "e186d1a61ae527e7767ec8aea60694871c4a909f14b5bfdc4bf8489721c85f84",
-      "version": 1
-    },
-    "status": "scheduled",
-    "title": "Internet usage across 186 places",
-    "youtube_url": null
-  },
-  "atlas008": {
-    "buffer_post_id": "6ac9195fcb5a8140da21e58d",
-    "due_at": "2026-10-10T12:00:00-04:00",
-    "id": "atlas008",
-    "media_public_id": "atlasinnumbers/atlas008",
-    "media_sha256": "ab2a973739f2949469a2ddbd4da83f663bdffe3ac2f7247e767ac4a8165dbedc",
-    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791564124/atlasinnumbers/atlas008.mp4",
-    "quality": {
-      "checked_at": "2026-10-08T18:39:58.853044+00:00",
-      "claims_sha256": "f0e6d04380b9f50d52e580cc5a019ec99d0dffa18f2a6793db81186c62273432",
-      "qa_sha256": "d7fcd01b3567251053b630f5190c2216ea7d2b2b1d8b49832c733e61bbd8a9be",
-      "quality_module_sha256": "650d112f3aff01e85a5035543f84c2bbcef432d2b29a3d2719af2d6487620fd8",
-      "version": 1
-    },
-    "status": "scheduled",
-    "title": "Electricity access in 207 places and territories",
-    "youtube_url": null
   }
 }

@@ -81,6 +81,13 @@
   },
   "atlas004": {
     "buffer_post_id": "6ac78880e63932e2c59f656f",
+    "delivery": {
+      "checked_at": "2026-10-09T00:52:58.783778+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "oyRjLx6KkNw",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-08T23:00:00.000Z",
     "id": "atlas004",
     "media_public_id": "atlasinnumbers/atlas004-qa-5ff6f0ab3b51",
@@ -98,9 +105,10 @@
       "replaced_at": "2026-10-08T18:40:11.878126+00:00",
       "title": "Only 47 countries reach a life expectancy of 80"
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-08T23:01:05.786Z",
+    "status": "sent",
     "title": "47 places Where Life Expectancy Reaches 80",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/oyRjLx6KkNw"
   },
   "atlas006": {
     "buffer_post_id": "6ac8001d74384ca756da74b5",
@@ -118,6 +126,24 @@
     },
     "status": "scheduled",
     "title": "Forest cover across the world in 207 places",
+    "youtube_url": null
+  },
+  "atlas007": {
+    "buffer_post_id": "6ac83af19db755aaaabcd1eb",
+    "due_at": "2026-10-09T19:00:00-04:00",
+    "id": "atlas007",
+    "media_public_id": "atlasinnumbers/atlas007",
+    "media_sha256": "bee17ea1d0fb4fca53ab6ac8f198bab630ccea080a4bef4bc69dc9ab2837c426",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791507182/atlasinnumbers/atlas007.mp4",
+    "quality": {
+      "checked_at": "2026-10-08T18:54:32.448616+00:00",
+      "claims_sha256": "64e34796bd83fccfcbb31caa412b9904f781c50bbe3a754171a64c7408b28815",
+      "qa_sha256": "a6a4b030f552e9c551df0983af2df4c8ce2babeb5e1fa2ceefc0ffd0275387ac",
+      "quality_module_sha256": "e186d1a61ae527e7767ec8aea60694871c4a909f14b5bfdc4bf8489721c85f84",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Internet usage across 186 places",
     "youtube_url": null
   }
 }

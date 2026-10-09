@@ -27,6 +27,13 @@
   },
   "atlas002": {
     "buffer_post_id": "6ac7c8606d8b6991f804eebd",
+    "delivery": {
+      "checked_at": "2026-10-09T16:42:01.539828+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "hPSLHT1JKow",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-09T16:00:00.000Z",
     "id": "atlas002",
     "media_public_id": "atlasinnumbers/atlas002-qa-008a923e4a26",
@@ -44,9 +51,10 @@
       "replaced_at": "2026-10-08T18:40:11.878126+00:00",
       "title": "45 countries are shrinking in 2025"
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-09T16:01:54.005Z",
+    "status": "sent",
     "title": "45 places with Falling Populations",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/hPSLHT1JKow"
   },
   "atlas003": {
     "buffer_post_id": "6ac7887be63932e2c59f649c",
@@ -144,6 +152,24 @@
     },
     "status": "scheduled",
     "title": "Internet usage across 186 places",
+    "youtube_url": null
+  },
+  "atlas008": {
+    "buffer_post_id": "6ac9195fcb5a8140da21e58d",
+    "due_at": "2026-10-10T12:00:00-04:00",
+    "id": "atlas008",
+    "media_public_id": "atlasinnumbers/atlas008",
+    "media_sha256": "ab2a973739f2949469a2ddbd4da83f663bdffe3ac2f7247e767ac4a8165dbedc",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791564124/atlasinnumbers/atlas008.mp4",
+    "quality": {
+      "checked_at": "2026-10-08T18:39:58.853044+00:00",
+      "claims_sha256": "f0e6d04380b9f50d52e580cc5a019ec99d0dffa18f2a6793db81186c62273432",
+      "qa_sha256": "d7fcd01b3567251053b630f5190c2216ea7d2b2b1d8b49832c733e61bbd8a9be",
+      "quality_module_sha256": "650d112f3aff01e85a5035543f84c2bbcef432d2b29a3d2719af2d6487620fd8",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Electricity access in 207 places and territories",
     "youtube_url": null
   }
 }

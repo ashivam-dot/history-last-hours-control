@@ -136,6 +136,24 @@
     "title": "Money Sent Home Equals 58% of GDP in Tajikistan",
     "youtube_url": null
   },
+  "atlas014": {
+    "buffer_post_id": "6ac9c259b07d37ac975f09c7",
+    "due_at": "2026-10-10T19:00:00-04:00",
+    "id": "atlas014",
+    "media_public_id": "atlasinnumbers/atlas014",
+    "media_sha256": "5ac2c46c08ba8a8ae7d53a775ae280d3c6e162a63e29d6991c3140ff7f7a12b9",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791607383/atlasinnumbers/atlas014.mp4",
+    "quality": {
+      "checked_at": "2026-10-10T03:30:25.985073+00:00",
+      "claims_sha256": "ba62fa2933f3718de194b291474a69729fdd19eb56165d198c715237d856cb27",
+      "qa_sha256": "e696f40cb0e4ce87b0f55327ae0f72c703fea46c9c9744b57c630dbf0522d991",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Finland Rates Life at 7.8 out of 10",
+    "youtube_url": null
+  },
   "atlas016": {
     "buffer_post_id": "6ac97f9bbba9419ccbe4e13b",
     "due_at": "2026-10-10T16:00:00-04:00",

@@ -25,15 +25,14 @@ permissions:
   contents: write
   issues: write
 
-concurrency:
-  group: doctor
-  cancel-in-progress: false
-
 jobs:
   doctor:
     if: >-
       vars.DOCTOR_PAUSED != 'true' && (github.event_name != 'workflow_run' ||
       github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'timed_out')
+    concurrency:
+      group: doctor-${{ github.event.workflow_run.path || github.event_name }}
+      cancel-in-progress: false
     uses: ashivam-dot/channel-doctor/.github/workflows/doctor.yml@main
     with:
       mode: ${{ github.event_name == 'schedule' && 'improve' || inputs.mode || 'heal' }}

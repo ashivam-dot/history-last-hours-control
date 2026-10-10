@@ -120,6 +120,13 @@
   },
   "atlas011": {
     "buffer_post_id": "6ac97f94ed92ed8fa5afb55f",
+    "delivery": {
+      "checked_at": "2026-10-10T16:40:42.320042+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "FXvD6vSV5ng",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-10T12:00:00-04:00",
     "id": "atlas011",
     "media_public_id": "atlasinnumbers/atlas011",
@@ -132,9 +139,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-10T16:00:59.928Z",
+    "status": "sent",
     "title": "Money Sent Home Equals 58% of GDP in Tajikistan",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/FXvD6vSV5ng"
   },
   "atlas014": {
     "buffer_post_id": "6ac9c259b07d37ac975f09c7",
@@ -170,6 +178,24 @@
     },
     "status": "scheduled",
     "title": "How Many Calories Each Country Has On Its Plate",
+    "youtube_url": null
+  },
+  "atlas017": {
+    "buffer_post_id": "6aca6a90d9cab260a7cea432",
+    "due_at": "2026-10-11T12:00:00-04:00",
+    "id": "atlas017",
+    "media_public_id": "atlasinnumbers/atlas017",
+    "media_sha256": "abffa211a8b43e84de6438467e908beb61593c26a882285c9752f916b88bbc92",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791650445/atlasinnumbers/atlas017.mp4",
+    "quality": {
+      "checked_at": "2026-10-10T05:32:42.734943+00:00",
+      "claims_sha256": "cfc7d3d26326058bea29f7fb110c66682866d02b7e53ab100203f06747b823b2",
+      "qa_sha256": "f2b17fd5eebc9d6dc313165a25092996279e187d9fc744dd84d83881e02011b9",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "The Youngest and Oldest places on Earth",
     "youtube_url": null
   }
 }

@@ -11,7 +11,7 @@ on:
     inputs:
       mode:
         type: choice
-        options: [heal, improve]
+        options: [heal, improve, growth]
         default: heal
       run_id:
         description: failed run id to heal
@@ -31,11 +31,11 @@ jobs:
       vars.DOCTOR_PAUSED != 'true' && (github.event_name != 'workflow_run' ||
       github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'timed_out')
     concurrency:
-      group: doctor-${{ github.event.workflow_run.path || github.event_name }}
+      group: doctor-${{ github.event.workflow_run.path || github.event.schedule || github.event_name }}
       cancel-in-progress: false
     uses: ashivam-dot/channel-doctor/.github/workflows/doctor.yml@main
     with:
-      mode: ${{ github.event_name == 'schedule' && 'improve' || inputs.mode || 'heal' }}
+      mode: ${{ github.event_name == 'schedule' && (github.event.schedule == '41 14 * * *' && 'growth' || 'improve') || inputs.mode || 'heal' }}
       run_id: ${{ format('{0}', inputs.run_id || github.event.workflow_run.id) }}
       dry: ${{ inputs.dry == true }}
       report_only: ${{ vars.DOCTOR_MODE == 'report' }}

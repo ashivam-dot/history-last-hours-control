@@ -302,6 +302,13 @@
   },
   "atlas024": {
     "buffer_post_id": "6acbf4597db619a29148cbfa",
+    "delivery": {
+      "checked_at": "2026-10-12T20:43:27.019985+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "GAKHRY2R0tw",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-12T16:00:00-04:00",
     "id": "atlas024",
     "media_public_id": "atlasinnumbers/atlas024",
@@ -314,9 +321,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-12T20:00:50.669Z",
+    "status": "sent",
     "title": "Where 30% of People are 65 or Older",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/GAKHRY2R0tw"
   },
   "atlas025": {
     "buffer_post_id": "6acc2f7afa026cfb811ec260",
@@ -352,6 +360,24 @@
     },
     "status": "scheduled",
     "title": "The Global Gap in Basic Drinking Water Access",
+    "youtube_url": null
+  },
+  "atlas027": {
+    "buffer_post_id": "6acd46768465d3f29e8d6353",
+    "due_at": "2026-10-13T16:00:00-04:00",
+    "id": "atlas027",
+    "media_public_id": "atlasinnumbers/atlas027",
+    "media_sha256": "f1d3e399c9a27d5347e9f22ccf150a8345be77b317583466d1b99c44bc0568ff",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791837811/atlasinnumbers/atlas027.mp4",
+    "quality": {
+      "checked_at": "2026-10-12T03:26:32.189759+00:00",
+      "claims_sha256": "610a8b214e76e5fc6eb43f38f52e35935211b702b15b76e645615807aa2e1a0e",
+      "qa_sha256": "03cb2bad43e37d465a3d97d9a5c553db6f6e8ebfb34fbf1735c68490828d8737",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Women in the labor force: 83% to 5%",
     "youtube_url": null
   }
 }

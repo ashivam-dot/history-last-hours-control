@@ -250,6 +250,13 @@
   },
   "atlas021": {
     "buffer_post_id": "6acadd35b07d37ac978ebfcc",
+    "delivery": {
+      "checked_at": "2026-10-12T00:53:07.801162+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "A1okPqEQ6q0",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-11T19:00:00-04:00",
     "id": "atlas021",
     "media_public_id": "atlasinnumbers/atlas021",
@@ -262,9 +269,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-11T23:00:30.798Z",
+    "status": "sent",
     "title": "Cuba has 9.5 doctors while Niger has 0.0",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/A1okPqEQ6q0"
   },
   "atlas023": {
     "buffer_post_id": "6acbbc357db619a2913e528c",
@@ -300,6 +308,24 @@
     },
     "status": "scheduled",
     "title": "Where 30% of People are 65 or Older",
+    "youtube_url": null
+  },
+  "atlas025": {
+    "buffer_post_id": "6acc2f7afa026cfb811ec260",
+    "due_at": "2026-10-12T19:00:00-04:00",
+    "id": "atlas025",
+    "media_public_id": "atlasinnumbers/atlas025",
+    "media_sha256": "8157a2f56286b5d6cdce259648c3da26f013735c192cf1acf8bcd3146e5a6282",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791766391/atlasinnumbers/atlas025.mp4",
+    "quality": {
+      "checked_at": "2026-10-11T03:40:47.948315+00:00",
+      "claims_sha256": "c25144430ee179cac49a7125b0c79f5939334a26be21608ed71686da3e0fd028",
+      "qa_sha256": "f71372385b1b9d86ad5c51c36f6df0d42f47b3d77b21495c846c9f4ab4a9cb52",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Qatar has 108 micrograms of particles",
     "youtube_url": null
   }
 }

@@ -328,6 +328,13 @@
   },
   "atlas025": {
     "buffer_post_id": "6acc2f7afa026cfb811ec260",
+    "delivery": {
+      "checked_at": "2026-10-13T00:54:45.420620+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "glFjY17APUA",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-12T19:00:00-04:00",
     "id": "atlas025",
     "media_public_id": "atlasinnumbers/atlas025",
@@ -340,9 +347,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-12T23:01:11.138Z",
+    "status": "sent",
     "title": "Qatar has 108 micrograms of particles",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/glFjY17APUA"
   },
   "atlas026": {
     "buffer_post_id": "6acd0ded38bff9415260fe63",
@@ -378,6 +386,24 @@
     },
     "status": "scheduled",
     "title": "Women in the labor force: 83% to 5%",
+    "youtube_url": null
+  },
+  "atlas028": {
+    "buffer_post_id": "6acd815c3d6121df40375c9e",
+    "due_at": "2026-10-13T19:00:00-04:00",
+    "id": "atlas028",
+    "media_public_id": "atlasinnumbers/atlas028",
+    "media_sha256": "9cc8dfa9b3a4ec583af214d2c7f5f6817e8de2a3e8cccba96b299c172ef68a9b",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791852889/atlasinnumbers/atlas028.mp4",
+    "quality": {
+      "checked_at": "2026-10-12T03:36:25.855886+00:00",
+      "claims_sha256": "9d1c9dfa39fa331efa7a5888c8f6a4362b9529646ffb337861f1230bc3655327",
+      "qa_sha256": "85e4ce1805e83ccb57d86a050ae0a79ba8fe0ab8bea2d188aee7236272041af2",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "61 places Still Have Most People Outside Cities",
     "youtube_url": null
   }
 }

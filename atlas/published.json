@@ -354,6 +354,13 @@
   },
   "atlas026": {
     "buffer_post_id": "6acd0ded38bff9415260fe63",
+    "delivery": {
+      "checked_at": "2026-10-13T16:44:54.042045+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "DQZ6ogdYnKA",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-13T12:00:00-04:00",
     "id": "atlas026",
     "media_public_id": "atlasinnumbers/atlas026",
@@ -366,9 +373,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-13T16:02:39.170Z",
+    "status": "sent",
     "title": "The Global Gap in Basic Drinking Water Access",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/DQZ6ogdYnKA"
   },
   "atlas027": {
     "buffer_post_id": "6acd46768465d3f29e8d6353",
@@ -404,6 +412,24 @@
     },
     "status": "scheduled",
     "title": "61 places Still Have Most People Outside Cities",
+    "youtube_url": null
+  },
+  "atlas030": {
+    "buffer_post_id": "6ace600fd9d45db80a06e88a",
+    "due_at": "2026-10-14T12:00:00-04:00",
+    "id": "atlas030",
+    "media_public_id": "atlasinnumbers/atlas030",
+    "media_sha256": "59bd2157334c550003d9ac48fc1d0a2766954dcb7a44a236c6dae61f5a0b01ab",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791909898/atlasinnumbers/atlas030.mp4",
+    "quality": {
+      "checked_at": "2026-10-12T03:57:01.694084+00:00",
+      "claims_sha256": "c19e13ba2b57cdd73ecb758dfe973fef0345b87bfeddfc10fd4daf6e715b2611",
+      "qa_sha256": "60c592c21809d1e8ce1186fa8eef3160df9eff3fc10983f0b365197d327bae92",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "places Where One City Holds 92% of City Dwellers",
     "youtube_url": null
   }
 }

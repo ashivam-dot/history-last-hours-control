@@ -7,11 +7,13 @@ on:
   workflow_run:
     workflows: ["Atlas in Numbers publisher"]
     types: [completed]
+  schedule:
+    - cron: "41 14 * * *"
   workflow_dispatch:
     inputs:
       mode:
         type: choice
-        options: [heal, improve, growth]
+        options: [heal, improve, growth, tidy]
         default: heal
       run_id:
         description: failed run id to heal
@@ -35,7 +37,7 @@ jobs:
       cancel-in-progress: false
     uses: ashivam-dot/channel-doctor/.github/workflows/doctor.yml@main
     with:
-      mode: ${{ github.event_name == 'schedule' && (github.event.schedule == '41 14 * * *' && 'growth' || 'improve') || inputs.mode || 'heal' }}
+      mode: ${{ github.event_name == 'schedule' && (github.event.schedule == '41 14 * * *' && 'tidy' || 'improve') || inputs.mode || 'heal' }}
       run_id: ${{ format('{0}', inputs.run_id || github.event.workflow_run.id) }}
       dry: ${{ inputs.dry == true }}
       report_only: ${{ vars.DOCTOR_MODE == 'report' }}

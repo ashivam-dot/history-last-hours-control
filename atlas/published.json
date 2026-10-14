@@ -458,6 +458,13 @@
   },
   "atlas031": {
     "buffer_post_id": "6ace9b509d95f50fddb99213",
+    "delivery": {
+      "checked_at": "2026-10-14T20:56:08.858619+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "BaZJYdOya_o",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-14T16:00:00-04:00",
     "id": "atlas031",
     "media_public_id": "atlasinnumbers/atlas031",
@@ -470,9 +477,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-14T20:00:57.808Z",
+    "status": "sent",
     "title": "In Qatar, 77% of people were born abroad",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/BaZJYdOya_o"
   },
   "atlas032": {
     "buffer_post_id": "6aced5d71f3f10bcb7a82223",
@@ -508,6 +516,24 @@
     },
     "status": "scheduled",
     "title": "Japan Has 51 Seniors per 100 Working-Age People",
+    "youtube_url": null
+  },
+  "atlas037": {
+    "buffer_post_id": "6acfec7268efdf6f76c42009",
+    "due_at": "2026-10-15T16:00:00-04:00",
+    "id": "atlas037",
+    "media_public_id": "atlasinnumbers/atlas037",
+    "media_sha256": "ec2a2d93b77654bd5d6d9ae5fe26a1ce3b160b5e0d52e3abf5f10fd153ab0dd2",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792011374/atlasinnumbers/atlas037.mp4",
+    "quality": {
+      "checked_at": "2026-10-14T13:29:42.168689+00:00",
+      "claims_sha256": "864c486861b4aa585cf2924bbbda0800f165a0d8bbee1a0cfc541f7635f2eb11",
+      "qa_sha256": "49ad37b76368abcf72d7d2d47cba21a51b7c5f43ea5ed63d19fb04363c1197ba",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Colombia Rains 180 Times Egypt's Annual Precipitation",
     "youtube_url": null
   }
 }

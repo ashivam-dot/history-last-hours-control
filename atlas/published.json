@@ -432,6 +432,13 @@
   },
   "atlas030": {
     "buffer_post_id": "6ace600fd9d45db80a06e88a",
+    "delivery": {
+      "checked_at": "2026-10-14T16:59:31.083603+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "oX3KtuvHdBA",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-14T12:00:00-04:00",
     "id": "atlas030",
     "media_public_id": "atlasinnumbers/atlas030",
@@ -444,9 +451,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-14T16:02:34.250Z",
+    "status": "sent",
     "title": "places Where One City Holds 92% of City Dwellers",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/oX3KtuvHdBA"
   },
   "atlas031": {
     "buffer_post_id": "6ace9b509d95f50fddb99213",
@@ -482,6 +490,24 @@
     },
     "status": "scheduled",
     "title": "Health Spending: The $10,550 to $13 Divide",
+    "youtube_url": null
+  },
+  "atlas033": {
+    "buffer_post_id": "6acfb4fcd95fde8a287e60dc",
+    "due_at": "2026-10-15T12:00:00-04:00",
+    "id": "atlas033",
+    "media_public_id": "atlasinnumbers/atlas033",
+    "media_sha256": "12508c842274a4660291a2681cb9966231db901e0e292832be7572e1b3a56a53",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791997175/atlasinnumbers/atlas033.mp4",
+    "quality": {
+      "checked_at": "2026-10-13T03:44:09.460485+00:00",
+      "claims_sha256": "666b1a83a925b75146b76cb12532a0809b8a6f287143e6cfdec9a374ae7036a1",
+      "qa_sha256": "819af3f0ce65a8ed6e3218ba139443e3f6850b6a65a3a91aed69d0f4cb797ec5",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Japan Has 51 Seniors per 100 Working-Age People",
     "youtube_url": null
   }
 }

@@ -406,6 +406,13 @@
   },
   "atlas028": {
     "buffer_post_id": "6acd815c3d6121df40375c9e",
+    "delivery": {
+      "checked_at": "2026-10-14T01:07:20.688849+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "xwY5BnkDJCI",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-13T19:00:00-04:00",
     "id": "atlas028",
     "media_public_id": "atlasinnumbers/atlas028",
@@ -418,9 +425,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-13T23:01:04.037Z",
+    "status": "sent",
     "title": "61 places Still Have Most People Outside Cities",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/xwY5BnkDJCI"
   },
   "atlas030": {
     "buffer_post_id": "6ace600fd9d45db80a06e88a",
@@ -456,6 +464,24 @@
     },
     "status": "scheduled",
     "title": "In Qatar, 77% of people were born abroad",
+    "youtube_url": null
+  },
+  "atlas032": {
+    "buffer_post_id": "6aced5d71f3f10bcb7a82223",
+    "due_at": "2026-10-14T19:00:00-04:00",
+    "id": "atlas032",
+    "media_public_id": "atlasinnumbers/atlas032",
+    "media_sha256": "db3f0a6cf31882d7b87cd4aeca530dcafee433a0df227c75e96ee84bbe5b1049",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1791940047/atlasinnumbers/atlas032.mp4",
+    "quality": {
+      "checked_at": "2026-10-13T03:36:58.083053+00:00",
+      "claims_sha256": "9e9697a6d65cfdbe91caa8de68bcba22fcfa6eb239bbc48a47feed42d7edcb51",
+      "qa_sha256": "c5b7f1807981be08afbf4069859c345306a60a214a1f12cb95e5390fb4b936b6",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Health Spending: The $10,550 to $13 Divide",
     "youtube_url": null
   }
 }

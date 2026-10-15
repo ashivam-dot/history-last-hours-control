@@ -484,6 +484,13 @@
   },
   "atlas032": {
     "buffer_post_id": "6aced5d71f3f10bcb7a82223",
+    "delivery": {
+      "checked_at": "2026-10-15T01:04:49.427578+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "KQd1z2mGQik",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-14T19:00:00-04:00",
     "id": "atlas032",
     "media_public_id": "atlasinnumbers/atlas032",
@@ -496,9 +503,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-14T23:01:16.146Z",
+    "status": "sent",
     "title": "Health Spending: The $10,550 to $13 Divide",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/KQd1z2mGQik"
   },
   "atlas033": {
     "buffer_post_id": "6acfb4fcd95fde8a287e60dc",

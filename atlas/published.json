@@ -536,6 +536,13 @@
   },
   "atlas037": {
     "buffer_post_id": "6acfec7268efdf6f76c42009",
+    "delivery": {
+      "checked_at": "2026-10-15T20:55:58.831185+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "xmPNLoqil84",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-15T16:00:00-04:00",
     "id": "atlas037",
     "media_public_id": "atlasinnumbers/atlas037",
@@ -548,9 +555,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-15T20:01:05.173Z",
+    "status": "sent",
     "title": "Colombia Rains 180 Times Egypt's Annual Precipitation",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/xmPNLoqil84"
   },
   "atlas039": {
     "buffer_post_id": "6ad05d09c183410f7421e469",
@@ -586,6 +594,24 @@
     },
     "status": "scheduled",
     "title": "Romania Drinks 16.8 Liters of Pure Alcohol per Adult",
+    "youtube_url": null
+  },
+  "atlas042": {
+    "buffer_post_id": "6ad13de72aec0f0a6da75eb0",
+    "due_at": "2026-10-16T16:00:00-04:00",
+    "id": "atlas042",
+    "media_public_id": "atlasinnumbers/atlas042",
+    "media_sha256": "59cc6b0da0202e3be148dcbf71ac3f43662847c73bf6d838ad7afff1ed2c95b7",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792097763/atlasinnumbers/atlas042.mp4",
+    "quality": {
+      "checked_at": "2026-10-15T13:52:40.005565+00:00",
+      "claims_sha256": "9aac74c7c07d0f9a2f979efec4a8dff6569f18d1fcaac2fa5651004fd7a12139",
+      "qa_sha256": "ab899dd16dbcdfe12d92eec9efde3c997a6a4800cb36bceabe948e91c40d7151",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Powering Life: Electric Consumption Per Person",
     "youtube_url": null
   }
 }

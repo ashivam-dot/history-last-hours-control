@@ -510,6 +510,13 @@
   },
   "atlas033": {
     "buffer_post_id": "6acfb4fcd95fde8a287e60dc",
+    "delivery": {
+      "checked_at": "2026-10-15T17:00:43.068047+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "cDdfDVEVHpo",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-15T12:00:00-04:00",
     "id": "atlas033",
     "media_public_id": "atlasinnumbers/atlas033",
@@ -522,9 +529,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-15T16:02:34.164Z",
+    "status": "sent",
     "title": "Japan Has 51 Seniors per 100 Working-Age People",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/cDdfDVEVHpo"
   },
   "atlas037": {
     "buffer_post_id": "6acfec7268efdf6f76c42009",
@@ -560,6 +568,24 @@
     },
     "status": "scheduled",
     "title": "Ireland Produces $131,592 per Person",
+    "youtube_url": null
+  },
+  "atlas040": {
+    "buffer_post_id": "6ad106c57208706296a0d68b",
+    "due_at": "2026-10-16T12:00:00-04:00",
+    "id": "atlas040",
+    "media_public_id": "atlasinnumbers/atlas040",
+    "media_sha256": "2294add662b6288f83e6294425b15c847f1e6875de0065f5a0573c7fa50e4e15",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792083647/atlasinnumbers/atlas040.mp4",
+    "quality": {
+      "checked_at": "2026-10-15T03:42:53.839351+00:00",
+      "claims_sha256": "e742483651bb77ef4c096ea887672b51d08829f4e98602cc9ca4703dddcc02c1",
+      "qa_sha256": "bca141870773161c8b56df391c6368f95143e1bb301574a36b9aca47f6a59410",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Romania Drinks 16.8 Liters of Pure Alcohol per Adult",
     "youtube_url": null
   }
 }

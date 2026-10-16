@@ -614,6 +614,13 @@
   },
   "atlas042": {
     "buffer_post_id": "6ad13de72aec0f0a6da75eb0",
+    "delivery": {
+      "checked_at": "2026-10-16T20:54:54.591915+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "K9qyXsFcWqA",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-16T16:00:00-04:00",
     "id": "atlas042",
     "media_public_id": "atlasinnumbers/atlas042",
@@ -626,9 +633,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-16T20:00:52.800Z",
+    "status": "sent",
     "title": "Powering Life: Electric Consumption Per Person",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/K9qyXsFcWqA"
   },
   "atlas047": {
     "buffer_post_id": "6ad23b77cb7df3516144e30c",
@@ -664,6 +672,24 @@
     },
     "status": "scheduled",
     "title": "Uruguay Leads the World in Cash Machines",
+    "youtube_url": null
+  },
+  "atlas049": {
+    "buffer_post_id": "6ad28f291c7e49ea4c2396cd",
+    "due_at": "2026-10-17T16:00:00-04:00",
+    "id": "atlas049",
+    "media_public_id": "atlasinnumbers/atlas049",
+    "media_sha256": "709e04f2bc8859fad7e9fbbccbe6d113a1283dcdc2627ebe92d63bd88207a5af",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792184100/atlasinnumbers/atlas049.mp4",
+    "quality": {
+      "checked_at": "2026-10-16T13:54:29.006628+00:00",
+      "claims_sha256": "15025ed41a9c3bf6902aa741236e7c9cbdc1f099352723bcf1baf77e9e7820d9",
+      "qa_sha256": "605f9bd999d269fc5c87726c59da5a9ee4ac78e446868e4a4ffcccd0d506152f",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Global Tobacco Use: East Timor at 48.8% and Nigeria at 3.1%",
     "youtube_url": null
   }
 }

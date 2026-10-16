@@ -588,6 +588,13 @@
   },
   "atlas040": {
     "buffer_post_id": "6ad106c57208706296a0d68b",
+    "delivery": {
+      "checked_at": "2026-10-16T16:57:48.701226+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "Pf62Ds0Y4HU",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-16T12:00:00-04:00",
     "id": "atlas040",
     "media_public_id": "atlasinnumbers/atlas040",
@@ -600,9 +607,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-16T16:02:14.703Z",
+    "status": "sent",
     "title": "Romania Drinks 16.8 Liters of Pure Alcohol per Adult",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/Pf62Ds0Y4HU"
   },
   "atlas042": {
     "buffer_post_id": "6ad13de72aec0f0a6da75eb0",
@@ -638,6 +646,24 @@
     },
     "status": "scheduled",
     "title": "Freshwater Per Person: From Iceland to Kuwait",
+    "youtube_url": null
+  },
+  "atlas048": {
+    "buffer_post_id": "6ad2579554bdc0a200299ec2",
+    "due_at": "2026-10-17T12:00:00-04:00",
+    "id": "atlas048",
+    "media_public_id": "atlasinnumbers/atlas048",
+    "media_sha256": "97abd81cdf5992a838971e2f5b02f2119d35d08e002bf152120c8c1a522169a6",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792169874/atlasinnumbers/atlas048.mp4",
+    "quality": {
+      "checked_at": "2026-10-16T13:46:31.095404+00:00",
+      "claims_sha256": "e2b017398c80c15918c9df0f5891d86b5b133506b2fabf5c46706ce61e446245",
+      "qa_sha256": "3f00ef3e2b7a6dca7c28b7698d554ef0509d2829af1c861d777aebbccbb4a279",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Uruguay Leads the World in Cash Machines",
     "youtube_url": null
   }
 }

@@ -621,5 +621,23 @@
     "status": "scheduled",
     "title": "Powering Life: Electric Consumption Per Person",
     "youtube_url": null
+  },
+  "atlas047": {
+    "buffer_post_id": "6ad23b77cb7df3516144e30c",
+    "due_at": "2026-10-16T19:00:00-04:00",
+    "id": "atlas047",
+    "media_public_id": "atlasinnumbers/atlas047",
+    "media_sha256": "4ae52b56c4f11b20d28a8e17648cbb3ee6d94373c337789a5ac36dd918674def",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792162676/atlasinnumbers/atlas047.mp4",
+    "quality": {
+      "checked_at": "2026-10-16T13:20:11.385709+00:00",
+      "claims_sha256": "ea150036b5115e7ca4d81a5f2bb7f6c3eb12eab44422da41ccc032f662d44869",
+      "qa_sha256": "b4f4851001fd189d39bfe167c8e95954c769a2657a82ce4c77189a7d3d7a8fd7",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Freshwater Per Person: From Iceland to Kuwait",
+    "youtube_url": null
   }
 }

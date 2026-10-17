@@ -666,6 +666,13 @@
   },
   "atlas048": {
     "buffer_post_id": "6ad2579554bdc0a200299ec2",
+    "delivery": {
+      "checked_at": "2026-10-17T16:55:11.307886+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "TQ6s0yutlh8",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-17T12:00:00-04:00",
     "id": "atlas048",
     "media_public_id": "atlasinnumbers/atlas048",
@@ -678,9 +685,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-17T16:01:45.274Z",
+    "status": "sent",
     "title": "Uruguay Leads the World in Cash Machines",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/TQ6s0yutlh8"
   },
   "atlas049": {
     "buffer_post_id": "6ad28f291c7e49ea4c2396cd",
@@ -716,6 +724,24 @@
     },
     "status": "scheduled",
     "title": "Clean Cooking Access: From 100% Down to 0%",
+    "youtube_url": null
+  },
+  "atlas053": {
+    "buffer_post_id": "6ad3a8760a208cb3232dbee5",
+    "due_at": "2026-10-18T12:00:00-04:00",
+    "id": "atlas053",
+    "media_public_id": "atlasinnumbers/atlas053",
+    "media_sha256": "37d61a97e86ebeeedd24b5057e40a4ddc07d368bce7c552f6e10057823cfbb63",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792256115/atlasinnumbers/atlas053.mp4",
+    "quality": {
+      "checked_at": "2026-10-17T13:25:13.205958+00:00",
+      "claims_sha256": "d493e900603ffa725a9ce96aaf40d3a91dbba5916cadf81c8c63d12879d568a3",
+      "qa_sha256": "ad7735774c50aa6f530ab08d8884a70b9bf5cb4612c79aff05889922f237bf9e",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Why Greece Has 165.1% College Enrollment",
     "youtube_url": null
   }
 }

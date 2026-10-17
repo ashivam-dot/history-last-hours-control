@@ -699,5 +699,23 @@
     "status": "scheduled",
     "title": "Global Tobacco Use: East Timor at 48.8% and Nigeria at 3.1%",
     "youtube_url": null
+  },
+  "atlas052": {
+    "buffer_post_id": "6ad38af90b0d72757ae077f8",
+    "due_at": "2026-10-17T19:00:00-04:00",
+    "id": "atlas052",
+    "media_public_id": "atlasinnumbers/atlas052",
+    "media_sha256": "354e8ee62c19887028e60360a6fa00e7787672411bfcb681c15b0c7632b42c99",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792248564/atlasinnumbers/atlas052.mp4",
+    "quality": {
+      "checked_at": "2026-10-17T13:18:07.600372+00:00",
+      "claims_sha256": "eea6d5e6b9699c7ac776078ae34660b5b85c7b4b14aaadfe242f9c0cd714c200",
+      "qa_sha256": "5173c031d2efbad7c545a249fd03152ea889dbeb45d47e5c53ed1b2d56a82f2c",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Clean Cooking Access: From 100% Down to 0%",
+    "youtube_url": null
   }
 }

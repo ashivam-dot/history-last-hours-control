@@ -640,6 +640,13 @@
   },
   "atlas047": {
     "buffer_post_id": "6ad23b77cb7df3516144e30c",
+    "delivery": {
+      "checked_at": "2026-10-17T01:06:03.262970+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "xscXRicASGw",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-16T19:00:00-04:00",
     "id": "atlas047",
     "media_public_id": "atlasinnumbers/atlas047",
@@ -652,9 +659,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-16T23:00:38.683Z",
+    "status": "sent",
     "title": "Freshwater Per Person: From Iceland to Kuwait",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/xscXRicASGw"
   },
   "atlas048": {
     "buffer_post_id": "6ad2579554bdc0a200299ec2",

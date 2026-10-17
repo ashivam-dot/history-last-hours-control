@@ -692,6 +692,13 @@
   },
   "atlas049": {
     "buffer_post_id": "6ad28f291c7e49ea4c2396cd",
+    "delivery": {
+      "checked_at": "2026-10-17T20:50:04.961133+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "VG_OqIC1kTs",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-17T16:00:00-04:00",
     "id": "atlas049",
     "media_public_id": "atlasinnumbers/atlas049",
@@ -704,9 +711,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-17T20:00:43.338Z",
+    "status": "sent",
     "title": "Global Tobacco Use: East Timor at 48.8% and Nigeria at 3.1%",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/VG_OqIC1kTs"
   },
   "atlas052": {
     "buffer_post_id": "6ad38af90b0d72757ae077f8",
@@ -742,6 +750,24 @@
     },
     "status": "scheduled",
     "title": "Why Greece Has 165.1% College Enrollment",
+    "youtube_url": null
+  },
+  "atlas054": {
+    "buffer_post_id": "6ad3df8b0b0d72757af36d48",
+    "due_at": "2026-10-18T16:00:00-04:00",
+    "id": "atlas054",
+    "media_public_id": "atlasinnumbers/atlas054",
+    "media_sha256": "653938a917026579caae0d9024e27c0dbd99ce248506db6741db96422b1de89c",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792270209/atlasinnumbers/atlas054.mp4",
+    "quality": {
+      "checked_at": "2026-10-17T13:33:37.097589+00:00",
+      "claims_sha256": "b00394589e1f344dd3dcece22729f60c6560a05142fb5579d443c35b81bf86da",
+      "qa_sha256": "01e0cf31861bc505f96a39b3528a3e6ff84bb7528bcd36d566f006b541968d2c",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Household Goods Cost 130 in Iceland but 100 in USA",
     "youtube_url": null
   }
 }

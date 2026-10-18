@@ -718,6 +718,13 @@
   },
   "atlas052": {
     "buffer_post_id": "6ad38af90b0d72757ae077f8",
+    "delivery": {
+      "checked_at": "2026-10-18T01:06:24.017076+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "WcuRt8C3WFA",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-17T19:00:00-04:00",
     "id": "atlas052",
     "media_public_id": "atlasinnumbers/atlas052",
@@ -730,9 +737,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-17T23:00:33.658Z",
+    "status": "sent",
     "title": "Clean Cooking Access: From 100% Down to 0%",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/WcuRt8C3WFA"
   },
   "atlas053": {
     "buffer_post_id": "6ad3a8760a208cb3232dbee5",
@@ -768,6 +776,24 @@
     },
     "status": "scheduled",
     "title": "Household Goods Cost 130 in Iceland but 100 in USA",
+    "youtube_url": null
+  },
+  "atlas055": {
+    "buffer_post_id": "6ad41b96769b457934a033f6",
+    "due_at": "2026-10-18T19:00:00-04:00",
+    "id": "atlas055",
+    "media_public_id": "atlasinnumbers/atlas055",
+    "media_sha256": "0e791cc0e07d86839ae948eb82bc247456c8ef8e815154b237085c639aea31d8",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792285587/atlasinnumbers/atlas055.mp4",
+    "quality": {
+      "checked_at": "2026-10-17T13:39:31.146867+00:00",
+      "claims_sha256": "b97908f16013c4f4ab52c37c22277fd17a43332c04ff2dba80496e6a2a418ec6",
+      "qa_sha256": "e7e18c7214816a94db56d520b1143b6c29c0d5dbd54182396b02d48cf4d8c09e",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "South Korea Has 12.8 Hospital Beds While Chad Has 0.1",
     "youtube_url": null
   }
 }

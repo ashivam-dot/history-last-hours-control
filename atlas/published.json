@@ -744,6 +744,13 @@
   },
   "atlas053": {
     "buffer_post_id": "6ad3a8760a208cb3232dbee5",
+    "delivery": {
+      "checked_at": "2026-10-18T17:28:33.408653+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "Knpi88OfuS4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-18T12:00:00-04:00",
     "id": "atlas053",
     "media_public_id": "atlasinnumbers/atlas053",
@@ -756,9 +763,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-18T16:01:13.828Z",
+    "status": "sent",
     "title": "Why Greece Has 165.1% College Enrollment",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/Knpi88OfuS4"
   },
   "atlas054": {
     "buffer_post_id": "6ad3df8b0b0d72757af36d48",
@@ -794,6 +802,24 @@
     },
     "status": "scheduled",
     "title": "South Korea Has 12.8 Hospital Beds While Chad Has 0.1",
+    "youtube_url": null
+  },
+  "atlas056": {
+    "buffer_post_id": "6ad501c9ae173d6e00100ec5",
+    "due_at": "2026-10-19T12:00:00-04:00",
+    "id": "atlas056",
+    "media_public_id": "atlasinnumbers/atlas056",
+    "media_sha256": "40288d20d833bf4f1b74cd39add68892fa774c531b520503f519e2104a2f6d1f",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792344518/atlasinnumbers/atlas056.mp4",
+    "quality": {
+      "checked_at": "2026-10-18T03:21:01.763667+00:00",
+      "claims_sha256": "7a3d928c64fbc0d0a493901f57dd6090500da8fc40c9076e12a03a3ed59a5a75",
+      "qa_sha256": "4664e1eb7fef97a35e81aad679775259da8289744620e2d0f6e6121fd5ffd160",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Where More Boys Are Born: 1.01 to 1.11 Worldwide",
     "youtube_url": null
   }
 }

@@ -770,6 +770,13 @@
   },
   "atlas054": {
     "buffer_post_id": "6ad3df8b0b0d72757af36d48",
+    "delivery": {
+      "checked_at": "2026-10-18T20:49:02.425691+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "eoHtvRQtZnY",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-18T16:00:00-04:00",
     "id": "atlas054",
     "media_public_id": "atlasinnumbers/atlas054",
@@ -782,9 +789,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-18T20:00:49.550Z",
+    "status": "sent",
     "title": "Household Goods Cost 130 in Iceland but 100 in USA",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/eoHtvRQtZnY"
   },
   "atlas055": {
     "buffer_post_id": "6ad41b96769b457934a033f6",
@@ -820,6 +828,24 @@
     },
     "status": "scheduled",
     "title": "Where More Boys Are Born: 1.01 to 1.11 Worldwide",
+    "youtube_url": null
+  },
+  "atlas058": {
+    "buffer_post_id": "6ad530c5938409f1d0e79bc7",
+    "due_at": "2026-10-19T16:00:00-04:00",
+    "id": "atlas058",
+    "media_public_id": "atlasinnumbers/atlas058",
+    "media_sha256": "2c95aa11b138d291fa3ac94fb7a9150ca37a40b90249e8a897f5a92c326f3fc8",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792356547/atlasinnumbers/atlas058.mp4",
+    "quality": {
+      "checked_at": "2026-10-18T03:28:12.957671+00:00",
+      "claims_sha256": "1dcb2efe4da22673ae287926d521fe8911a2cdb5899c08d8777465115db2d782",
+      "qa_sha256": "951433a9cbaf718dade8fc5e838ec2cefc2f2d6fcb286afefd00632365636301",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Years Children Must Legally Attend School",
     "youtube_url": null
   }
 }

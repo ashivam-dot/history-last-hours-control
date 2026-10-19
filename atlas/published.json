@@ -822,6 +822,13 @@
   },
   "atlas056": {
     "buffer_post_id": "6ad501c9ae173d6e00100ec5",
+    "delivery": {
+      "checked_at": "2026-10-19T17:00:25.699705+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "k0HFeK-vD-A",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-19T12:00:00-04:00",
     "id": "atlas056",
     "media_public_id": "atlasinnumbers/atlas056",
@@ -834,9 +841,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-19T16:02:37.117Z",
+    "status": "sent",
     "title": "Where More Boys Are Born: 1.01 to 1.11 Worldwide",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/k0HFeK-vD-A"
   },
   "atlas058": {
     "buffer_post_id": "6ad530c5938409f1d0e79bc7",
@@ -872,6 +880,24 @@
     },
     "status": "scheduled",
     "title": "100% of Adults in Iceland Have an Account, South Sudan 6%",
+    "youtube_url": null
+  },
+  "atlas065": {
+    "buffer_post_id": "6ad64cb4408d925d996eda94",
+    "due_at": "2026-10-20T12:00:00-04:00",
+    "id": "atlas065",
+    "media_public_id": "atlasinnumbers/atlas065",
+    "media_sha256": "71ea8c2614d290a726eb631fb956341a4b676255f74d6bf37f8f3e52dae7aa84",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792429232/atlasinnumbers/atlas065.mp4",
+    "quality": {
+      "checked_at": "2026-10-19T13:35:59.242845+00:00",
+      "claims_sha256": "4982228994b2f21f5bf5402157419ae9995dd78fefa4b394c11b60ee381f1b15",
+      "qa_sha256": "de3b434104f87531736cf277b59047831cc9f207a16d1f22bc260c1ca73d3502",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Iceland Uses 16,248 kg of Energy Per Person",
     "youtube_url": null
   }
 }

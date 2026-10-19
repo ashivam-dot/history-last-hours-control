@@ -848,6 +848,13 @@
   },
   "atlas058": {
     "buffer_post_id": "6ad530c5938409f1d0e79bc7",
+    "delivery": {
+      "checked_at": "2026-10-19T20:57:28.049862+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "aukMgLMzxSY",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-19T16:00:00-04:00",
     "id": "atlas058",
     "media_public_id": "atlasinnumbers/atlas058",
@@ -860,9 +867,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-19T20:01:02.168Z",
+    "status": "sent",
     "title": "Years Children Must Legally Attend School",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/aukMgLMzxSY"
   },
   "atlas061": {
     "buffer_post_id": "6ad56d750a208cb3238b5ff0",

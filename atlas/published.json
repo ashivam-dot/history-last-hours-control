@@ -796,6 +796,13 @@
   },
   "atlas055": {
     "buffer_post_id": "6ad41b96769b457934a033f6",
+    "delivery": {
+      "checked_at": "2026-10-19T01:07:56.607827+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "ybZ7bo3Lwq4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-18T19:00:00-04:00",
     "id": "atlas055",
     "media_public_id": "atlasinnumbers/atlas055",
@@ -808,9 +815,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-18T23:00:31.994Z",
+    "status": "sent",
     "title": "South Korea Has 12.8 Hospital Beds While Chad Has 0.1",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/ybZ7bo3Lwq4"
   },
   "atlas056": {
     "buffer_post_id": "6ad501c9ae173d6e00100ec5",
@@ -846,6 +854,24 @@
     },
     "status": "scheduled",
     "title": "Years Children Must Legally Attend School",
+    "youtube_url": null
+  },
+  "atlas061": {
+    "buffer_post_id": "6ad56d750a208cb3238b5ff0",
+    "due_at": "2026-10-19T19:00:00-04:00",
+    "id": "atlas061",
+    "media_public_id": "atlasinnumbers/atlas061",
+    "media_sha256": "29b58221e62d96f3c76f916eeb3504dfcbc5402754c923a6aafb2e27a2544c89",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792372082/atlasinnumbers/atlas061.mp4",
+    "quality": {
+      "checked_at": "2026-10-18T13:35:54.385888+00:00",
+      "claims_sha256": "ea1eb357673040450d42313057fa865e71ba1ad03f40c2c7b7f530f0f9dfa402",
+      "qa_sha256": "baad86c3a6b69657dab2eefb745d9e97b17af77f3c62e9cb715aca636f12c13b",
+      "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "100% of Adults in Iceland Have an Account, South Sudan 6%",
     "youtube_url": null
   }
 }

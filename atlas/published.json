@@ -926,6 +926,13 @@
   },
   "atlas071": {
     "buffer_post_id": "6ad7824d009aee686444de00",
+    "delivery": {
+      "checked_at": "2026-10-20T20:56:36.643855+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "e-zr-ZbDp3w",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-20T16:00:00-04:00",
     "id": "atlas071",
     "media_public_id": "atlasinnumbers/atlas071",
@@ -938,8 +945,9 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-20T20:00:30.612Z",
+    "status": "sent",
     "title": "Australia Leads the World in Overweight Toddlers",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/e-zr-ZbDp3w"
   }
 }

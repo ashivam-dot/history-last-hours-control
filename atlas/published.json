@@ -874,6 +874,13 @@
   },
   "atlas061": {
     "buffer_post_id": "6ad56d750a208cb3238b5ff0",
+    "delivery": {
+      "checked_at": "2026-10-20T01:09:57.444259+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "orvieQnL4vY",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-19T19:00:00-04:00",
     "id": "atlas061",
     "media_public_id": "atlasinnumbers/atlas061",
@@ -886,9 +893,10 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-19T23:01:06.830Z",
+    "status": "sent",
     "title": "100% of Adults in Iceland Have an Account, South Sudan 6%",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/orvieQnL4vY"
   },
   "atlas065": {
     "buffer_post_id": "6ad64cb4408d925d996eda94",

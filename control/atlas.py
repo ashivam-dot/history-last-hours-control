@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -36,6 +37,49 @@ VOLUME = "creature-receipts-outbox"
 AHEAD = 2
 MAX_RETRIES = 2
 MAX_BYTES = 200 * 1024 * 1024
+
+
+# Titles a viewer reads as an error, which went out on Atlas Shorts before 2026-10-22 (revenue-push gap audit #9):
+# "places Where One City Holds 92% of City Dwellers", "Cuba has 9.5 doctors while Niger has 0.0", "Why Greece Has
+# 165.1% College Enrollment". The producer's writer.title_lint and publish.schedule hold these and more; this copy of
+# the plainest rules runs here first, so a producer regression can't ship one. It is never stricter than the producer:
+# a percentage over 100 passes when signed ("-512%"), for a growth rate (.ZG), for a gross ratio the title calls
+# gross, or when the data has values below -100 (said as a fall).
+_ZERO = re.compile(r"(?<![\w.])0\.0+(?![\d.]*\d)")
+_DECIMALS = re.compile(r"(?<![\d.])\d[\d,]*\.\d{3,}(?!\d)")
+_PERCENT = re.compile(r"((?<![\w.,])-|\u2212|\bminus\s+)?(\d[\d,]*(?:\.\d+)?)\s*(?:%|percent\b)", re.I)
+_CODE = re.compile(r"\b[A-Z][A-Z0-9]+(?:\.[A-Z0-9]{2,}){2,}\b")
+_BRACKETS = re.compile(r"[(\[][^)\]]*[)\]]")
+
+
+def title_problems(title: str, label: str = "", indicator: str = "", values=()) -> list[str]:
+    out = []
+    first = re.search(r"[A-Za-z]", title)
+    if first and first.group(0).islower() or re.search(r"\b(places|countries)\b", title):
+        out.append("starts with a lowercase word or has a lowercase 'places'")
+    if zero := _ZERO.search(title):
+        out.append(f"'{zero.group(0)}' reads as nothing")
+    if decimals := _DECIMALS.search(title):
+        out.append(f"'{decimals.group(0)}' has more than 2 decimals")
+    gross = re.search(r"\bgross\b", label or "", re.I) and re.search(r"\bgross\b", title, re.I)
+    exempt = gross or (indicator or "").upper().endswith(".ZG") or any(v < -100 for v in values)
+    for m in _PERCENT.finditer(title):
+        if not m.group(1) and not exempt and float(m.group(2).replace(",", "")) > 100:
+            out.append(f"'{m.group(0)}' is over 100%")
+    if _CODE.search(title) or _BRACKETS.search(title):
+        out.append("quotes an indicator code or a unit in brackets")
+    return out
+
+
+def _title_held(ep, ds) -> list[str]:
+    """title_problems of a parked Short; a check that itself breaks never stops a publish (the producer's
+    publish.schedule still runs its full lint)."""
+    try:
+        return title_problems(ep.title, getattr(ds, "label", "") or "", getattr(ds, "indicator", "") or "",
+                              [float(v) for v in (getattr(ds, "values", None) or {}).values()])
+    except Exception as err:
+        print(f"atlas title lint skipped for {getattr(ep, 'id', '?')}: {type(err).__name__}", file=sys.stderr)
+        return []
 
 
 def _load(path: Path) -> dict:
@@ -215,7 +259,7 @@ def main(argv: list[str]) -> int:
                if p.parent.name not in state and p.parent.name not in withdrawn]
     waiting = ordered(waiting, atlas, state, producer)
     report |= {"future_posts": len(future), "waiting": [w.name for w in waiting], "scheduled": [], "failed": [],
-               "old_format": []}
+               "old_format": [], "title_held": []}
     for folder in waiting:
         if len(report["scheduled"]) >= max(AHEAD - len(future), 0):
             break
@@ -232,6 +276,10 @@ def main(argv: list[str]) -> int:
             accepted = quality.verify(folder, ready["media_sha256"])
             ep = AtlasEpisode.load(folder / "atlas.yaml")
             ds = Dataset.load(folder / "data.json")
+            # Held, not failed: the producer doesn't count a held title as reserve and re-makes the Short.
+            if held := _title_held(ep, ds):
+                report["title_held"].append({"id": folder.name, "title": ep.title, "problems": held})
+                continue
             with tempfile.TemporaryDirectory() as tmp:
                 video = Path(tmp) / "short.mp4"
                 video.write_bytes(_video(ready["modal_path"], ready["media_sha256"]))
@@ -246,9 +294,16 @@ def main(argv: list[str]) -> int:
     starving = not future and not report["scheduled"]
     problem = ("Nothing is queued in Buffer and the producer has no Short waiting: check Modal atlas_run."
                if starving else "")
+    if starving and report["title_held"]:
+        problem = ("Nothing is queued in Buffer; the waiting Shorts' titles are held ("
+                   + ", ".join(h["id"] for h in report["title_held"]) + "): the producer re-makes them.")
     errors += report["failed"]
     _save(HEALTH, {"checked_at": now.isoformat(timespec="seconds"), "future_posts": len(future) + len(report["scheduled"]),
-                   "waiting": len(waiting) - len(report["scheduled"]), "errors": errors, "problem": problem})
+                   "waiting": len(waiting) - len(report["scheduled"]), "errors": errors, "problem": problem,
+                   "title_held": [h["id"] for h in report["title_held"]]})
+    if report["title_held"]:
+        print("atlas title lint: held " + ", ".join(f"{h['id']} ({'; '.join(h['problems'])})"
+                                                   for h in report["title_held"]), file=sys.stderr)
     print(json.dumps(report | {"problem": problem, "errors": errors}, indent=2))
     return 1 if starving or errors else 0
 

@@ -31,3 +31,12 @@ def test_name_order_without_a_producer_order_or_when_it_fails(tmp_path):
     got = {}
     ordered(waiting, SimpleNamespace(order=lambda f, last: got.update(last=last) or f), {}, tmp_path)
     assert got["last"] is None
+
+
+def test_the_last_post_is_found_by_instant_not_by_string(tmp_path):
+    # 19:00 at -05:00 (00:00Z on 2 Nov) is after 23:30Z on 1 Nov, though it sorts first as text.
+    state = {"atlas090": {"due_at": "2026-11-01T19:00:00-05:00"}, "atlas091": {"due_at": "2026-11-01T23:30:00Z"},
+             "atlas089": {"due_at": "not a date"}}
+    got = {}
+    ordered([tmp_path / "atlas092"], SimpleNamespace(order=lambda f, last: got.update(last=last) or f), state, tmp_path)
+    assert got["last"] == tmp_path / "content" / "atlas" / "atlas090"

@@ -101,7 +101,15 @@ def ordered(waiting: list[Path], atlas, state: dict, producer: Path) -> list[Pat
     order = getattr(atlas, "order", None)
     if order is None:
         return waiting
-    last = max(state, key=lambda k: state[k].get("due_at") or "", default=None)
+    def due(key: str) -> datetime:
+        # Compared as instants, not strings: "-04:00" and "-05:00" (or "Z") stamps sort wrong as text.
+        try:
+            when = datetime.fromisoformat(state[key]["due_at"])
+            return when if when.tzinfo else when.replace(tzinfo=timezone.utc)
+        except (KeyError, TypeError, ValueError):
+            return datetime.min.replace(tzinfo=timezone.utc)
+
+    last = max(state, key=due, default=None)
     try:
         return order(waiting, producer / "content" / "atlas" / last if last else None)
     except Exception as err:  # ordering is a preference; never let it stop a post

@@ -50,12 +50,21 @@ _DECIMALS = re.compile(r"(?<![\d.])\d[\d,]*\.\d{3,}(?!\d)")
 _PERCENT = re.compile(r"((?<![\w.,])-|\u2212|\bminus\s+)?(\d[\d,]*(?:\.\d+)?)\s*(?:%|percent\b)", re.I)
 _CODE = re.compile(r"\b[A-Z][A-Z0-9]+(?:\.[A-Z0-9]{2,}){2,}\b")
 _BRACKETS = re.compile(r"[(\[][^)\]]*[)\]]")
+# The producer's writer._SMALL and writer._TITLE_UNITS: words its title_case leaves lowercase.
+_SMALL = frozenset("a an and as at but by for in nor of on or per the to vs via".split())
+_UNITS = frozenset("m km cm mm kg g t ha l kwh mwh gwh twh mbps kbps gbps mb gb".split())
+_FIRST_WORD = re.compile(r"[^A-Za-z]*([A-Za-z][A-Za-z'\u2019]*)")
 
 
 def title_problems(title: str, label: str = "", indicator: str = "", values=()) -> list[str]:
     out = []
-    first = re.search(r"[A-Za-z]", title)
-    if first and first.group(0).islower() or re.search(r"\b(places|countries)\b", title):
+    first = _FIRST_WORD.match(title)
+    word = first.group(1) if first else ""
+    # Only a first word the producer's title_case would capitalise: not a small word ("100% of Adults"), a unit
+    # symbol ("3,000 mm of Rain") or a word with a capital inside it ("eSwatini", "kWh").
+    lower_first = (word[:1].islower() and word not in _SMALL and word not in _UNITS
+                   and not any(c.isupper() for c in word[1:]))
+    if lower_first or re.search(r"\b(places|countries)\b", title):
         out.append("starts with a lowercase word or has a lowercase 'places'")
     if zero := _ZERO.search(title):
         out.append(f"'{zero.group(0)}' reads as nothing")
@@ -71,12 +80,15 @@ def title_problems(title: str, label: str = "", indicator: str = "", values=()) 
     return out
 
 
-def _title_held(ep, ds) -> list[str]:
-    """title_problems of a parked Short; a check that itself breaks never stops a publish (the producer's
-    publish.schedule still runs its full lint)."""
+def _title_held(ep, ds, producer_check=None) -> list[str]:
+    """title_problems of a parked Short, then the producer's own check (ytc.atlas.publish.title_problems, which
+    publish.schedule raises on), so a title held only by a producer rule is held here too rather than failed. A check
+    that itself breaks never stops a publish (publish.schedule still runs the producer's full lint)."""
     try:
-        return title_problems(ep.title, getattr(ds, "label", "") or "", getattr(ds, "indicator", "") or "",
-                              [float(v) for v in (getattr(ds, "values", None) or {}).values()])
+        if held := title_problems(ep.title, getattr(ds, "label", "") or "", getattr(ds, "indicator", "") or "",
+                                  [float(v) for v in (getattr(ds, "values", None) or {}).values()]):
+            return held
+        return list(producer_check(ep, ds)) if callable(producer_check) else []
     except Exception as err:
         print(f"atlas title lint skipped for {getattr(ep, 'id', '?')}: {type(err).__name__}", file=sys.stderr)
         return []
@@ -277,7 +289,7 @@ def main(argv: list[str]) -> int:
             ep = AtlasEpisode.load(folder / "atlas.yaml")
             ds = Dataset.load(folder / "data.json")
             # Held, not failed: the producer doesn't count a held title as reserve and re-makes the Short.
-            if held := _title_held(ep, ds):
+            if held := _title_held(ep, ds, getattr(atlas, "title_problems", None)):
                 report["title_held"].append({"id": folder.name, "title": ep.title, "problems": held})
                 continue
             with tempfile.TemporaryDirectory() as tmp:

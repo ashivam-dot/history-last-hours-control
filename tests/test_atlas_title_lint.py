@@ -40,6 +40,12 @@ def test_never_stricter_than_the_producer():
     # Two decimals and a table-row ending are the producer's calls (writer.title_lint), not this copy's.
     assert control.title_problems("Where More Boys Are Born: 1.01 to 1.11 Worldwide") == []
     assert control.title_problems("Bulgaria Has 93.8 Bank Branches to DR Congo 0.6") == []
+    # The producer's title_case keeps unit symbols after a number, words with a capital inside and small words
+    # lowercase, so writer.title_lint passes these (review 2026-10-22); a Short held here forever would be stuck.
+    assert control.title_problems("3,000 mm of Rain a Year in Colombia") == []
+    assert control.title_problems("eSwatini Has the Most HIV") == []
+    assert control.title_problems("Iceland Uses 16,248 kg of Energy Per Person") == []
+    assert control.title_problems("100% of Adults in Iceland Have a Bank Account") == []
     # Over 100% is fine signed, for a growth rate, a gross ratio said as gross, or data with falls below -100.
     assert control.title_problems("Where Money Fell -512%") == []
     assert control.title_problems("Where Prices Rose 512%", indicator="FP.CPI.TOTL.ZG") == []
@@ -60,6 +66,17 @@ def test_a_broken_check_never_stops_a_publish():
     class Ds:
         label, indicator, values = "x", "y", {"A": "not a number"}
     assert control._title_held(Ep(), Ds()) == []
+    assert control._title_held(Ep(), Ds(), lambda ep, ds: 1 / 0) == []
+
+
+def test_a_title_held_only_by_the_producer_is_held_not_failed():
+    class Ep:
+        id, title = "atlas075", "Bulgaria Has 93.8 Bank Branches to DR Congo 0.6"
+    class Ds:
+        label, indicator, values = "x", "y", {}
+    # Two decimals and a table-row ending are the producer's rules; schedule would raise on them (an error).
+    assert control.title_problems(Ep.title) == []
+    assert control._title_held(Ep(), Ds(), lambda ep, ds: ["ends on a bare value"]) == ["ends on a bare value"]
 
 
 def test_a_held_title_is_skipped_not_failed_and_the_next_short_still_posts(tmp_path, monkeypatch, capsys):

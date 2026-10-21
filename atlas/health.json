@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-10-21T19:07:55+00:00",
+  "checked_at": "2026-10-21T20:56:57+00:00",
   "errors": [],
-  "future_posts": 0,
-  "problem": "Nothing is queued in Buffer and the producer has no Short waiting: check Modal atlas_run.",
-  "waiting": 0
+  "future_posts": 2,
+  "problem": "",
+  "waiting": 2
 }

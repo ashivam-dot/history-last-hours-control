@@ -975,5 +975,41 @@
     "status": "sent",
     "title": "Bulgaria Has 93.8 Bank Branches to DR Congo 0.6",
     "youtube_url": "https://www.youtube.com/shorts/quCFhCNpplc"
+  },
+  "atlas078": {
+    "buffer_post_id": "6ad9272be7a121c462dec039",
+    "due_at": "2026-10-22T12:00:00-04:00",
+    "id": "atlas078",
+    "media_public_id": "atlasinnumbers/atlas078",
+    "media_sha256": "1e45c0e366c9927b8a6e6565c39a2395d53acd399a81c890bbd7b28316e567e3",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792616230/atlasinnumbers/atlas078.mp4",
+    "quality": {
+      "checked_at": "2026-10-21T20:05:35.190617+00:00",
+      "claims_sha256": "56372b2fb9947753be7b6570e52b4c50a6b7add9c7d24afd1b9c676e735b6aca",
+      "qa_sha256": "9b50dee52fb893a4eea2c88f71f645a62f8a179460ca53058e74be2e9e2b2f28",
+      "quality_module_sha256": "e7f26572dbfefb35b9f8c49e8e94ac6899f007d0e4e390447c2d9b83bd12ff81",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Places Ranked by Megacity Populations",
+    "youtube_url": null
+  },
+  "atlas079": {
+    "buffer_post_id": "6ad92722cecd7a6cc1647817",
+    "due_at": "2026-10-21T19:00:00-04:00",
+    "id": "atlas079",
+    "media_public_id": "atlasinnumbers/atlas079",
+    "media_sha256": "2f1c7b1680bb2d9947993d1fe760ff52ee0e41dd1564630960d556a820051ca8",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792616223/atlasinnumbers/atlas079.mp4",
+    "quality": {
+      "checked_at": "2026-10-21T20:15:21.170297+00:00",
+      "claims_sha256": "703d3b3e6bebc4868ac2aeb48158af01fbea7f576bb551c4321b2ac4dc5b847f",
+      "qa_sha256": "79d1f2cd31367a16ec8cfc3a93b2de461e0957401c6e08ee6865941de93f860d",
+      "quality_module_sha256": "e7f26572dbfefb35b9f8c49e8e94ac6899f007d0e4e390447c2d9b83bd12ff81",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Places Ranked by Arable Land",
+    "youtube_url": null
   }
 }

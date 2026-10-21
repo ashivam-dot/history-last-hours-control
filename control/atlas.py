@@ -31,8 +31,9 @@ HOLD = HERE / "hold.json"
 WITHDRAWN = HERE / "withdrawn.json"
 WORKSPACE = "aksha-shivam18"
 VOLUME = "creature-receipts-outbox"
-# Future Atlas posts kept in Buffer: a day of the producer's SLOTS, so a missed run costs no post.
-AHEAD = 3
+# Future Atlas posts kept in Buffer: a day of the producer's SLOTS (12:00 and 19:00 ET from 2026-10-22), so a
+# missed run costs no post.
+AHEAD = 2
 MAX_RETRIES = 2
 MAX_BYTES = 200 * 1024 * 1024
 
@@ -92,6 +93,20 @@ def confirm_delivery(record: dict, getter=None) -> dict:
         return {"confirmed": False, "video_id": video_id, "reason": "YouTube title/channel identity mismatch"}
     return {"confirmed": True, "video_id": video_id, "checked_at": datetime.now(timezone.utc).isoformat(),
             "method": "official-oembed", "visibility": "public-or-unlisted; authenticated API needed to distinguish"}
+
+
+def ordered(waiting: list[Path], atlas, state: dict, producer: Path) -> list[Path]:
+    """Waiting Shorts in the producer's order (`ytc.atlas.publish.order`: best score first, no family twice in a
+    row, none left stale), after the post scheduled last; folder-name order with a producer that has no order."""
+    order = getattr(atlas, "order", None)
+    if order is None:
+        return waiting
+    last = max(state, key=lambda k: state[k].get("due_at") or "", default=None)
+    try:
+        return order(waiting, producer / "content" / "atlas" / last if last else None)
+    except Exception as err:  # ordering is a preference; never let it stop a post
+        print(f"atlas order failed, using name order: {type(err).__name__}: {err}", file=sys.stderr)
+        return waiting
 
 
 def main(argv: list[str]) -> int:
@@ -190,6 +205,7 @@ def main(argv: list[str]) -> int:
 
     waiting = [p.parent for p in sorted((producer / "content" / "atlas").glob("atlas*/ready.json"))
                if p.parent.name not in state and p.parent.name not in withdrawn]
+    waiting = ordered(waiting, atlas, state, producer)
     report |= {"future_posts": len(future), "waiting": [w.name for w in waiting], "scheduled": [], "failed": [],
                "old_format": []}
     for folder in waiting:

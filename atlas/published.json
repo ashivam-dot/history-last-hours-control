@@ -952,6 +952,13 @@
   },
   "atlas075": {
     "buffer_post_id": "6ad8d349b535ec9954c7b472",
+    "delivery": {
+      "checked_at": "2026-10-21T16:59:29.034708+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "quCFhCNpplc",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-21T12:00:00-04:00",
     "id": "atlas075",
     "media_public_id": "atlasinnumbers/atlas075",
@@ -964,8 +971,9 @@
       "quality_module_sha256": "abf82a585f855cc47faceb8807dd90b999b3d330d3a23eac1d6dd346e7364b2d",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-21T16:00:55.292Z",
+    "status": "sent",
     "title": "Bulgaria Has 93.8 Bank Branches to DR Congo 0.6",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/quCFhCNpplc"
   }
 }

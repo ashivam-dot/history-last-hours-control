@@ -978,6 +978,13 @@
   },
   "atlas078": {
     "buffer_post_id": "6ad9272be7a121c462dec039",
+    "delivery": {
+      "checked_at": "2026-10-22T16:59:30.149733+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "-qKM_mpWRkg",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-22T12:00:00-04:00",
     "id": "atlas078",
     "media_public_id": "atlasinnumbers/atlas078",
@@ -990,9 +997,10 @@
       "quality_module_sha256": "e7f26572dbfefb35b9f8c49e8e94ac6899f007d0e4e390447c2d9b83bd12ff81",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-22T16:03:43.558Z",
+    "status": "sent",
     "title": "Places Ranked by Megacity Populations",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/-qKM_mpWRkg"
   },
   "atlas079": {
     "buffer_post_id": "6ad92722cecd7a6cc1647817",
@@ -1036,6 +1044,24 @@
     },
     "status": "scheduled",
     "title": "Places Ranked by Income Inequality",
+    "youtube_url": null
+  },
+  "atlas083": {
+    "buffer_post_id": "6ada40f8399af6f1f727f880",
+    "due_at": "2026-10-23T12:00:00-04:00",
+    "id": "atlas083",
+    "media_public_id": "atlasinnumbers/atlas083",
+    "media_sha256": "8db781becb7c1befdec192172a9f45f46a5a2ec98cd0ef13c14565aef08c27fa",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792688373/atlasinnumbers/atlas083.mp4",
+    "quality": {
+      "checked_at": "2026-10-21T20:33:45.525847+00:00",
+      "claims_sha256": "5cec5cc8cece13a39c2ec5ed97cac88fbe0ee157aed71e24d96ccf76082816fc",
+      "qa_sha256": "9a14713c054f831f884aadafe2a2545211776997d396b27cdc9cfc11667e29ca",
+      "quality_module_sha256": "e7f26572dbfefb35b9f8c49e8e94ac6899f007d0e4e390447c2d9b83bd12ff81",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "The Places With the Oldest Male Populations",
     "youtube_url": null
   }
 }

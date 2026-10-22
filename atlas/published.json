@@ -996,6 +996,13 @@
   },
   "atlas079": {
     "buffer_post_id": "6ad92722cecd7a6cc1647817",
+    "delivery": {
+      "checked_at": "2026-10-22T01:07:30.722091+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "BQAOz0eP0QI",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-21T19:00:00-04:00",
     "id": "atlas079",
     "media_public_id": "atlasinnumbers/atlas079",
@@ -1008,8 +1015,27 @@
       "quality_module_sha256": "e7f26572dbfefb35b9f8c49e8e94ac6899f007d0e4e390447c2d9b83bd12ff81",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-21T23:00:12.045Z",
+    "status": "sent",
     "title": "Places Ranked by Arable Land",
+    "youtube_url": "https://www.youtube.com/shorts/BQAOz0eP0QI"
+  },
+  "atlas081": {
+    "buffer_post_id": "6ad961dcdeacf5d253237f66",
+    "due_at": "2026-10-22T19:00:00-04:00",
+    "id": "atlas081",
+    "media_public_id": "atlasinnumbers/atlas081",
+    "media_sha256": "cc6a8a904af36d9a6ebbeb518d4b6888dfa3c29dc1274c387f87a0f97f704b45",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792631257/atlasinnumbers/atlas081.mp4",
+    "quality": {
+      "checked_at": "2026-10-21T20:25:09.766806+00:00",
+      "claims_sha256": "da501e3d55da9aacc7b39a52013f1d7b564f4e4ac8405b334dfb195e29bcc7b9",
+      "qa_sha256": "27ea8abb3e8b95cc025f523241b107cec18d0d3acb0d980fe76496e874772721",
+      "quality_module_sha256": "e7f26572dbfefb35b9f8c49e8e94ac6899f007d0e4e390447c2d9b83bd12ff81",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Places Ranked by Income Inequality",
     "youtube_url": null
   }
 }

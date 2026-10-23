@@ -1030,6 +1030,13 @@
   },
   "atlas081": {
     "buffer_post_id": "6ad961dcdeacf5d253237f66",
+    "delivery": {
+      "checked_at": "2026-10-23T01:12:41.469349+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "iG5oAPCvVsw",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-22T19:00:00-04:00",
     "id": "atlas081",
     "media_public_id": "atlasinnumbers/atlas081",
@@ -1042,9 +1049,10 @@
       "quality_module_sha256": "e7f26572dbfefb35b9f8c49e8e94ac6899f007d0e4e390447c2d9b83bd12ff81",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-22T23:01:12.412Z",
+    "status": "sent",
     "title": "Places Ranked by Income Inequality",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/iG5oAPCvVsw"
   },
   "atlas083": {
     "buffer_post_id": "6ada40f8399af6f1f727f880",
@@ -1062,6 +1070,24 @@
     },
     "status": "scheduled",
     "title": "The Places With the Oldest Male Populations",
+    "youtube_url": null
+  },
+  "atlas090": {
+    "buffer_post_id": "6adab4928d2197cb2a0bc5dd",
+    "due_at": "2026-10-23T19:00:00-04:00",
+    "id": "atlas090",
+    "media_public_id": "atlasinnumbers/atlas090",
+    "media_sha256": "025aa63033c1240b13a45d4b8ba6adbcce4ef31bc5530e83461cf9fb63d92c17",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792717965/atlasinnumbers/atlas090.mp4",
+    "quality": {
+      "checked_at": "2026-10-22T09:43:45.170860+00:00",
+      "claims_sha256": "87a876174f8515072a2a7e7285fec0b651ced5512d96dc6847785dc5b188cd31",
+      "qa_sha256": "226b6cb5e2e457cfd80a75cdd689426164023a66058c37be165201d4b3df67da",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Places Ranked by Container Shipping CONNECTIVITY",
     "youtube_url": null
   }
 }

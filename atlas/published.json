@@ -1056,6 +1056,13 @@
   },
   "atlas083": {
     "buffer_post_id": "6ada40f8399af6f1f727f880",
+    "delivery": {
+      "checked_at": "2026-10-23T16:59:53.032161+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "miWmLszba3s",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-23T12:00:00-04:00",
     "id": "atlas083",
     "media_public_id": "atlasinnumbers/atlas083",
@@ -1068,9 +1075,10 @@
       "quality_module_sha256": "e7f26572dbfefb35b9f8c49e8e94ac6899f007d0e4e390447c2d9b83bd12ff81",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-23T16:02:31.233Z",
+    "status": "sent",
     "title": "The Places With the Oldest Male Populations",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/miWmLszba3s"
   },
   "atlas090": {
     "buffer_post_id": "6adab4928d2197cb2a0bc5dd",
@@ -1088,6 +1096,24 @@
     },
     "status": "scheduled",
     "title": "Places Ranked by Container Shipping CONNECTIVITY",
+    "youtube_url": null
+  },
+  "atlas093": {
+    "buffer_post_id": "6adb9290ab287b2bec1904b1",
+    "due_at": "2026-10-24T12:00:00-04:00",
+    "id": "atlas093",
+    "media_public_id": "atlasinnumbers/atlas093",
+    "media_sha256": "6c2b34037f3df428215059a507bcea870b6dc92d0d2d644b447284f328e1f121",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792774797/atlasinnumbers/atlas093.mp4",
+    "quality": {
+      "checked_at": "2026-10-23T01:24:13.489006+00:00",
+      "claims_sha256": "210beec0445ad4e9edb0a4f88de42073bbdc04c86df61d13a84284dc42c6c2ac",
+      "qa_sha256": "b0452c7312ede91839c11024a7d743f78efeb20b67b029ddf9e893f1650e4405",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Direct Medical Costs Paid by Families",
     "youtube_url": null
   }
 }

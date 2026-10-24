@@ -1082,6 +1082,13 @@
   },
   "atlas090": {
     "buffer_post_id": "6adab4928d2197cb2a0bc5dd",
+    "delivery": {
+      "checked_at": "2026-10-24T01:15:18.235929+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "EvZmeScDN9Y",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-23T19:00:00-04:00",
     "id": "atlas090",
     "media_public_id": "atlasinnumbers/atlas090",
@@ -1094,9 +1101,10 @@
       "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-23T23:01:19.957Z",
+    "status": "sent",
     "title": "Places Ranked by Container Shipping CONNECTIVITY",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/EvZmeScDN9Y"
   },
   "atlas093": {
     "buffer_post_id": "6adb9290ab287b2bec1904b1",
@@ -1114,6 +1122,24 @@
     },
     "status": "scheduled",
     "title": "Direct Medical Costs Paid by Families",
+    "youtube_url": null
+  },
+  "atlas094": {
+    "buffer_post_id": "6adc06afe4be8a4d8633e21c",
+    "due_at": "2026-10-24T19:00:00-04:00",
+    "id": "atlas094",
+    "media_public_id": "atlasinnumbers/atlas094",
+    "media_sha256": "8266bd47763115b355b5adb80753391d551b260f379a01f43fdae2e608094a7c",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792804523/atlasinnumbers/atlas094.mp4",
+    "quality": {
+      "checked_at": "2026-10-23T01:30:39.058554+00:00",
+      "claims_sha256": "c562ba0d3e8addc8150363b72e080efb23f9ebcfcf6a9bed003388e46ce0dc32",
+      "qa_sha256": "6c44318c3b3a5da4b2f81ac9015832cffd8c9131bc11c57bb205d1402eea23a9",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Places Ranked by Cost of Power Outages",
     "youtube_url": null
   }
 }

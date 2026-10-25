@@ -1134,6 +1134,13 @@
   },
   "atlas094": {
     "buffer_post_id": "6adc06afe4be8a4d8633e21c",
+    "delivery": {
+      "checked_at": "2026-10-25T01:05:03.163312+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "J6B5DKRXzvU",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-24T19:00:00-04:00",
     "id": "atlas094",
     "media_public_id": "atlasinnumbers/atlas094",
@@ -1146,8 +1153,27 @@
       "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-24T23:00:39.483Z",
+    "status": "sent",
     "title": "Places Ranked by Cost of Power Outages",
+    "youtube_url": "https://www.youtube.com/shorts/J6B5DKRXzvU"
+  },
+  "atlas098": {
+    "buffer_post_id": "6add55c8e4be8a4d86859774",
+    "due_at": "2026-10-25T19:00:00-04:00",
+    "id": "atlas098",
+    "media_public_id": "atlasinnumbers/atlas098",
+    "media_sha256": "af58fb968e4162e5803ca4336b6f12525a7145bcefd6b0d6f5bad3f0f5f5e793",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792890309/atlasinnumbers/atlas098.mp4",
+    "quality": {
+      "checked_at": "2026-10-23T09:52:50.637014+00:00",
+      "claims_sha256": "61ae750faed9d27720956ae83965b2221213690e79f6b7820cd789afff7aa7ba",
+      "qa_sha256": "eeef764a512c74dada7b874b716a8d5d5fd29476483da7246072a8ac54b1f7b1",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Places Ranked by the Income of the Richest Fifth",
     "youtube_url": null
   },
   "atlas100": {

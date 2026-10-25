@@ -1178,6 +1178,13 @@
   },
   "atlas100": {
     "buffer_post_id": "6adce2c06887a2efc1c89bb5",
+    "delivery": {
+      "checked_at": "2026-10-25T16:54:39.743691+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "swXmPr4uuaI",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-25T12:00:00-04:00",
     "id": "atlas100",
     "media_public_id": "atlasinnumbers/atlas100",
@@ -1190,8 +1197,27 @@
       "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-25T16:01:53.705Z",
+    "status": "sent",
     "title": "Places Ranked by Nursing Staff Density",
+    "youtube_url": "https://www.youtube.com/watch?v=swXmPr4uuaI"
+  },
+  "atlas101": {
+    "buffer_post_id": "6ade3457e4be8a4d86b8d928",
+    "due_at": "2026-10-26T12:00:00-04:00",
+    "id": "atlas101",
+    "media_public_id": "atlasinnumbers/atlas101",
+    "media_sha256": "931385fadaa85ba001011a1b001ad3ce1a2ae7c7f33662585feb8ebecc9510f8",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1792947284/atlasinnumbers/atlas101.mp4",
+    "quality": {
+      "checked_at": "2026-10-24T17:31:40.272747+00:00",
+      "claims_sha256": "14704afa466911f103b678c94381bbc8c582a24d70d31055f0811ad74e84cc34",
+      "qa_sha256": "f01d27cc08bee0ed922c8e428cc033a44e53d7563bf55acb96b037c4e12eda5a",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Which Nations Grow the MOST Permanent Crops?",
     "youtube_url": null
   }
 }

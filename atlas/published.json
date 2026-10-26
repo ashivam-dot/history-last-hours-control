@@ -1158,6 +1158,24 @@
     "title": "Places Ranked by Cost of Power Outages",
     "youtube_url": "https://www.youtube.com/shorts/J6B5DKRXzvU"
   },
+  "atlas097": {
+    "buffer_post_id": "6adf892ac0781bde2d2ea03c",
+    "due_at": "2026-10-27T12:00:00-04:00",
+    "id": "atlas097",
+    "media_public_id": "atlasinnumbers/atlas097",
+    "media_sha256": "9f534ef4771cfdb8777964741b7be83fbc6a5d13fd1d4e1e801c9404cac5f852",
+    "media_url": "https://res.cloudinary.com/mw0oh0v8/video/upload/v1793034535/atlasinnumbers/atlas097.mp4",
+    "quality": {
+      "checked_at": "2026-10-23T01:39:40.139415+00:00",
+      "claims_sha256": "e0b7b2bc7afc0b35ae57eeae75d04c5faa4b9f7c250dacfe6ba2330e2fb53247",
+      "qa_sha256": "b061ccffe72db0aaa13753827417c28384fbab76c3925cad58e6fa00f4127349",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "status": "scheduled",
+    "title": "Places Where Women MATCH Men at Work",
+    "youtube_url": null
+  },
   "atlas098": {
     "buffer_post_id": "6add55c8e4be8a4d86859774",
     "delivery": {
@@ -1212,6 +1230,13 @@
   },
   "atlas101": {
     "buffer_post_id": "6ade3457e4be8a4d86b8d928",
+    "delivery": {
+      "checked_at": "2026-10-26T17:08:47.975235+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "L7kfyUq8xko",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-26T12:00:00-04:00",
     "id": "atlas101",
     "media_public_id": "atlasinnumbers/atlas101",
@@ -1224,9 +1249,10 @@
       "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-26T16:03:45.163Z",
+    "status": "sent",
     "title": "Which Nations Grow the MOST Permanent Crops?",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/L7kfyUq8xko"
   },
   "atlas102": {
     "buffer_post_id": "6adeaac3bd33ce99c39f6ba8",

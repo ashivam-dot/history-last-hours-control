@@ -31,10 +31,18 @@ RETRIES = HERE / "retries.json"
 HOLD = HERE / "hold.json"
 WITHDRAWN = HERE / "withdrawn.json"
 WORKSPACE = "aksha-shivam18"
+PRODUCER_APP = "creature-receipts"
+# While direct.json exists, Shorts are uploaded straight to YouTube (_upload), not through Buffer.
+DIRECT = HERE / "direct.json"
 VOLUME = "creature-receipts-outbox"
 # Future Atlas posts kept in Buffer: a day of the producer's SLOTS (12:00 and 19:00 ET from 2026-10-22), so a
 # missed run costs no post.
 AHEAD = 2
+# Uploaded straight to YouTube (DIRECT), a week of 3 a day waits as scheduled
+# private videos: Buffer's free plan held 10. An upload costs 1,600 of the 10,000 daily quota units of the Google
+# project Atlas shares with Orbitwire, so 4 a day leaves Orbitwire its uploads.
+AHEAD_DIRECT = 21
+DAILY_UPLOADS = 4
 MAX_RETRIES = 2
 MAX_BYTES = 200 * 1024 * 1024
 
@@ -94,6 +102,14 @@ def _title_held(ep, ds, producer_check=None) -> list[str]:
         return []
 
 
+def _when(stamp: str | None) -> datetime | None:
+    try:
+        when = datetime.fromisoformat((stamp or "").replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return when if when.tzinfo else when.replace(tzinfo=timezone.utc)
+
+
 def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
@@ -117,6 +133,28 @@ def _video(path: str, sha: str) -> bytes:
     if hashlib.sha256(data).hexdigest() != sha or data[4:8] != b"ftyp":
         raise RuntimeError(f"{path} differs from the producer's record")
     return bytes(data)
+
+
+def _upload(folder: Path, ready: dict, taken: list[datetime]) -> dict:
+    """Upload a parked Short straight to YouTube through the producer's Modal function `atlas_upload`, which reads
+    the video from the outbox and holds the channel's sign-in; this job never sees either."""
+    import modal
+
+    if modal.Workspace.from_context().hydrate().name != WORKSPACE:
+        raise RuntimeError("the Modal token belongs to a different workspace")
+    files = {n: (folder / n).read_text(encoding="utf-8") for n in ("atlas.yaml", "data.json", "credits.json")
+             if (folder / n).exists()}
+    upload = modal.Function.from_name(PRODUCER_APP, "atlas_upload")
+    return upload.remote(files, ready["modal_path"], ready["media_sha256"], [t.isoformat() for t in taken])
+
+
+def _withdraw(video_ids: list[str]) -> list[str]:
+    """Unschedule direct uploads through the producer's Modal function `atlas_withdraw` (they stay private)."""
+    import modal
+
+    if modal.Workspace.from_context().hydrate().name != WORKSPACE:
+        raise RuntimeError("the Modal token belongs to a different workspace")
+    return modal.Function.from_name(PRODUCER_APP, "atlas_withdraw").remote(video_ids)
 
 
 def quality_record(ready: dict, accepted: dict) -> dict:
@@ -214,6 +252,16 @@ def main(argv: list[str]) -> int:
                 del state[episode_id]
             else:
                 errors.append({"id": episode_id, "error": message})
+    for episode_id, record in state.items():
+        if record.get("route") != "youtube" or record.get("delivery", {}).get("confirmed"):
+            continue
+        due = _when(record.get("due_at"))
+        if due and due <= now:
+            record["status"] = "sent"
+            record["delivery"] = confirm_delivery(record)
+            if not record["delivery"]["confirmed"] and now - due > timedelta(hours=4):
+                errors.append({"id": episode_id, "error": "Scheduled upload is not public on YouTube: "
+                               + record["delivery"]["reason"]})
     _save(STATE, state)
     _save(RETRIES, retries)
 
@@ -233,6 +281,24 @@ def main(argv: list[str]) -> int:
             _save(STATE, state)
             _save(WITHDRAWN, withdrawn)
             report["withdrawn"].append({"id": episode_id, "title": record.get("title"), "due_at": record.get("due_at")})
+        direct_future = {episode_id: record for episode_id, record in state.items()
+                         if record.get("route") == "youtube" and (_when(record.get("due_at")) or now) > now}
+        if direct_future:
+            try:
+                done = set(_withdraw([r["youtube_video_id"] for r in direct_future.values()]))
+            except Exception as err:
+                done = set()
+                errors.append({"id": "hold", "error": "couldn't unschedule direct uploads: " + str(err)[:300]})
+            for episode_id, record in direct_future.items():
+                if record["youtube_video_id"] not in done:
+                    continue
+                withdrawn[episode_id] = record | {"status": "withdrawn", "withdrawn_at": now.isoformat(),
+                                                  "reason": reason}
+                del state[episode_id]
+                report["withdrawn"].append({"id": episode_id, "title": record.get("title"),
+                                            "due_at": record.get("due_at")})
+            _save(STATE, state)
+            _save(WITHDRAWN, withdrawn)
         _save(HEALTH, {"checked_at": now.isoformat(timespec="seconds"), "future_posts": 0, "waiting": 0,
                        "errors": errors, "problem": "", "held": reason})
         print(json.dumps(report | {"held": reason, "errors": errors}, indent=2))
@@ -270,10 +336,20 @@ def main(argv: list[str]) -> int:
     waiting = [p.parent for p in sorted((producer / "content" / "atlas").glob("atlas*/ready.json"))
                if p.parent.name not in state and p.parent.name not in withdrawn]
     waiting = ordered(waiting, atlas, state, producer)
+    direct = DIRECT.exists()
+    # Uploads already scheduled on YouTube count even with direct.json gone, so Buffer can't book over them.
+    future += [r for r in state.values() if r.get("route") == "youtube" and (_when(r.get("due_at")) or now) > now]
     report |= {"future_posts": len(future), "waiting": [w.name for w in waiting], "scheduled": [], "failed": [],
-               "old_format": [], "title_held": []}
+               "old_format": [], "title_held": [], "route": "youtube" if direct else "buffer"}
+    room = max(AHEAD - len(future), 0)
+    if direct:
+        uploaded = sum(1 for r in state.values() if (_when(r.get("uploaded_at")) or now - timedelta(days=2))
+                       > now - timedelta(hours=24))
+        room = max(min(AHEAD_DIRECT - len(future), DAILY_UPLOADS - uploaded), 0)
+        taken = [t for t in (_when(r.get("due_at")) for r in state.values()) if t and t > now]
+        taken += [t for t in (_when(p.get("dueAt")) for p in queue) if t]
     for folder in waiting:
-        if len(report["scheduled"]) >= max(AHEAD - len(future), 0):
+        if len(report["scheduled"]) >= room:
             break
         try:
             ready = json.loads((folder / "ready.json").read_text(encoding="utf-8"))
@@ -292,14 +368,21 @@ def main(argv: list[str]) -> int:
             if held := _title_held(ep, ds, getattr(atlas, "title_problems", None)):
                 report["title_held"].append({"id": folder.name, "title": ep.title, "problems": held})
                 continue
-            with tempfile.TemporaryDirectory() as tmp:
-                video = Path(tmp) / "short.mp4"
-                video.write_bytes(_video(ready["modal_path"], ready["media_sha256"]))
-                record = atlas.schedule(ep, Path(tmp), ds, video)
+            if direct:
+                record = _upload(folder, ready, taken)
+                taken.append(_when(record["due_at"]))
+            else:
+                with tempfile.TemporaryDirectory() as tmp:
+                    video = Path(tmp) / "short.mp4"
+                    video.write_bytes(_video(ready["modal_path"], ready["media_sha256"]))
+                    record = atlas.schedule(ep, Path(tmp), ds, video)
         except Exception as err:  # one bad Short mustn't stop the rest
             report["failed"].append({"id": folder.name, "error": f"{type(err).__name__}: {str(err)[:300]}"})
+            if direct and any(m in str(err) for m in ("quota", "uploadLimitExceeded", "rateLimitExceeded")):
+                break
             continue
-        state[folder.name] = record | {"media_sha256": ready["media_sha256"], "quality": quality_record(ready, accepted)}
+        state[folder.name] = record | {"media_sha256": ready["media_sha256"], "quality": quality_record(ready, accepted),
+                                       "look": ready.get("look")}
         _save(STATE, state)
         report["scheduled"].append({"id": folder.name, "title": record["title"], "due_at": record["due_at"]})
 

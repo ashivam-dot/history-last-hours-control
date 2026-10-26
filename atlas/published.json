@@ -1202,6 +1202,25 @@
     "title": "Places Ranked by the Income of the Richest Fifth",
     "youtube_url": "https://www.youtube.com/shorts/Ajxn3k-Y1HY"
   },
+  "atlas099": {
+    "due_at": "2026-10-27T16:00:00-04:00",
+    "id": "atlas099",
+    "look": null,
+    "media_sha256": "ca4d752208a21a837d535a2f565893b45b69b8fe139df4b9d0be837bb70463d2",
+    "quality": {
+      "checked_at": "2026-10-23T17:44:07.434132+00:00",
+      "claims_sha256": "5215ac26e0f8318cfe7a5e4197a29f14207af0aa777fba03e8d22cf3dc3e4702",
+      "qa_sha256": "80aa35fa5f88c0213ca4e2db792f7b6df58c4a58b5e8fd40e7d1eb6bd31b979b",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Youth Dependency",
+    "uploaded_at": "2026-10-26T20:13:51+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/Tske8W82DqA",
+    "youtube_video_id": "Tske8W82DqA"
+  },
   "atlas100": {
     "buffer_post_id": "6adce2c06887a2efc1c89bb5",
     "delivery": {
@@ -1271,5 +1290,62 @@
     "status": "scheduled",
     "title": "Places Ranked by the Cost of Sending Money",
     "youtube_url": null
+  },
+  "atlas103": {
+    "due_at": "2026-10-28T12:00:00-04:00",
+    "id": "atlas103",
+    "look": null,
+    "media_sha256": "13a07f43e845488441c3085fcfc368574ed1a2142691718b1605fb8c1023b22e",
+    "quality": {
+      "checked_at": "2026-10-25T17:19:02.692631+00:00",
+      "claims_sha256": "c070fa2cd4b56bd5b3ea65ea150aaa5547c2e6ed3952b257424bf66b9b5e3610",
+      "qa_sha256": "f0ca457c2f5f9f43bd950be74e3cc94decee6c757012c1dd1804b5a585f2a1e3",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Dependency Load",
+    "uploaded_at": "2026-10-26T20:14:01+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/r20VC-oQccQ",
+    "youtube_video_id": "r20VC-oQccQ"
+  },
+  "atlas104": {
+    "due_at": "2026-10-27T19:00:00-04:00",
+    "id": "atlas104",
+    "look": null,
+    "media_sha256": "580cffe5cc267312f72c42233a1cd285fe1e091229047fbf78760587b6e7208c",
+    "quality": {
+      "checked_at": "2026-10-26T09:23:00.083636+00:00",
+      "claims_sha256": "6843bec5534300f1d48d25f8ea1af3b4dc4f4f04bc634b86a43240707d98e4a5",
+      "qa_sha256": "0b2dcee6068b39fa19010d2925899e2e6d0a63081085274913a04a039a6cc02d",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Food Insecurity",
+    "uploaded_at": "2026-10-26T20:13:57+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/6YZHnVj0XKo",
+    "youtube_video_id": "6YZHnVj0XKo"
+  },
+  "atlas105": {
+    "due_at": "2026-10-28T16:00:00-04:00",
+    "id": "atlas105",
+    "look": null,
+    "media_sha256": "0e1b75a51b3f926af80f121c7082c8e4f08d767eca0f0ce8e608236760457861",
+    "quality": {
+      "checked_at": "2026-10-26T17:26:01.217383+00:00",
+      "claims_sha256": "2b69c23b9113d594714cdbd7bacf14734ce7751965e009b1e185f8763f9285e2",
+      "qa_sha256": "3b370f56bf47f974baf49a63ebe7b1804f32ec7f337fa3afd11921263fdaf52c",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Places Use the MOST Water for Industry?",
+    "uploaded_at": "2026-10-26T20:14:07+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/tjrOUqev3Q4",
+    "youtube_video_id": "tjrOUqev3Q4"
   }
 }

@@ -1393,6 +1393,13 @@
     "youtube_video_id": "tjrOUqev3Q4"
   },
   "atlas106": {
+    "delivery": {
+      "checked_at": "2026-10-30T19:33:20.760346+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "1nSePuIDeQ8",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-30T12:00:00-04:00",
     "id": "atlas106",
     "look": "versus",
@@ -1405,7 +1412,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "USA vs Iraq: The 85 Times Research Spending Gap",
     "uploaded_at": "2026-10-30T13:16:28+00:00",
     "youtube_url": "https://www.youtube.com/shorts/1nSePuIDeQ8",

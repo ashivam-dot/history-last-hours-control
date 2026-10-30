@@ -1160,6 +1160,13 @@
   },
   "atlas097": {
     "buffer_post_id": "6adf892ac0781bde2d2ea03c",
+    "delivery": {
+      "checked_at": "2026-10-30T13:16:19.148109+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "HFGcEJidlH8",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-27T12:00:00-04:00",
     "id": "atlas097",
     "media_public_id": "atlasinnumbers/atlas097",
@@ -1172,9 +1179,10 @@
       "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
       "version": 1
     },
-    "status": "scheduled",
+    "sent_at": "2026-10-27T16:03:35.664Z",
+    "status": "sent",
     "title": "Places Where Women MATCH Men at Work",
-    "youtube_url": null
+    "youtube_url": "https://www.youtube.com/shorts/HFGcEJidlH8"
   },
   "atlas098": {
     "buffer_post_id": "6add55c8e4be8a4d86859774",
@@ -1203,6 +1211,13 @@
     "youtube_url": "https://www.youtube.com/shorts/Ajxn3k-Y1HY"
   },
   "atlas099": {
+    "delivery": {
+      "checked_at": "2026-10-30T13:16:19.212175+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "Tske8W82DqA",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-27T16:00:00-04:00",
     "id": "atlas099",
     "look": null,
@@ -1215,7 +1230,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Youth Dependency",
     "uploaded_at": "2026-10-26T20:13:51+00:00",
     "youtube_url": "https://www.youtube.com/shorts/Tske8W82DqA",
@@ -1300,6 +1315,13 @@
     "youtube_url": "https://www.youtube.com/shorts/OkfJBlG5XxU"
   },
   "atlas103": {
+    "delivery": {
+      "checked_at": "2026-10-30T13:16:19.300159+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "r20VC-oQccQ",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-28T12:00:00-04:00",
     "id": "atlas103",
     "look": null,
@@ -1312,13 +1334,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Dependency Load",
     "uploaded_at": "2026-10-26T20:14:01+00:00",
     "youtube_url": "https://www.youtube.com/shorts/r20VC-oQccQ",
     "youtube_video_id": "r20VC-oQccQ"
   },
   "atlas104": {
+    "delivery": {
+      "checked_at": "2026-10-30T13:16:19.369018+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "6YZHnVj0XKo",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-27T19:00:00-04:00",
     "id": "atlas104",
     "look": null,
@@ -1331,13 +1360,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Food Insecurity",
     "uploaded_at": "2026-10-26T20:13:57+00:00",
     "youtube_url": "https://www.youtube.com/shorts/6YZHnVj0XKo",
     "youtube_video_id": "6YZHnVj0XKo"
   },
   "atlas105": {
+    "delivery": {
+      "checked_at": "2026-10-30T13:16:19.439757+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "tjrOUqev3Q4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-28T16:00:00-04:00",
     "id": "atlas105",
     "look": null,
@@ -1350,10 +1386,86 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Places Use the MOST Water for Industry?",
     "uploaded_at": "2026-10-26T20:14:07+00:00",
     "youtube_url": "https://www.youtube.com/shorts/tjrOUqev3Q4",
     "youtube_video_id": "tjrOUqev3Q4"
+  },
+  "atlas106": {
+    "due_at": "2026-10-30T12:00:00-04:00",
+    "id": "atlas106",
+    "look": "versus",
+    "media_sha256": "2116e48bf8f433aaa990f7e0e8b13e845469ea14b4d329e463b78e607998e8a9",
+    "quality": {
+      "checked_at": "2026-10-27T01:19:22.353046+00:00",
+      "claims_sha256": "085d0df5982ee2a71f82bca7fe09c64d44c83eb014c0beeb966f739cc8cda02b",
+      "qa_sha256": "4885dfaad20cc35005ddcb86c270393571a11e8a136af719e655a0106acdfe10",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "USA vs Iraq: The 85 Times Research Spending Gap",
+    "uploaded_at": "2026-10-30T13:16:28+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/1nSePuIDeQ8",
+    "youtube_video_id": "1nSePuIDeQ8"
+  },
+  "atlas107": {
+    "due_at": "2026-10-30T16:00:00-04:00",
+    "id": "atlas107",
+    "look": "odd_one_out",
+    "media_sha256": "ce697abd5f1f1904dd0734aeafa6ec1a130e00e212703af7ed8d06934e5342a0",
+    "quality": {
+      "checked_at": "2026-10-27T01:27:47.700194+00:00",
+      "claims_sha256": "5c9027fb0fdd73f133cc4093c43ea099e9e9d1591225975b824ec7c451b4063a",
+      "qa_sha256": "380666fe4a153588431f1b95d32936dc3dd90a91e96ce315309c229ad9104cba",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Country Has the MOST Diabetes?",
+    "uploaded_at": "2026-10-30T13:16:33+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/e1yAtIAFQbk",
+    "youtube_video_id": "e1yAtIAFQbk"
+  },
+  "atlas108": {
+    "due_at": "2026-10-30T19:00:00-04:00",
+    "id": "atlas108",
+    "look": "map_reveal",
+    "media_sha256": "71f5b2b197a6d7900c12fbacc974d9f81c29bf29413072784949f702f58fc44e",
+    "quality": {
+      "checked_at": "2026-10-27T01:34:10.721827+00:00",
+      "claims_sha256": "0418dd87bb555f9d1f9cc401ab9124071499dec9f217a521fc8fc8b5841c2ae0",
+      "qa_sha256": "f4067dfee356488222a5e0fa1050f161e8ea4620e4764eb32cfa986bfcfe9071",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by How Much Money They Save",
+    "uploaded_at": "2026-10-30T13:16:38+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/ngiyb0gsiUE",
+    "youtube_video_id": "ngiyb0gsiUE"
+  },
+  "atlas109": {
+    "due_at": "2026-10-31T12:00:00-04:00",
+    "id": "atlas109",
+    "look": "rank_ladder",
+    "media_sha256": "2ac3955f0ba50b91db977476d3ded58d6a8d876318e96103f4f440163aed16a3",
+    "quality": {
+      "checked_at": "2026-10-27T01:39:18.909247+00:00",
+      "claims_sha256": "4ce31aa52205d93f95c931cc08d9e6e82745500d2f4b1721dc0c240f3f055e8d",
+      "qa_sha256": "2055270491e35aa1045e1e49df579fe07ebfc4a420245298f6ffb16d6d5f62e4",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Years of Preschool",
+    "uploaded_at": "2026-10-30T13:16:42+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/IpYhnrI0qYM",
+    "youtube_video_id": "IpYhnrI0qYM"
   }
 }

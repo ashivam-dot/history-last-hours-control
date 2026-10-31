@@ -1471,6 +1471,13 @@
     "youtube_video_id": "ngiyb0gsiUE"
   },
   "atlas109": {
+    "delivery": {
+      "checked_at": "2026-10-31T18:40:04.807427+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "IpYhnrI0qYM",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-31T12:00:00-04:00",
     "id": "atlas109",
     "look": "rank_ladder",
@@ -1483,10 +1490,86 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Years of Preschool",
     "uploaded_at": "2026-10-30T13:16:42+00:00",
     "youtube_url": "https://www.youtube.com/shorts/IpYhnrI0qYM",
     "youtube_video_id": "IpYhnrI0qYM"
+  },
+  "atlas112": {
+    "due_at": "2026-10-31T16:00:00-04:00",
+    "id": "atlas112",
+    "look": "odd_one_out",
+    "media_sha256": "6b6a9b0e112824d1dfaeda99c92b89f7f7301eb9b1422b1b29a38d55dfb01eee",
+    "quality": {
+      "checked_at": "2026-10-30T17:29:06.177651+00:00",
+      "claims_sha256": "2e38bbbab7cb49e5bd18f0239be6c688592300e8a6b50f78294f238faa072e83",
+      "qa_sha256": "e2190e8f65e60a640a5a731dfcba49e7b0dcfc773d0018c16de2b9b1d3be1a42",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Country Has the Most Youth Financial Access?",
+    "uploaded_at": "2026-10-31T18:40:16+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/EOe-HOtlST4",
+    "youtube_video_id": "EOe-HOtlST4"
+  },
+  "atlas113": {
+    "due_at": "2026-10-31T19:00:00-04:00",
+    "id": "atlas113",
+    "look": "map_reveal",
+    "media_sha256": "7118cd253d61146c1dc10c4b2f34924acd46d7d813529fc3453538b7f8b7134f",
+    "quality": {
+      "checked_at": "2026-10-30T17:38:41.256914+00:00",
+      "claims_sha256": "7d428791f20279591442f567a77bcd965f29c2781aa0a4742f3d5233b4e76665",
+      "qa_sha256": "eb7ba1639c1b69a92ea02fffd3ae31254bb7133c229603883a6c6c104ff813c7",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Is YOUR Country a Service Economy?",
+    "uploaded_at": "2026-10-31T18:40:24+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/VDyF2UVeySc",
+    "youtube_video_id": "VDyF2UVeySc"
+  },
+  "atlas114": {
+    "due_at": "2026-11-01T12:00:00-05:00",
+    "id": "atlas114",
+    "look": "rank_ladder",
+    "media_sha256": "d1d61acab15f0aaced54b77cf4336e1c7da247aeb57ca7c771ff987585a25aad",
+    "quality": {
+      "checked_at": "2026-10-30T17:52:26.424326+00:00",
+      "claims_sha256": "a65e8191cf8d7ebf170df1b40caefd61533657243c2c8fc30c21c5a2be4c06ec",
+      "qa_sha256": "cb0b317e7df64daf34b8b95c6aadd41f2f330cf9a09cf429ac2c043b3b691733",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by University Degrees",
+    "uploaded_at": "2026-10-31T18:40:31+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/yaEk8BwQAzg",
+    "youtube_video_id": "yaEk8BwQAzg"
+  },
+  "atlas119": {
+    "due_at": "2026-11-01T16:00:00-05:00",
+    "id": "atlas119",
+    "look": "versus",
+    "media_sha256": "06d4e4e9efbcf29f5a3a4b28f979476d0f97753a35dc6b7189a33f57956f3af8",
+    "quality": {
+      "checked_at": "2026-10-31T09:25:27.566779+00:00",
+      "claims_sha256": "ced818c0e0fef5f2a6e891eb629b295296cc06519a9e8da3515c2459e40c36f9",
+      "qa_sha256": "6c9dd8e89eb8173c0e14b87dc3bb96affd35f27e9f21759a07db1f92b9937667",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Qatar vs Chad: The Global Paid Employment Gap",
+    "uploaded_at": "2026-10-31T18:40:39+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/BjjIC0nFiZs",
+    "youtube_video_id": "BjjIC0nFiZs"
   }
 }

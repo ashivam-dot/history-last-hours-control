@@ -1497,6 +1497,13 @@
     "youtube_video_id": "IpYhnrI0qYM"
   },
   "atlas112": {
+    "delivery": {
+      "checked_at": "2026-10-31T23:31:30.339898+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "EOe-HOtlST4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-31T16:00:00-04:00",
     "id": "atlas112",
     "look": "odd_one_out",
@@ -1509,13 +1516,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Country Has the Most Youth Financial Access?",
     "uploaded_at": "2026-10-31T18:40:16+00:00",
     "youtube_url": "https://www.youtube.com/shorts/EOe-HOtlST4",
     "youtube_video_id": "EOe-HOtlST4"
   },
   "atlas113": {
+    "delivery": {
+      "checked_at": "2026-10-31T23:31:30.419311+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "VDyF2UVeySc",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-10-31T19:00:00-04:00",
     "id": "atlas113",
     "look": "map_reveal",
@@ -1528,7 +1542,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Is YOUR Country a Service Economy?",
     "uploaded_at": "2026-10-31T18:40:24+00:00",
     "youtube_url": "https://www.youtube.com/shorts/VDyF2UVeySc",

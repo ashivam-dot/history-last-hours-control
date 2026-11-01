@@ -1549,6 +1549,13 @@
     "youtube_video_id": "VDyF2UVeySc"
   },
   "atlas114": {
+    "delivery": {
+      "checked_at": "2026-11-01T20:40:14.249886+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "yaEk8BwQAzg",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-01T12:00:00-05:00",
     "id": "atlas114",
     "look": "rank_ladder",
@@ -1561,7 +1568,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by University Degrees",
     "uploaded_at": "2026-10-31T18:40:31+00:00",
     "youtube_url": "https://www.youtube.com/shorts/yaEk8BwQAzg",
@@ -1585,5 +1592,81 @@
     "uploaded_at": "2026-10-31T18:40:39+00:00",
     "youtube_url": "https://www.youtube.com/shorts/BjjIC0nFiZs",
     "youtube_video_id": "BjjIC0nFiZs"
+  },
+  "atlas120": {
+    "due_at": "2026-11-01T19:00:00-05:00",
+    "id": "atlas120",
+    "look": "spotlight",
+    "media_sha256": "46bcdafa2fe14f6294aa5607e64abf72fe4828374de26846c46af3916bd2d0b5",
+    "quality": {
+      "checked_at": "2026-11-01T01:22:39.662797+00:00",
+      "claims_sha256": "5f47285739d99a06521472a16d4907665323a00650eed08746e7dc3e6953b79f",
+      "qa_sha256": "776755e1f9d2eebdc3822b672cd605c9fdb12fe1d3522c62088dccec9fa3aae4",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "How Does the USA Compare on Safe Drinking Water?",
+    "uploaded_at": "2026-11-01T20:40:21+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/QvO3VyhuA34",
+    "youtube_video_id": "QvO3VyhuA34"
+  },
+  "atlas121": {
+    "due_at": "2026-11-02T12:00:00-05:00",
+    "id": "atlas121",
+    "look": "map_reveal",
+    "media_sha256": "e764779627d7b5a798d99a81c7e8b28fa9a6982883a3b1df872b098765346cc2",
+    "quality": {
+      "checked_at": "2026-11-01T01:31:25.902676+00:00",
+      "claims_sha256": "b022f7f6701514305bd4b36c6c8eab5283c361be77f9888c949aac72c3914e91",
+      "qa_sha256": "863da67d238dfe1e06fd2981c269494009272af34c22d3aed33259a480e299a6",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "The Places With the Highest Male Share",
+    "uploaded_at": "2026-11-01T20:40:26+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/fK-oyqpQ8Ws",
+    "youtube_video_id": "fK-oyqpQ8Ws"
+  },
+  "atlas122": {
+    "due_at": "2026-11-02T19:00:00-05:00",
+    "id": "atlas122",
+    "look": "versus",
+    "media_sha256": "8f861145655986e410d0d6b7ebc9e960e58e4484fc2207f08f5c06f6a54a148a",
+    "quality": {
+      "checked_at": "2026-11-01T01:39:03.080165+00:00",
+      "claims_sha256": "d3bd45626920d307e6fd3624478ec7a9c354b75e7f58b9133a85fdb1fb01ea4c",
+      "qa_sha256": "a4c7c486d6bd83b6f7be3acbb6f18d45a104a7f7693c10913914cf36c4d0bd4e",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "USA vs Russia: How Much Tax Revenue Comes From Income?",
+    "uploaded_at": "2026-11-01T20:40:36+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/_331z2i2Rb4",
+    "youtube_video_id": "_331z2i2Rb4"
+  },
+  "atlas123": {
+    "due_at": "2026-11-02T16:00:00-05:00",
+    "id": "atlas123",
+    "look": "rank_ladder",
+    "media_sha256": "49c8d7c73ce851e41f50c59f69cfcb48fb3f09099f47708d462c3afb2e7f409b",
+    "quality": {
+      "checked_at": "2026-11-01T01:46:04.919231+00:00",
+      "claims_sha256": "1e30d54f7fab11eaa6d33a08ec5a7b2034070faaf6e5581cdb37aff8ff377edc",
+      "qa_sha256": "ac0f1fe3a8d3d05aab84f0ee45926512799778b9b5b0ae51205f73160fe925ac",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Access to Basic Sanitation",
+    "uploaded_at": "2026-11-01T20:40:32+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/faApITxzDDU",
+    "youtube_video_id": "faApITxzDDU"
   }
 }

@@ -1627,6 +1627,13 @@
     "youtube_video_id": "QvO3VyhuA34"
   },
   "atlas121": {
+    "delivery": {
+      "checked_at": "2026-11-02T20:27:07.491007+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "fK-oyqpQ8Ws",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-02T12:00:00-05:00",
     "id": "atlas121",
     "look": "map_reveal",
@@ -1639,7 +1646,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "The Places With the Highest Male Share",
     "uploaded_at": "2026-11-01T20:40:26+00:00",
     "youtube_url": "https://www.youtube.com/shorts/fK-oyqpQ8Ws",

@@ -1653,6 +1653,13 @@
     "youtube_video_id": "fK-oyqpQ8Ws"
   },
   "atlas122": {
+    "delivery": {
+      "checked_at": "2026-11-03T03:32:47.639092+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "_331z2i2Rb4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-02T19:00:00-05:00",
     "id": "atlas122",
     "look": "versus",
@@ -1665,13 +1672,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "USA vs Russia: How Much Tax Revenue Comes From Income?",
     "uploaded_at": "2026-11-01T20:40:36+00:00",
     "youtube_url": "https://www.youtube.com/shorts/_331z2i2Rb4",
     "youtube_video_id": "_331z2i2Rb4"
   },
   "atlas123": {
+    "delivery": {
+      "checked_at": "2026-11-03T03:32:47.745325+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "faApITxzDDU",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-02T16:00:00-05:00",
     "id": "atlas123",
     "look": "rank_ladder",
@@ -1684,10 +1698,86 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Access to Basic Sanitation",
     "uploaded_at": "2026-11-01T20:40:32+00:00",
     "youtube_url": "https://www.youtube.com/shorts/faApITxzDDU",
     "youtube_video_id": "faApITxzDDU"
+  },
+  "atlas124": {
+    "due_at": "2026-11-03T16:00:00-05:00",
+    "id": "atlas124",
+    "look": "odd_one_out",
+    "media_sha256": "d0ae81e9d02cd3f36ebecc53e3553fb371def0039c567efc936e49512cb63710",
+    "quality": {
+      "checked_at": "2026-11-02T01:20:21.847238+00:00",
+      "claims_sha256": "8bdcf67b82d119f6aea4f45107f955985b572d8e05a10e128316422ee501dd53",
+      "qa_sha256": "424e26b8555c1d0a9567c21fcfa0cb8663691f683293528328ff6e4e8c80071c",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Major Country Has the Highest Savings Rate?",
+    "uploaded_at": "2026-11-03T03:33:03+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/hlaRxTfRfHY",
+    "youtube_video_id": "hlaRxTfRfHY"
+  },
+  "atlas125": {
+    "due_at": "2026-11-03T12:00:00-05:00",
+    "id": "atlas125",
+    "look": "map_reveal",
+    "media_sha256": "ab81617ce080a0d2fa2731f6695e13025a215bfae940092f9b360e9944dc3f2f",
+    "quality": {
+      "checked_at": "2026-11-02T01:36:40.369938+00:00",
+      "claims_sha256": "622173bdad90273e491c86edb236bd751e3ff58cd572e31c50b79f19a7ca341f",
+      "qa_sha256": "28a01a61f7ec2830aee8560cb7b19b791f716b1511926cc38014d01582589788",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Adult Literacy",
+    "uploaded_at": "2026-11-03T03:32:57+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/04ZgAZ4nMzE",
+    "youtube_video_id": "04ZgAZ4nMzE"
+  },
+  "atlas126": {
+    "due_at": "2026-11-04T12:00:00-05:00",
+    "id": "atlas126",
+    "look": "versus",
+    "media_sha256": "89e3e83ad0207feab3f86ba030b5152fa241bec92386632589d5109677b54e83",
+    "quality": {
+      "checked_at": "2026-11-02T01:42:42.681756+00:00",
+      "claims_sha256": "f74a1142284de2477f660c5b1cd35a9953c6e23a2b13f4fcd2399ac9f2d82a65",
+      "qa_sha256": "96a768ff7c8f6482746a85345e049453590c73d7cef238d53442f43cdae48d1d",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Iraq vs USA: Natural Resource Wealth",
+    "uploaded_at": "2026-11-03T03:33:13+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/xHHW_gA17-M",
+    "youtube_video_id": "xHHW_gA17-M"
+  },
+  "atlas127": {
+    "due_at": "2026-11-03T19:00:00-05:00",
+    "id": "atlas127",
+    "look": "spotlight",
+    "media_sha256": "d7960ec9b2a72eb0e994fd96a266d95c29307f8359917fab2ff06d323e0ed539",
+    "quality": {
+      "checked_at": "2026-11-02T09:25:28.032830+00:00",
+      "claims_sha256": "a7ff14408331c84ebba2f08d45cfbfbb4ae7fec0cfff00d42ceaaa42bf3a6852",
+      "qa_sha256": "bdd4afe40c9569bca3fa01ed2ed4c29e0f2d3337055be9e59718b0e7f237e9bb",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "How Does the USA Compare on High School Completion?",
+    "uploaded_at": "2026-11-03T03:33:08+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/U4EuezbAArA",
+    "youtube_video_id": "U4EuezbAArA"
   }
 }

@@ -1724,6 +1724,13 @@
     "youtube_video_id": "hlaRxTfRfHY"
   },
   "atlas125": {
+    "delivery": {
+      "checked_at": "2026-11-03T19:41:53.768253+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "04ZgAZ4nMzE",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-03T12:00:00-05:00",
     "id": "atlas125",
     "look": "map_reveal",
@@ -1736,7 +1743,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Adult Literacy",
     "uploaded_at": "2026-11-03T03:32:57+00:00",
     "youtube_url": "https://www.youtube.com/shorts/04ZgAZ4nMzE",

@@ -1705,6 +1705,13 @@
     "youtube_video_id": "faApITxzDDU"
   },
   "atlas124": {
+    "delivery": {
+      "checked_at": "2026-11-04T00:44:32.040569+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "hlaRxTfRfHY",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-03T16:00:00-05:00",
     "id": "atlas124",
     "look": "odd_one_out",
@@ -1717,7 +1724,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Major Country Has the Highest Savings Rate?",
     "uploaded_at": "2026-11-03T03:33:03+00:00",
     "youtube_url": "https://www.youtube.com/shorts/hlaRxTfRfHY",
@@ -1769,6 +1776,13 @@
     "youtube_video_id": "xHHW_gA17-M"
   },
   "atlas127": {
+    "delivery": {
+      "checked_at": "2026-11-04T00:44:32.087409+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "U4EuezbAArA",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-03T19:00:00-05:00",
     "id": "atlas127",
     "look": "spotlight",
@@ -1781,7 +1795,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "How Does the USA Compare on High School Completion?",
     "uploaded_at": "2026-11-03T03:33:08+00:00",
     "youtube_url": "https://www.youtube.com/shorts/U4EuezbAArA",

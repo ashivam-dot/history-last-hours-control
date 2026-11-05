@@ -1897,5 +1897,81 @@
     "uploaded_at": "2026-11-04T09:34:58+00:00",
     "youtube_url": "https://www.youtube.com/shorts/jqyjPOhOWog",
     "youtube_video_id": "jqyjPOhOWog"
+  },
+  "atlas135": {
+    "due_at": "2026-11-05T19:00:00-05:00",
+    "id": "atlas135",
+    "look": "spotlight",
+    "media_sha256": "3b9ce460612cdede71ba82df8a5446d25843b8ee1b851bd449c7f37a6f697016",
+    "quality": {
+      "checked_at": "2026-11-04T17:24:08.383763+00:00",
+      "claims_sha256": "b11381d654cb99fe26b76d749f1d1af2f36f3455484d23fb70d11ae9f7bf83e8",
+      "qa_sha256": "2be47ab3f0f06c1b1fcf500f34347cf345613465411cef84f4bdc0e7d470a634",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Is YOUR Country Spending More Than It Produces?",
+    "uploaded_at": "2026-11-05T16:37:35+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/W1ANqzx8hWc",
+    "youtube_video_id": "W1ANqzx8hWc"
+  },
+  "atlas136": {
+    "due_at": "2026-11-06T19:00:00-05:00",
+    "id": "atlas136",
+    "look": "rank_ladder",
+    "media_sha256": "1a48f9bfca1cbc67ee68ea017334d147fde879a407b4df6c2eb1697947a37624",
+    "quality": {
+      "checked_at": "2026-11-04T17:38:47.109626+00:00",
+      "claims_sha256": "95ac75b1abb325116086b215cc52b25d400007c43b338d482491fea02a8638f5",
+      "qa_sha256": "1d44ba5f7084d84f691a96223ba2ec824f2a9fa31f3b5be8d876ea1aaa455539",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Open Defecation Rates",
+    "uploaded_at": "2026-11-05T16:37:47+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/sadIVp7B4Dc",
+    "youtube_video_id": "sadIVp7B4Dc"
+  },
+  "atlas137": {
+    "due_at": "2026-11-06T12:00:00-05:00",
+    "id": "atlas137",
+    "look": "map_reveal",
+    "media_sha256": "335d9bec4ec01be79565065b2f1a3f945ea4841b3e1344c8a08c10feeac2ed5b",
+    "quality": {
+      "checked_at": "2026-11-04T17:48:49.340781+00:00",
+      "claims_sha256": "34e85285a88f0264801d57237aa7a0abbc72a091af6ed930e7692bcb9d8732b8",
+      "qa_sha256": "23a057b773e5458712748b59478545fed9f8d26e59bdfdd19f9d31e26e7c9560",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "The Places With the Highest Adolescent Birth Rates",
+    "uploaded_at": "2026-11-05T16:37:39+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/KSUz8dAdNuo",
+    "youtube_video_id": "KSUz8dAdNuo"
+  },
+  "atlas138": {
+    "due_at": "2026-11-06T16:00:00-05:00",
+    "id": "atlas138",
+    "look": "odd_one_out",
+    "media_sha256": "821ade2b5e064eff23b8c76a65a11c6e02f43aefe58a30b8ac3a1ef83a21a206",
+    "quality": {
+      "checked_at": "2026-11-05T01:22:34.566542+00:00",
+      "claims_sha256": "fa5e5f0a6a78b7727e5e8c93edf82ff92a5d5dfc947fa94e0c22718530caafb6",
+      "qa_sha256": "e69781ab7ae74ba3ea64ce15f1891488efdf489b75898f27ee753d856965f006",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Country Has the MOST Rural Handwashing Access?",
+    "uploaded_at": "2026-11-05T16:37:43+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/f2Ous00hhpc",
+    "youtube_video_id": "f2Ous00hhpc"
   }
 }

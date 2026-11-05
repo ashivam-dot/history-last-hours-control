@@ -1835,6 +1835,13 @@
     "youtube_video_id": "HTbYXsefPSU"
   },
   "atlas131": {
+    "delivery": {
+      "checked_at": "2026-11-05T23:44:59.835246+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "bBqy61yDJFY",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-05T16:00:00-05:00",
     "id": "atlas131",
     "look": "odd_one_out",
@@ -1847,7 +1854,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Country Has the MOST Renewable Electricity?",
     "uploaded_at": "2026-11-04T09:35:08+00:00",
     "youtube_url": "https://www.youtube.com/shorts/bBqy61yDJFY",
@@ -1880,6 +1887,13 @@
     "youtube_video_id": "CVd6eMl-w-U"
   },
   "atlas134": {
+    "delivery": {
+      "checked_at": "2026-11-05T23:44:59.903885+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "jqyjPOhOWog",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-05T12:00:00-05:00",
     "id": "atlas134",
     "look": "versus",
@@ -1892,7 +1906,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "East Timor vs Nigeria: Male Tobacco Use",
     "uploaded_at": "2026-11-04T09:34:58+00:00",
     "youtube_url": "https://www.youtube.com/shorts/jqyjPOhOWog",

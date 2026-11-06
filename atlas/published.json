@@ -1913,6 +1913,13 @@
     "youtube_video_id": "jqyjPOhOWog"
   },
   "atlas135": {
+    "delivery": {
+      "checked_at": "2026-11-06T07:06:31.921494+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "W1ANqzx8hWc",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-05T19:00:00-05:00",
     "id": "atlas135",
     "look": "spotlight",
@@ -1925,7 +1932,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Is YOUR Country Spending More Than It Produces?",
     "uploaded_at": "2026-11-05T16:37:35+00:00",
     "youtube_url": "https://www.youtube.com/shorts/W1ANqzx8hWc",

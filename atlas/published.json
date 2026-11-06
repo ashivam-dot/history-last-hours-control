@@ -1958,6 +1958,13 @@
     "youtube_video_id": "sadIVp7B4Dc"
   },
   "atlas137": {
+    "delivery": {
+      "checked_at": "2026-11-06T21:41:16.598679+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "KSUz8dAdNuo",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-06T12:00:00-05:00",
     "id": "atlas137",
     "look": "map_reveal",
@@ -1970,13 +1977,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "The Places With the Highest Adolescent Birth Rates",
     "uploaded_at": "2026-11-05T16:37:39+00:00",
     "youtube_url": "https://www.youtube.com/shorts/KSUz8dAdNuo",
     "youtube_video_id": "KSUz8dAdNuo"
   },
   "atlas138": {
+    "delivery": {
+      "checked_at": "2026-11-06T21:41:16.648441+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "f2Ous00hhpc",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-06T16:00:00-05:00",
     "id": "atlas138",
     "look": "odd_one_out",
@@ -1989,10 +2003,86 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Country Has the MOST Rural Handwashing Access?",
     "uploaded_at": "2026-11-05T16:37:43+00:00",
     "youtube_url": "https://www.youtube.com/shorts/f2Ous00hhpc",
     "youtube_video_id": "f2Ous00hhpc"
+  },
+  "atlas144": {
+    "due_at": "2026-11-07T12:00:00-05:00",
+    "id": "atlas144",
+    "look": "spotlight",
+    "media_sha256": "3b01863bff04177d4fce5fcaa29e4b13a9d97d2682a9cbf5dae9a783fbe95060",
+    "quality": {
+      "checked_at": "2026-11-06T01:24:56.270775+00:00",
+      "claims_sha256": "a4838f03e037c3c8e3505f66c30cb29942b1d8be6df08a6f8d7683067dfb1fd4",
+      "qa_sha256": "40ce6841cf7b21c1409e8efa8c0e45bc03fb570e45793e1c9c708bab2822d754",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Is EAST Timor Near the Top for Energy Depletion?",
+    "uploaded_at": "2026-11-06T21:41:26+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/-6H0DInbiR4",
+    "youtube_video_id": "-6H0DInbiR4"
+  },
+  "atlas145": {
+    "due_at": "2026-11-07T16:00:00-05:00",
+    "id": "atlas145",
+    "look": "map_reveal",
+    "media_sha256": "d3a306b600d1a2bf7c994b24741336863416e82dc8836fc94d952f99af345b2e",
+    "quality": {
+      "checked_at": "2026-11-06T01:34:33.818713+00:00",
+      "claims_sha256": "c4a16b8dab9e9c9ffcf7e3fb61c050e3eb7d561dfda25c8acf92ad88d343031d",
+      "qa_sha256": "72bd806d8f4de0b193670e038ab7d9db56e940f3ab4d54d0329af16b6f3dda28",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Is YOUR Country Powered by Oil?",
+    "uploaded_at": "2026-11-06T21:41:31+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/rHSKAGPBCNQ",
+    "youtube_video_id": "rHSKAGPBCNQ"
+  },
+  "atlas149": {
+    "due_at": "2026-11-07T19:00:00-05:00",
+    "id": "atlas149",
+    "look": "versus",
+    "media_sha256": "ded517062e48b8b9973d560b8add4c2425cefb6bff36e3c04239c0f676955762",
+    "quality": {
+      "checked_at": "2026-11-06T09:18:33.118272+00:00",
+      "claims_sha256": "9a8d95aa0c610d13163e97aadd74884c8bc7586c2a22c1d715f0c7082bf64202",
+      "qa_sha256": "992739f22c0d0d5e18da007d545f8693a359ccff3dc4bd7caa25dc8ca6b039f1",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Romania vs India: Female Alcohol Consumption",
+    "uploaded_at": "2026-11-06T21:41:36+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/vSd-3tGLKx4",
+    "youtube_video_id": "vSd-3tGLKx4"
+  },
+  "atlas151": {
+    "due_at": "2026-11-08T12:00:00-05:00",
+    "id": "atlas151",
+    "look": "rank_ladder",
+    "media_sha256": "14a85e282d1921eff6fa7151598918182b7e53388ee851b6adc3596193d0c2ea",
+    "quality": {
+      "checked_at": "2026-11-06T17:39:40.099499+00:00",
+      "claims_sha256": "efce6ed7c24a9f363989303f7cd0b3b0afb75c1ad9b0c7d6825244662847d30c",
+      "qa_sha256": "42c4cb46626535c6a6bf1d62483f4db4547fb7e7fe2ca808dc0d7c3b31da0b45",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Male Internet Use",
+    "uploaded_at": "2026-11-06T21:41:41+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/2hyGTqZ_QOk",
+    "youtube_video_id": "2hyGTqZ_QOk"
   }
 }

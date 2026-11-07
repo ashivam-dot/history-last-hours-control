@@ -1939,6 +1939,13 @@
     "youtube_video_id": "W1ANqzx8hWc"
   },
   "atlas136": {
+    "delivery": {
+      "checked_at": "2026-11-07T02:06:42.617861+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "sadIVp7B4Dc",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-06T19:00:00-05:00",
     "id": "atlas136",
     "look": "rank_ladder",
@@ -1951,7 +1958,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Open Defecation Rates",
     "uploaded_at": "2026-11-05T16:37:47+00:00",
     "youtube_url": "https://www.youtube.com/shorts/sadIVp7B4Dc",

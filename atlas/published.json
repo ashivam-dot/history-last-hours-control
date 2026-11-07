@@ -2017,6 +2017,13 @@
     "youtube_video_id": "f2Ous00hhpc"
   },
   "atlas144": {
+    "delivery": {
+      "checked_at": "2026-11-07T22:08:08.657729+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "-6H0DInbiR4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-07T12:00:00-05:00",
     "id": "atlas144",
     "look": "spotlight",
@@ -2029,13 +2036,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Is EAST Timor Near the Top for Energy Depletion?",
     "uploaded_at": "2026-11-06T21:41:26+00:00",
     "youtube_url": "https://www.youtube.com/shorts/-6H0DInbiR4",
     "youtube_video_id": "-6H0DInbiR4"
   },
   "atlas145": {
+    "delivery": {
+      "checked_at": "2026-11-07T22:08:08.719666+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "rHSKAGPBCNQ",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-07T16:00:00-05:00",
     "id": "atlas145",
     "look": "map_reveal",
@@ -2048,7 +2062,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Is YOUR Country Powered by Oil?",
     "uploaded_at": "2026-11-06T21:41:31+00:00",
     "youtube_url": "https://www.youtube.com/shorts/rHSKAGPBCNQ",
@@ -2091,5 +2105,81 @@
     "uploaded_at": "2026-11-06T21:41:41+00:00",
     "youtube_url": "https://www.youtube.com/shorts/2hyGTqZ_QOk",
     "youtube_video_id": "2hyGTqZ_QOk"
+  },
+  "atlas153": {
+    "due_at": "2026-11-08T16:00:00-05:00",
+    "id": "atlas153",
+    "look": "spotlight",
+    "media_sha256": "b00daeba531fc0f1aa4dfbec8299c08eadf34db3524711e36cd07bcb68ad0bd3",
+    "quality": {
+      "checked_at": "2026-11-07T01:44:16.011271+00:00",
+      "claims_sha256": "9011f361f77d8cf659d6b1c3336428fa77ce6fa4da5fa79b95c8365794cb60f7",
+      "qa_sha256": "2bbe3dea03809fcff5fb780da15216ae5323285e802e54ebd1fec8043c7db917",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Is Madagascar the Highest for Bank Loan Spreads?",
+    "uploaded_at": "2026-11-07T22:08:16+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/jdZgJ20H5gA",
+    "youtube_video_id": "jdZgJ20H5gA"
+  },
+  "atlas154": {
+    "due_at": "2026-11-09T16:00:00-05:00",
+    "id": "atlas154",
+    "look": "odd_one_out",
+    "media_sha256": "c47f9591822ea1af65736e77ffba9b49c6ec4834f8d0f36054adfa92bf074ae3",
+    "quality": {
+      "checked_at": "2026-11-07T09:20:16.317718+00:00",
+      "claims_sha256": "b6087cc52978b7dd4a94b7254a6acbecf13d50cb1de8249604d1e58bcfada14f",
+      "qa_sha256": "0e9a38bbc91f18b445a0fa3fed708fe5e3a6839e25d93738f5ee9a1e1a9e2577",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Country Has the MOST Equal Youth Literacy?",
+    "uploaded_at": "2026-11-07T22:08:31+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/YLYEMFkoEaA",
+    "youtube_video_id": "YLYEMFkoEaA"
+  },
+  "atlas155": {
+    "due_at": "2026-11-09T12:00:00-05:00",
+    "id": "atlas155",
+    "look": "map_reveal",
+    "media_sha256": "1dcf3633c6e99c20d10d5d24f5baf7ef7e22bb8d2ea8a48d96af730d9d0abaf1",
+    "quality": {
+      "checked_at": "2026-11-07T09:34:25.061977+00:00",
+      "claims_sha256": "b58a548b5620faabfa9abdc09eda38609a44a7b33f99505daa698b074b220cc3",
+      "qa_sha256": "dae943cee6c35a684b9ab26769e1c965a44ed536cf9e134989a5827e7a0d0925",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "The Nations Powered by Mineral Wealth",
+    "uploaded_at": "2026-11-07T22:08:27+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/g77rPUs4Uk4",
+    "youtube_video_id": "g77rPUs4Uk4"
+  },
+  "atlas156": {
+    "due_at": "2026-11-08T19:00:00-05:00",
+    "id": "atlas156",
+    "look": "versus",
+    "media_sha256": "29e2c55d35fafd05a8412f834f392a0a0bd26b18d1561abd96ec066064ccad71",
+    "quality": {
+      "checked_at": "2026-11-07T09:42:18.847865+00:00",
+      "claims_sha256": "e3d629e699141c88b1b63749c7aedf8169a10af1d9e85cdca6078d010e9b4bbc",
+      "qa_sha256": "92353953a7407720e821d55d4e9fd78e31da296ec5f9d0c247838476108a0f28",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Germany vs USA: The Years Spent in School",
+    "uploaded_at": "2026-11-07T22:08:22+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/Nyic0uTBWzc",
+    "youtube_video_id": "Nyic0uTBWzc"
   }
 }

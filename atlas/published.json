@@ -2095,6 +2095,13 @@
     "youtube_video_id": "vSd-3tGLKx4"
   },
   "atlas151": {
+    "delivery": {
+      "checked_at": "2026-11-08T22:18:27.936013+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "2hyGTqZ_QOk",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-08T12:00:00-05:00",
     "id": "atlas151",
     "look": "rank_ladder",
@@ -2107,13 +2114,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Male Internet Use",
     "uploaded_at": "2026-11-06T21:41:41+00:00",
     "youtube_url": "https://www.youtube.com/shorts/2hyGTqZ_QOk",
     "youtube_video_id": "2hyGTqZ_QOk"
   },
   "atlas153": {
+    "delivery": {
+      "checked_at": "2026-11-08T22:18:28.005099+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "jdZgJ20H5gA",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-08T16:00:00-05:00",
     "id": "atlas153",
     "look": "spotlight",
@@ -2126,7 +2140,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Is Madagascar the Highest for Bank Loan Spreads?",
     "uploaded_at": "2026-11-07T22:08:16+00:00",
     "youtube_url": "https://www.youtube.com/shorts/jdZgJ20H5gA",
@@ -2188,5 +2202,81 @@
     "uploaded_at": "2026-11-07T22:08:22+00:00",
     "youtube_url": "https://www.youtube.com/shorts/Nyic0uTBWzc",
     "youtube_video_id": "Nyic0uTBWzc"
+  },
+  "atlas158": {
+    "due_at": "2026-11-09T19:00:00-05:00",
+    "id": "atlas158",
+    "look": "spotlight",
+    "media_sha256": "08f72fe3c023b18f47db9d2e9f633c49505f78541b99db2b000983ccd7d40eaa",
+    "quality": {
+      "checked_at": "2026-11-08T01:38:46.172236+00:00",
+      "claims_sha256": "33e716486c89831efb1539e936dac50915f56be67b971234eb3ca515ebd64cc0",
+      "qa_sha256": "f19164820caf71693e777858ee725bbea84ef47393d1170666ca911629a9deba",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "How Does the USA Compare on Female Part-Time Work?",
+    "uploaded_at": "2026-11-08T22:18:50+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/NfEoFSLGaww",
+    "youtube_video_id": "NfEoFSLGaww"
+  },
+  "atlas159": {
+    "due_at": "2026-11-10T12:00:00-05:00",
+    "id": "atlas159",
+    "look": "rank_ladder",
+    "media_sha256": "5e9593aabcbf97c9f950b4c1cf08c77c054f8d20088845f9c1f7c5057a3ffc6f",
+    "quality": {
+      "checked_at": "2026-11-08T09:27:46.322060+00:00",
+      "claims_sha256": "06b51fc21726363386dae2b299dc53b1efb78a6d560a5e5bb1d4962e3d2908c0",
+      "qa_sha256": "8c28012b82eb4c1e1f1b4b0e0b64963330c623a4b5c2b79965e8110a476e519c",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Female Primary Teachers",
+    "uploaded_at": "2026-11-08T22:19:03+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/auGKl5QHWDI",
+    "youtube_video_id": "auGKl5QHWDI"
+  },
+  "atlas160": {
+    "due_at": "2026-11-10T16:00:00-05:00",
+    "id": "atlas160",
+    "look": "map_reveal",
+    "media_sha256": "d0d9e8355c762dfb37a84e6c487ccb97418ebefd5ad186b363a448dbe8eeeddb",
+    "quality": {
+      "checked_at": "2026-11-08T09:38:19.535092+00:00",
+      "claims_sha256": "c5844ebc08e35fd4add07c9032c1cea0837d993305f7373a2f7e99603aa17562",
+      "qa_sha256": "258ec48d2eae91b4eb3298ce18754d7b7f60472548992de4f3048483a27ae4bb",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Who Emits the Most Greenhouse Gases per Person?",
+    "uploaded_at": "2026-11-08T22:19:20+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/rHMO1Y3Z5W4",
+    "youtube_video_id": "rHMO1Y3Z5W4"
+  },
+  "atlas161": {
+    "due_at": "2026-11-10T19:00:00-05:00",
+    "id": "atlas161",
+    "look": "versus",
+    "media_sha256": "c59ec222f963bdecc83555e0be0129039342825615346c79c80ba31e119094cd",
+    "quality": {
+      "checked_at": "2026-11-08T09:46:39.638212+00:00",
+      "claims_sha256": "40520978db766dfdd92696b56952df84b01f3c146360252d2468f33dc77e73f2",
+      "qa_sha256": "92238ee205bc65057eec28e94ef4f83aac4521f6b660c4628f628ef969765495",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Armenia vs Liberia: Women in Secondary Teaching",
+    "uploaded_at": "2026-11-08T22:19:35+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/HL_1sLyvE54",
+    "youtube_video_id": "HL_1sLyvE54"
   }
 }

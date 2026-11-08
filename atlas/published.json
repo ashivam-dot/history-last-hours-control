@@ -2069,6 +2069,13 @@
     "youtube_video_id": "rHSKAGPBCNQ"
   },
   "atlas149": {
+    "delivery": {
+      "checked_at": "2026-11-08T01:38:37.467265+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "vSd-3tGLKx4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-07T19:00:00-05:00",
     "id": "atlas149",
     "look": "versus",
@@ -2081,7 +2088,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Romania vs India: Female Alcohol Consumption",
     "uploaded_at": "2026-11-06T21:41:36+00:00",
     "youtube_url": "https://www.youtube.com/shorts/vSd-3tGLKx4",

@@ -2166,6 +2166,13 @@
     "youtube_video_id": "YLYEMFkoEaA"
   },
   "atlas155": {
+    "delivery": {
+      "checked_at": "2026-11-09T20:53:59.271105+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "g77rPUs4Uk4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-09T12:00:00-05:00",
     "id": "atlas155",
     "look": "map_reveal",
@@ -2178,7 +2185,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "The Nations Powered by Mineral Wealth",
     "uploaded_at": "2026-11-07T22:08:27+00:00",
     "youtube_url": "https://www.youtube.com/shorts/g77rPUs4Uk4",

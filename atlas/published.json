@@ -2185,6 +2185,13 @@
     "youtube_video_id": "g77rPUs4Uk4"
   },
   "atlas156": {
+    "delivery": {
+      "checked_at": "2026-11-09T01:48:07.302005+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "Nyic0uTBWzc",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-08T19:00:00-05:00",
     "id": "atlas156",
     "look": "versus",
@@ -2197,7 +2204,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Germany vs USA: The Years Spent in School",
     "uploaded_at": "2026-11-07T22:08:22+00:00",
     "youtube_url": "https://www.youtube.com/shorts/Nyic0uTBWzc",

@@ -2147,6 +2147,13 @@
     "youtube_video_id": "jdZgJ20H5gA"
   },
   "atlas154": {
+    "delivery": {
+      "checked_at": "2026-11-10T04:14:05.311503+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "YLYEMFkoEaA",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-09T16:00:00-05:00",
     "id": "atlas154",
     "look": "odd_one_out",
@@ -2159,7 +2166,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Country Has the MOST Equal Youth Literacy?",
     "uploaded_at": "2026-11-07T22:08:31+00:00",
     "youtube_url": "https://www.youtube.com/shorts/YLYEMFkoEaA",
@@ -2218,6 +2225,13 @@
     "youtube_video_id": "Nyic0uTBWzc"
   },
   "atlas158": {
+    "delivery": {
+      "checked_at": "2026-11-10T04:14:05.386541+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "NfEoFSLGaww",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-09T19:00:00-05:00",
     "id": "atlas158",
     "look": "spotlight",
@@ -2230,7 +2244,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "How Does the USA Compare on Female Part-Time Work?",
     "uploaded_at": "2026-11-08T22:18:50+00:00",
     "youtube_url": "https://www.youtube.com/shorts/NfEoFSLGaww",
@@ -2292,5 +2306,81 @@
     "uploaded_at": "2026-11-08T22:19:35+00:00",
     "youtube_url": "https://www.youtube.com/shorts/HL_1sLyvE54",
     "youtube_video_id": "HL_1sLyvE54"
+  },
+  "atlas162": {
+    "due_at": "2026-11-11T12:00:00-05:00",
+    "id": "atlas162",
+    "look": "odd_one_out",
+    "media_sha256": "04fd24de9972f0ab659d7d7375e0fa7ab6cb64f1665aa08421e8c0bdea292003",
+    "quality": {
+      "checked_at": "2026-11-09T01:23:20.865339+00:00",
+      "claims_sha256": "3c2bd44b15fa4d70aa9b2d8da519c585d476a1b3e5e55c8a3c40e3e09285d5b7",
+      "qa_sha256": "e3458ca2d2a051f9f92963efd13589343290a86235763078a4af4ceb0f6ab0a0",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Country Has the Highest Working-Age Share?",
+    "uploaded_at": "2026-11-10T04:14:14+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/h48cN3ZUB_s",
+    "youtube_video_id": "h48cN3ZUB_s"
+  },
+  "atlas164": {
+    "due_at": "2026-11-11T16:00:00-05:00",
+    "id": "atlas164",
+    "look": "spotlight",
+    "media_sha256": "f58aa6af47ba9ddc31794f46e9328210b73fa398f31a528790435540ee69d699",
+    "quality": {
+      "checked_at": "2026-11-09T09:19:44.948163+00:00",
+      "claims_sha256": "fc2fcbb642576c12045191e52934047d673ff2df45b3c87a05738d0684c545a4",
+      "qa_sha256": "930cdd64c04e76054f09e308f55e670f9b84fa6a9fc525434382afa128576c5c",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "How Does the USA Compare on Bank Capital?",
+    "uploaded_at": "2026-11-10T04:14:20+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/Vt65oWHi99g",
+    "youtube_video_id": "Vt65oWHi99g"
+  },
+  "atlas165": {
+    "due_at": "2026-11-11T19:00:00-05:00",
+    "id": "atlas165",
+    "look": "map_reveal",
+    "media_sha256": "3c0b14660f7621be64ea87338f6fa2975e48360ec8a4879e8cdae4fc498aefad",
+    "quality": {
+      "checked_at": "2026-11-09T09:27:20.827744+00:00",
+      "claims_sha256": "517f2608d38a9d0cbf7a417661b8c85b8871850bc2e396b41b5a5268f99ea3e5",
+      "qa_sha256": "192d0801293f89e35f0941b19a8d3d705f7081122e07369b48cd5f3c86135851",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Places Are Growing the Most Food?",
+    "uploaded_at": "2026-11-10T04:14:23+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/MdTXCeTONB8",
+    "youtube_video_id": "MdTXCeTONB8"
+  },
+  "atlas166": {
+    "due_at": "2026-11-12T12:00:00-05:00",
+    "id": "atlas166",
+    "look": "versus",
+    "media_sha256": "19366fc4e0e2497d904c0683c9275d645a01e93f3352af51fd2a556524b9ecf5",
+    "quality": {
+      "checked_at": "2026-11-09T09:35:21.033971+00:00",
+      "claims_sha256": "e6c5948eac8fec5b51347e93afad18e94a9257cf5053d8b373c5e4b218bd48de",
+      "qa_sha256": "3b05b8ccb38938df1ac61b4a40d48f983ce0ffac692469f6bd7f235802668ddd",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "USA vs Brazil: Upper Middle Class Income Share",
+    "uploaded_at": "2026-11-10T04:14:27+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/FqeNkkZhfV0",
+    "youtube_video_id": "FqeNkkZhfV0"
   }
 }

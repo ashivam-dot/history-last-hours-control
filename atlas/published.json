@@ -2251,6 +2251,13 @@
     "youtube_video_id": "NfEoFSLGaww"
   },
   "atlas159": {
+    "delivery": {
+      "checked_at": "2026-11-10T20:56:01.703881+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "auGKl5QHWDI",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-10T12:00:00-05:00",
     "id": "atlas159",
     "look": "rank_ladder",
@@ -2263,7 +2270,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Female Primary Teachers",
     "uploaded_at": "2026-11-08T22:19:03+00:00",
     "youtube_url": "https://www.youtube.com/shorts/auGKl5QHWDI",

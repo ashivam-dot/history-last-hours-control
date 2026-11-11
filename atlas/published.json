@@ -2329,6 +2329,13 @@
     "youtube_video_id": "HL_1sLyvE54"
   },
   "atlas162": {
+    "delivery": {
+      "checked_at": "2026-11-11T17:58:27.911352+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "h48cN3ZUB_s",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-11T12:00:00-05:00",
     "id": "atlas162",
     "look": "odd_one_out",
@@ -2341,7 +2348,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Country Has the Highest Working-Age Share?",
     "uploaded_at": "2026-11-10T04:14:14+00:00",
     "youtube_url": "https://www.youtube.com/shorts/h48cN3ZUB_s",

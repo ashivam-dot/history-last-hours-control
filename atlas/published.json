@@ -2403,5 +2403,81 @@
     "uploaded_at": "2026-11-10T04:14:27+00:00",
     "youtube_url": "https://www.youtube.com/shorts/FqeNkkZhfV0",
     "youtube_video_id": "FqeNkkZhfV0"
+  },
+  "atlas167": {
+    "due_at": "2026-11-13T12:00:00-05:00",
+    "id": "atlas167",
+    "look": "rank_ladder",
+    "media_sha256": "a4dd45db96840f9020f179f1158936f5202d8568c119894e24ad6d96a11a650a",
+    "quality": {
+      "checked_at": "2026-11-10T09:23:10.358977+00:00",
+      "claims_sha256": "39fcc0ec19cf8261a9c464bd2c2d8beec3de5f1a3190626ac490537ab7a9ad17",
+      "qa_sha256": "168a51ea58f0d44890870f85a06bb996a28f83f5fa1e08eb5820b1cc1f32528b",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Years in Primary School",
+    "uploaded_at": "2026-11-11T09:40:24+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/3-Wrfn78I5s",
+    "youtube_video_id": "3-Wrfn78I5s"
+  },
+  "atlas169": {
+    "due_at": "2026-11-13T16:00:00-05:00",
+    "id": "atlas169",
+    "look": "map_reveal",
+    "media_sha256": "54708e9bb0dd9b75cb0a575b8a927cf05b7a203e8837edbd470905c75e78da33",
+    "quality": {
+      "checked_at": "2026-11-10T17:46:08.638478+00:00",
+      "claims_sha256": "5c450d33a38a467cbbadeda1be9903852c81d47a67c4c1fb71f4fa64ccf5ffa5",
+      "qa_sha256": "9f75a5e5dc04b7d605c9b8b47308e750569e0fde8e5858428e0f53435847268b",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Renewable Electricity Share",
+    "uploaded_at": "2026-11-11T09:40:28+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/uCHwEpPcsvw",
+    "youtube_video_id": "uCHwEpPcsvw"
+  },
+  "atlas172": {
+    "due_at": "2026-11-12T19:00:00-05:00",
+    "id": "atlas172",
+    "look": "versus",
+    "media_sha256": "1a99bc480423c5afa96cb6036a1302a84367ced009799b8f558b9679aede2204",
+    "quality": {
+      "checked_at": "2026-11-11T01:27:55.408049+00:00",
+      "claims_sha256": "74cbd0a9ad1a404ccb524bdd474e3a835d57061fbe1c37524904859b20936c39",
+      "qa_sha256": "b73543338d7ceffca580e1c61909b5ff91f1159593ba9db2175ebce0dc3fe5bc",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "The Global Divide in Relative Poverty",
+    "uploaded_at": "2026-11-11T09:40:19+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/SN1nFrF1tgQ",
+    "youtube_video_id": "SN1nFrF1tgQ"
+  },
+  "atlas173": {
+    "due_at": "2026-11-12T16:00:00-05:00",
+    "id": "atlas173",
+    "look": "map_reveal",
+    "media_sha256": "00abfaad33e99260e0df49b0703b40dff7817e47084190967e2bbb10d6a455bb",
+    "quality": {
+      "checked_at": "2026-11-11T01:52:16.073599+00:00",
+      "claims_sha256": "c8a111084d1ff82e0416fda9209dd81cffdd09c80cbeb0531f6a8e8929d8c9d6",
+      "qa_sha256": "989781ac5d5b4a229cecb4c6d3565ebadefac190835fc77c56afbd4fba9d404a",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Where Women DOMINATE University Faculty",
+    "uploaded_at": "2026-11-11T09:40:15+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/t60dcMaYqeA",
+    "youtube_video_id": "t60dcMaYqeA"
   }
 }

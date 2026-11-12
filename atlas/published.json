@@ -2500,5 +2500,81 @@
     "uploaded_at": "2026-11-11T09:40:15+00:00",
     "youtube_url": "https://www.youtube.com/shorts/t60dcMaYqeA",
     "youtube_video_id": "t60dcMaYqeA"
+  },
+  "atlas174": {
+    "due_at": "2026-11-14T12:00:00-05:00",
+    "id": "atlas174",
+    "look": "odd_one_out",
+    "media_sha256": "a57a77c55e17ad5491b32170c9508b93d6223cc06b1e6ef4eadd390403efedc5",
+    "quality": {
+      "checked_at": "2026-11-11T17:24:34.523247+00:00",
+      "claims_sha256": "25b54ed2a20f887d568d5ba1d56e2de4b7ccbcfca1e6194c820df33393280058",
+      "qa_sha256": "c5b3b73b3bae1bbf8941df0188ec1d5ff1693b989fab1fb631ccab3bc0dd2b43",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Male Part-Time Work",
+    "uploaded_at": "2026-11-12T10:00:33+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/fBpnykTwLzQ",
+    "youtube_video_id": "fBpnykTwLzQ"
+  },
+  "atlas175": {
+    "due_at": "2026-11-14T16:00:00-05:00",
+    "id": "atlas175",
+    "look": "rank_ladder",
+    "media_sha256": "136ccaa95909a99fd9e54e984fcc5f1408b83ff790ef3af9d65c37b6084bd47b",
+    "quality": {
+      "checked_at": "2026-11-11T17:39:44.369247+00:00",
+      "claims_sha256": "750d0df008c0947987ef1ed650e3d9efd17f8a3e705f1497b34751d39797f733",
+      "qa_sha256": "e4b89245f6783c558d1776e564f83b1072f6ded08bf27996b834ecdb05690a0c",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Master's Degree Attainment",
+    "uploaded_at": "2026-11-12T10:00:56+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/hy1q5vCY9vc",
+    "youtube_video_id": "hy1q5vCY9vc"
+  },
+  "atlas176": {
+    "due_at": "2026-11-14T19:00:00-05:00",
+    "id": "atlas176",
+    "look": "map_reveal",
+    "media_sha256": "752dacdb663a285c4da6c3683eeee07a6df03ba5dda402e249956558cda4b014",
+    "quality": {
+      "checked_at": "2026-11-11T17:50:59.562831+00:00",
+      "claims_sha256": "32d19e22804a20347d1b7ebfb63bf32f88f86321a1e50efd55ac2125ecefb86f",
+      "qa_sha256": "ab0aace88c2aee2531e0644451213f04ebf8354a13c089bd9e1b25b7bd06c9be",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Debt Interest Costs",
+    "uploaded_at": "2026-11-12T10:01:11+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/r0ph17EKOKs",
+    "youtube_video_id": "r0ph17EKOKs"
+  },
+  "atlas178": {
+    "due_at": "2026-11-13T19:00:00-05:00",
+    "id": "atlas178",
+    "look": "spotlight",
+    "media_sha256": "7edfc878a9413c8580861b69ea3432055b91d997ab3700849e7fc71242b6d661",
+    "quality": {
+      "checked_at": "2026-11-12T01:28:23.890422+00:00",
+      "claims_sha256": "c2559acd331b2380de4cea42210b786cbeab634770908a0f7625a7015497e94e",
+      "qa_sha256": "3f009d3af326c62d5e75348f610e3bff25660346d04eb0d7fd887a9150138b7a",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Is INDIA Near the Top for School Completion?",
+    "uploaded_at": "2026-11-12T10:00:22+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/08FvglhaBco",
+    "youtube_video_id": "08FvglhaBco"
   }
 }

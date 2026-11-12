@@ -2407,6 +2407,13 @@
     "youtube_video_id": "MdTXCeTONB8"
   },
   "atlas166": {
+    "delivery": {
+      "checked_at": "2026-11-12T18:28:40.986791+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "FqeNkkZhfV0",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-12T12:00:00-05:00",
     "id": "atlas166",
     "look": "versus",
@@ -2419,7 +2426,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "USA vs Brazil: Upper Middle Class Income Share",
     "uploaded_at": "2026-11-10T04:14:27+00:00",
     "youtube_url": "https://www.youtube.com/shorts/FqeNkkZhfV0",

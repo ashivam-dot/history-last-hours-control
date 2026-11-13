@@ -2433,6 +2433,13 @@
     "youtube_video_id": "FqeNkkZhfV0"
   },
   "atlas167": {
+    "delivery": {
+      "checked_at": "2026-11-13T17:56:41.866511+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "3-Wrfn78I5s",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-13T12:00:00-05:00",
     "id": "atlas167",
     "look": "rank_ladder",
@@ -2445,7 +2452,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Years in Primary School",
     "uploaded_at": "2026-11-11T09:40:24+00:00",
     "youtube_url": "https://www.youtube.com/shorts/3-Wrfn78I5s",
@@ -2597,5 +2604,81 @@
     "uploaded_at": "2026-11-12T10:00:22+00:00",
     "youtube_url": "https://www.youtube.com/shorts/08FvglhaBco",
     "youtube_video_id": "08FvglhaBco"
+  },
+  "atlas179": {
+    "due_at": "2026-11-15T12:00:00-05:00",
+    "id": "atlas179",
+    "look": "versus",
+    "media_sha256": "e9f327f77de07ab34e47b687a66c768b29c59ad4c2605a033117c8f29b716363",
+    "quality": {
+      "checked_at": "2026-11-12T17:25:45.378088+00:00",
+      "claims_sha256": "699fd4f3a0f63ed00bf1a8b4a5abc9b1975bad4d60dc4c08814d9342126d7d95",
+      "qa_sha256": "8da0ed9a09e876a1cfbc0b00982b93925e29bcd66f87dd057f58637becfddb66",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places With the Smallest Labor Gaps",
+    "uploaded_at": "2026-11-13T17:56:52+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/oHpW9Hhae5w",
+    "youtube_video_id": "oHpW9Hhae5w"
+  },
+  "atlas180": {
+    "due_at": "2026-11-16T12:00:00-05:00",
+    "id": "atlas180",
+    "look": "rank_ladder",
+    "media_sha256": "27ff725472f67b26fd07b861d252d318f5189fd93ac53d11caf1cc48a01c578a",
+    "quality": {
+      "checked_at": "2026-11-12T17:48:05.490851+00:00",
+      "claims_sha256": "4ff8d87d43292337be6d14a1fae9b9156f7bf7f908adf507dff6c05bf845232b",
+      "qa_sha256": "87a31f04db3cf0774d404c8a9816366e8cdab6678a0e0bf0a41d60a595123553",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Fossil Fuel Electricity Reliance",
+    "uploaded_at": "2026-11-13T17:57:08+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/UKerQ1_q1Mg",
+    "youtube_video_id": "UKerQ1_q1Mg"
+  },
+  "atlas181": {
+    "due_at": "2026-11-15T19:00:00-05:00",
+    "id": "atlas181",
+    "look": "odd_one_out",
+    "media_sha256": "f575083529bff2cbe9c0892badb47942cd7f4f79b74e151e4e216044072e73eb",
+    "quality": {
+      "checked_at": "2026-11-13T01:38:10.621187+00:00",
+      "claims_sha256": "ba859511a5293503b9ddac31e70870caeeb2ceff7bc0fb4c2626b33300bba19f",
+      "qa_sha256": "dbbcd1383b03b91548c8e4844137836e696975a8d6d5b76f0d2ea495e812c02c",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Country Has the MOST Revenue From Sales Taxes?",
+    "uploaded_at": "2026-11-13T17:57:03+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/cBoGFAcfvl8",
+    "youtube_video_id": "cBoGFAcfvl8"
+  },
+  "atlas182": {
+    "due_at": "2026-11-15T16:00:00-05:00",
+    "id": "atlas182",
+    "look": "map_reveal",
+    "media_sha256": "ce5668f81f01f74f621db99e014f7ed30acec716a26194160f7db27b2c11c2fe",
+    "quality": {
+      "checked_at": "2026-11-13T17:19:56.408360+00:00",
+      "claims_sha256": "d9da04bb508c030c7f3d280c911a73490ebf6b5d121fa7b67b5157119617fc0a",
+      "qa_sha256": "58cd56d9518172b60b63c4a925194276b0cdafecd47fa95725cca79c5bf94b73",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "The Places Most Dependent on Their Forests",
+    "uploaded_at": "2026-11-13T17:56:58+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/0R9b5GZOWO4",
+    "youtube_video_id": "0R9b5GZOWO4"
   }
 }

@@ -2594,6 +2594,13 @@
     "youtube_video_id": "r0ph17EKOKs"
   },
   "atlas178": {
+    "delivery": {
+      "checked_at": "2026-11-14T06:49:58.208166+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "08FvglhaBco",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-13T19:00:00-05:00",
     "id": "atlas178",
     "look": "spotlight",
@@ -2606,7 +2613,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Is INDIA Near the Top for School Completion?",
     "uploaded_at": "2026-11-12T10:00:22+00:00",
     "youtube_url": "https://www.youtube.com/shorts/08FvglhaBco",

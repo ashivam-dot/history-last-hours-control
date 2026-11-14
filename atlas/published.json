@@ -2537,6 +2537,13 @@
     "youtube_video_id": "t60dcMaYqeA"
   },
   "atlas174": {
+    "delivery": {
+      "checked_at": "2026-11-14T20:50:09.314963+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "fBpnykTwLzQ",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-14T12:00:00-05:00",
     "id": "atlas174",
     "look": "odd_one_out",
@@ -2549,7 +2556,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Male Part-Time Work",
     "uploaded_at": "2026-11-12T10:00:33+00:00",
     "youtube_url": "https://www.youtube.com/shorts/fBpnykTwLzQ",
@@ -2694,5 +2701,81 @@
     "uploaded_at": "2026-11-13T17:56:58+00:00",
     "youtube_url": "https://www.youtube.com/shorts/0R9b5GZOWO4",
     "youtube_video_id": "0R9b5GZOWO4"
+  },
+  "atlas183": {
+    "due_at": "2026-11-16T16:00:00-05:00",
+    "id": "atlas183",
+    "look": "spotlight",
+    "media_sha256": "3bdf1c6ee4177a59f802f84876c3b49a53d2925543ede198aab2241593cf630c",
+    "quality": {
+      "checked_at": "2026-11-14T01:23:52.629638+00:00",
+      "claims_sha256": "9f5af7ff044b4f664e9190c15c5c9d3d8f45314c807f44d66d7fa1b4cac1dcb2",
+      "qa_sha256": "0fad88f1547b3d2c77abb9af1358358feb4bad902ec52de061c2b7507464987b",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Is INDIA the Highest for Underweight Babies?",
+    "uploaded_at": "2026-11-14T20:50:16+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/7G4v4FFZqCo",
+    "youtube_video_id": "7G4v4FFZqCo"
+  },
+  "atlas184": {
+    "due_at": "2026-11-16T19:00:00-05:00",
+    "id": "atlas184",
+    "look": "versus",
+    "media_sha256": "95338a82e3d67b0491c06806faec79edbc308295f3940c983e24678db93c0edb",
+    "quality": {
+      "checked_at": "2026-11-14T01:32:17.658698+00:00",
+      "claims_sha256": "4339cd486e95476380cd2b17a97693a3e3fbd5ebdcb1f6bcdcee9777a3695163",
+      "qa_sha256": "decbf50bccd348380b6fd3ad814c2fff863f0377d73a3e2fba632e36016cd790",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "East Timor vs Qatar: Natural Gas Rents",
+    "uploaded_at": "2026-11-14T20:50:19+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/eKh8-FdUY1w",
+    "youtube_video_id": "eKh8-FdUY1w"
+  },
+  "atlas185": {
+    "due_at": "2026-11-17T16:00:00-05:00",
+    "id": "atlas185",
+    "look": "map_reveal",
+    "media_sha256": "50acc640717ad9eed9d268442d660b288ca964b464fdce95c86635fa78677051",
+    "quality": {
+      "checked_at": "2026-11-14T01:43:35.690721+00:00",
+      "claims_sha256": "e0a03c0ad820ba0fd0b335877c50f37ddfac9484f502b455cceda64d73b9c7b3",
+      "qa_sha256": "6de1529102d2e3659921b1074133cbf2b2860b90aed850805e9ca960296f5b02",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Where Women Are Most Likely to Hire Employees",
+    "uploaded_at": "2026-11-14T20:50:26+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/MUe_03RgSi0",
+    "youtube_video_id": "MUe_03RgSi0"
+  },
+  "atlas186": {
+    "due_at": "2026-11-17T12:00:00-05:00",
+    "id": "atlas186",
+    "look": "rank_ladder",
+    "media_sha256": "ab218ba41ece4447787f2b9ef0a2743f41be889400ad7b07928a334168ee2094",
+    "quality": {
+      "checked_at": "2026-11-14T17:23:10.170277+00:00",
+      "claims_sha256": "e649414e76bd4ef77f0b6d134d92b16609c7da3f6cc993de5c731302c6b5fccf",
+      "qa_sha256": "e319e32980bc62cc050bc4bb3fcabcdbc5cdfa47f2b9fc3ecb44b145584c0b60",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Rural Population Growth",
+    "uploaded_at": "2026-11-14T20:50:22+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/0PmC-xw_ge0",
+    "youtube_video_id": "0PmC-xw_ge0"
   }
 }

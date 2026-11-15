@@ -2705,6 +2705,13 @@
     "youtube_video_id": "cBoGFAcfvl8"
   },
   "atlas182": {
+    "delivery": {
+      "checked_at": "2026-11-15T23:02:05.157042+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "0R9b5GZOWO4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-15T16:00:00-05:00",
     "id": "atlas182",
     "look": "map_reveal",
@@ -2717,7 +2724,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "The Places Most Dependent on Their Forests",
     "uploaded_at": "2026-11-13T17:56:58+00:00",
     "youtube_url": "https://www.youtube.com/shorts/0R9b5GZOWO4",
@@ -2798,5 +2805,81 @@
     "uploaded_at": "2026-11-14T20:50:22+00:00",
     "youtube_url": "https://www.youtube.com/shorts/0PmC-xw_ge0",
     "youtube_video_id": "0PmC-xw_ge0"
+  },
+  "atlas187": {
+    "due_at": "2026-11-17T19:00:00-05:00",
+    "id": "atlas187",
+    "look": "odd_one_out",
+    "media_sha256": "dbff4d9446df978b3bf2b249fd5c81cae575c137a66bab968b386ceafc252949",
+    "quality": {
+      "checked_at": "2026-11-15T01:24:37.344008+00:00",
+      "claims_sha256": "4210f0e4425e3dc471b4f417af16bc9349e5298d2418107c2c21a2328f3e2c41",
+      "qa_sha256": "8ac9e7f62267e54ccad9b9b3d5c4bc29035217302e8f84c90e11cefba4f90c9f",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Country Has the MOST Stable Prices?",
+    "uploaded_at": "2026-11-15T23:02:40+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/f66urOQzA5U",
+    "youtube_video_id": "f66urOQzA5U"
+  },
+  "atlas188": {
+    "due_at": "2026-11-18T19:00:00-05:00",
+    "id": "atlas188",
+    "look": "versus",
+    "media_sha256": "aa6fcbf02bc1ef08cc1d2a5893944a2ba6ade8d357be750fb9373c4c521a2c0e",
+    "quality": {
+      "checked_at": "2026-11-15T01:32:00.278632+00:00",
+      "claims_sha256": "3194497cab31deee229c1dc25315fa01ebd80bafbfda84620d731491ef13d122",
+      "qa_sha256": "b3b8276838363d1c14c3f3d700dc4ecb5e4fea0681565e74a1a6246084ad286c",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Eswatini vs USA: Dependency on Trade Taxes",
+    "uploaded_at": "2026-11-15T23:03:23+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/evOCswc3Nns",
+    "youtube_video_id": "evOCswc3Nns"
+  },
+  "atlas190": {
+    "due_at": "2026-11-18T16:00:00-05:00",
+    "id": "atlas190",
+    "look": "rank_ladder",
+    "media_sha256": "6136b22efb81fa10ad6ba512793686be7bb03ae35348f73f8ffa064ddc0eb27a",
+    "quality": {
+      "checked_at": "2026-11-15T01:50:26.944993+00:00",
+      "claims_sha256": "2260fab6191c9cc9607a9b0ffe5de9257ed6cf0a65104132e9acea9d5a5d2d54",
+      "qa_sha256": "97333513898b75cedc70e87615b17a6d25c0ba05082d41bda28b7d1989d703af",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "The Top Places for Middle Class Income",
+    "uploaded_at": "2026-11-15T23:03:05+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/8zFgpEv7lZI",
+    "youtube_video_id": "8zFgpEv7lZI"
+  },
+  "atlas191": {
+    "due_at": "2026-11-18T12:00:00-05:00",
+    "id": "atlas191",
+    "look": "map_reveal",
+    "media_sha256": "3610a6db270a302f4c96d5834561ab75c5bcb2034aa6d325a982eb77631c2673",
+    "quality": {
+      "checked_at": "2026-11-15T09:39:32.309891+00:00",
+      "claims_sha256": "284abe32cb08be54c74684061a2cbf9f3857437d3d6374171658a730882e90f1",
+      "qa_sha256": "aa36a7911b1649adc8a0519a46e9a2fdb01dac24153e79196f7df17b4cf84bcf",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Who Pays for Healthcare in YOUR Country?",
+    "uploaded_at": "2026-11-15T23:02:55+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/EqnfNImv3Do",
+    "youtube_video_id": "EqnfNImv3Do"
   }
 }

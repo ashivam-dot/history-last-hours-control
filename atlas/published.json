@@ -2641,6 +2641,13 @@
     "youtube_video_id": "08FvglhaBco"
   },
   "atlas179": {
+    "delivery": {
+      "checked_at": "2026-11-15T17:18:36.714963+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "oHpW9Hhae5w",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-15T12:00:00-05:00",
     "id": "atlas179",
     "look": "versus",
@@ -2653,7 +2660,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places With the Smallest Labor Gaps",
     "uploaded_at": "2026-11-13T17:56:52+00:00",
     "youtube_url": "https://www.youtube.com/shorts/oHpW9Hhae5w",

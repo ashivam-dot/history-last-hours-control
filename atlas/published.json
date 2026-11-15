@@ -2563,6 +2563,13 @@
     "youtube_video_id": "fBpnykTwLzQ"
   },
   "atlas175": {
+    "delivery": {
+      "checked_at": "2026-11-15T02:00:29.439549+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "hy1q5vCY9vc",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-14T16:00:00-05:00",
     "id": "atlas175",
     "look": "rank_ladder",
@@ -2575,13 +2582,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Master's Degree Attainment",
     "uploaded_at": "2026-11-12T10:00:56+00:00",
     "youtube_url": "https://www.youtube.com/shorts/hy1q5vCY9vc",
     "youtube_video_id": "hy1q5vCY9vc"
   },
   "atlas176": {
+    "delivery": {
+      "checked_at": "2026-11-15T02:00:29.482822+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "r0ph17EKOKs",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-14T19:00:00-05:00",
     "id": "atlas176",
     "look": "map_reveal",
@@ -2594,7 +2608,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Debt Interest Costs",
     "uploaded_at": "2026-11-12T10:01:11+00:00",
     "youtube_url": "https://www.youtube.com/shorts/r0ph17EKOKs",

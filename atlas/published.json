@@ -2686,6 +2686,13 @@
     "youtube_video_id": "UKerQ1_q1Mg"
   },
   "atlas181": {
+    "delivery": {
+      "checked_at": "2026-11-16T06:56:54.818557+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "cBoGFAcfvl8",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-15T19:00:00-05:00",
     "id": "atlas181",
     "look": "odd_one_out",
@@ -2698,7 +2705,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Country Has the MOST Revenue From Sales Taxes?",
     "uploaded_at": "2026-11-13T17:57:03+00:00",
     "youtube_url": "https://www.youtube.com/shorts/cBoGFAcfvl8",

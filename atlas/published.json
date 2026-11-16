@@ -2667,6 +2667,13 @@
     "youtube_video_id": "oHpW9Hhae5w"
   },
   "atlas180": {
+    "delivery": {
+      "checked_at": "2026-11-16T18:44:17.197328+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "UKerQ1_q1Mg",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-16T12:00:00-05:00",
     "id": "atlas180",
     "look": "rank_ladder",
@@ -2679,7 +2686,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Fossil Fuel Electricity Reliance",
     "uploaded_at": "2026-11-13T17:57:08+00:00",
     "youtube_url": "https://www.youtube.com/shorts/UKerQ1_q1Mg",

@@ -2797,6 +2797,13 @@
     "youtube_video_id": "eKh8-FdUY1w"
   },
   "atlas185": {
+    "delivery": {
+      "checked_at": "2026-11-17T22:33:04.795289+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "MUe_03RgSi0",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-17T16:00:00-05:00",
     "id": "atlas185",
     "look": "map_reveal",
@@ -2809,13 +2816,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Where Women Are Most Likely to Hire Employees",
     "uploaded_at": "2026-11-14T20:50:26+00:00",
     "youtube_url": "https://www.youtube.com/shorts/MUe_03RgSi0",
     "youtube_video_id": "MUe_03RgSi0"
   },
   "atlas186": {
+    "delivery": {
+      "checked_at": "2026-11-17T22:33:04.865907+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "0PmC-xw_ge0",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-17T12:00:00-05:00",
     "id": "atlas186",
     "look": "rank_ladder",
@@ -2828,7 +2842,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Rural Population Growth",
     "uploaded_at": "2026-11-14T20:50:22+00:00",
     "youtube_url": "https://www.youtube.com/shorts/0PmC-xw_ge0",

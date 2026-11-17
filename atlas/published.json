@@ -2745,6 +2745,13 @@
     "youtube_video_id": "0R9b5GZOWO4"
   },
   "atlas183": {
+    "delivery": {
+      "checked_at": "2026-11-17T03:01:20.241997+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "7G4v4FFZqCo",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-16T16:00:00-05:00",
     "id": "atlas183",
     "look": "spotlight",
@@ -2757,13 +2764,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Is INDIA the Highest for Underweight Babies?",
     "uploaded_at": "2026-11-14T20:50:16+00:00",
     "youtube_url": "https://www.youtube.com/shorts/7G4v4FFZqCo",
     "youtube_video_id": "7G4v4FFZqCo"
   },
   "atlas184": {
+    "delivery": {
+      "checked_at": "2026-11-17T03:01:20.329821+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "eKh8-FdUY1w",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-16T19:00:00-05:00",
     "id": "atlas184",
     "look": "versus",
@@ -2776,7 +2790,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "East Timor vs Qatar: Natural Gas Rents",
     "uploaded_at": "2026-11-14T20:50:19+00:00",
     "youtube_url": "https://www.youtube.com/shorts/eKh8-FdUY1w",
@@ -2895,5 +2909,81 @@
     "uploaded_at": "2026-11-15T23:02:55+00:00",
     "youtube_url": "https://www.youtube.com/shorts/EqnfNImv3Do",
     "youtube_video_id": "EqnfNImv3Do"
+  },
+  "atlas193": {
+    "due_at": "2026-11-19T12:00:00-05:00",
+    "id": "atlas193",
+    "look": "odd_one_out",
+    "media_sha256": "83d9524a967ea9c7c30f31aae525e354fa41d82dfd775b0e51ea3070f596a3e6",
+    "quality": {
+      "checked_at": "2026-11-16T01:23:24.509023+00:00",
+      "claims_sha256": "872f293a710f59ec1676352128fe6e1d68f8d348b0fd9a3480cc9578649a11fd",
+      "qa_sha256": "38cd1f7c0c819638a0277c2f7f7ee6cea4a492c3681cf37789eed75f7da7055e",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Country Reinvests the MOST in Fixed Assets?",
+    "uploaded_at": "2026-11-17T03:01:32+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/0LY95lAVAWA",
+    "youtube_video_id": "0LY95lAVAWA"
+  },
+  "atlas194": {
+    "due_at": "2026-11-19T16:00:00-05:00",
+    "id": "atlas194",
+    "look": "versus",
+    "media_sha256": "0e7daa3a395e28b899df824f71a46d3ae03852ad62242a7546af06ecf95f4e04",
+    "quality": {
+      "checked_at": "2026-11-16T01:44:40.460780+00:00",
+      "claims_sha256": "bdb78d525c68072218ff98636d07ffe9bbad2dde11bbb4d6f6f1ea1565f8a953",
+      "qa_sha256": "f75789a5d441c893cc7870fc7848572e71e96d4dc2c2991c3ed3c3208cae83b6",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "USA vs Nigeria: The Doctoral Degree Gap",
+    "uploaded_at": "2026-11-17T03:01:37+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/aQZjetWr5K8",
+    "youtube_video_id": "aQZjetWr5K8"
+  },
+  "atlas196": {
+    "due_at": "2026-11-19T19:00:00-05:00",
+    "id": "atlas196",
+    "look": "rank_ladder",
+    "media_sha256": "76f942b2aefc21981bf00cee165bfa660fc7c2169cf7303f57b0af7603b2366e",
+    "quality": {
+      "checked_at": "2026-11-16T09:29:34.695930+00:00",
+      "claims_sha256": "8c1cad6dd45d70392941a46e0bc9132d1e3b6f9306720119cd4ec6c11a85705d",
+      "qa_sha256": "c90cf4c746481d78846d867acebfdfa06a64cd151c215b37f9a5d2ec50285438",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Global Trade Share of GDP",
+    "uploaded_at": "2026-11-17T03:01:42+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/YTze4M7Y6BE",
+    "youtube_video_id": "YTze4M7Y6BE"
+  },
+  "atlas197": {
+    "due_at": "2026-11-20T12:00:00-05:00",
+    "id": "atlas197",
+    "look": "map_reveal",
+    "media_sha256": "33ccf48e34b51e2a1e160600c28da7181f599060f2d996208bb0110c1e2ad2fa",
+    "quality": {
+      "checked_at": "2026-11-17T01:23:43.480781+00:00",
+      "claims_sha256": "723bb97ba6774ad3db4e4b3c5b9ff8c0a0e4a36d4badce6f7aaee5576668de0b",
+      "qa_sha256": "f426e425b8a03e40b25428b62919f9b71476e487523a75c52062e05b4360c6de",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by University Gender Parity",
+    "uploaded_at": "2026-11-17T03:01:47+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/uqv9f6IfTk4",
+    "youtube_video_id": "uqv9f6IfTk4"
   }
 }

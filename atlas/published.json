@@ -2849,6 +2849,13 @@
     "youtube_video_id": "0PmC-xw_ge0"
   },
   "atlas187": {
+    "delivery": {
+      "checked_at": "2026-11-18T07:47:33.046476+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "f66urOQzA5U",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-17T19:00:00-05:00",
     "id": "atlas187",
     "look": "odd_one_out",
@@ -2861,7 +2868,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Country Has the MOST Stable Prices?",
     "uploaded_at": "2026-11-15T23:02:40+00:00",
     "youtube_url": "https://www.youtube.com/shorts/f66urOQzA5U",

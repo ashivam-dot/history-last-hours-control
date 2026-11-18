@@ -2913,6 +2913,13 @@
     "youtube_video_id": "8zFgpEv7lZI"
   },
   "atlas191": {
+    "delivery": {
+      "checked_at": "2026-11-18T17:24:29.400274+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "EqnfNImv3Do",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-18T12:00:00-05:00",
     "id": "atlas191",
     "look": "map_reveal",
@@ -2925,7 +2932,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Who Pays for Healthcare in YOUR Country?",
     "uploaded_at": "2026-11-15T23:02:55+00:00",
     "youtube_url": "https://www.youtube.com/shorts/EqnfNImv3Do",

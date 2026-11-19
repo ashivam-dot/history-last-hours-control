@@ -3027,5 +3027,81 @@
     "uploaded_at": "2026-11-17T03:01:47+00:00",
     "youtube_url": "https://www.youtube.com/shorts/uqv9f6IfTk4",
     "youtube_video_id": "uqv9f6IfTk4"
+  },
+  "atlas203": {
+    "due_at": "2026-11-20T16:00:00-05:00",
+    "id": "atlas203",
+    "look": "spotlight",
+    "media_sha256": "0039ad7eb9dc0731d956bb175f9b43093a1ffe628b2278f9304ade5eaaa61462",
+    "quality": {
+      "checked_at": "2026-11-19T01:19:58.174026+00:00",
+      "claims_sha256": "a242147eb414e8b8ae8cb13e162f01b57a95edab3f505ab13468db61b8ce2cc1",
+      "qa_sha256": "b6ed52d34d478132e6e4dc61a0ed7484d5bd2bcc3c60f5795a7d7e0542ca5bf9",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "How Does the USA Compare on Daily Poverty?",
+    "uploaded_at": "2026-11-19T10:33:58+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/KO7__alNzzE",
+    "youtube_video_id": "KO7__alNzzE"
+  },
+  "atlas205": {
+    "due_at": "2026-11-20T19:00:00-05:00",
+    "id": "atlas205",
+    "look": "rank_ladder",
+    "media_sha256": "28eba15e4095e2aae781afa29e290434bbee73fd6aa1c61c674c675cf8bd0fb5",
+    "quality": {
+      "checked_at": "2026-11-19T01:40:49.977712+00:00",
+      "claims_sha256": "e14ec28c703a90d2ef3a94fe654a734e07c7f41dc24721e327e1ed68af5e51e6",
+      "qa_sha256": "d4dc8a552f88b26502ca83a9905a4c0cfad962563a5bfe722b5ece11d3ac6bfd",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Middle School Starting Age",
+    "uploaded_at": "2026-11-19T10:34:04+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/xSnBJRQ1QV8",
+    "youtube_video_id": "xSnBJRQ1QV8"
+  },
+  "atlas206": {
+    "due_at": "2026-11-21T12:00:00-05:00",
+    "id": "atlas206",
+    "look": "versus",
+    "media_sha256": "c4b89d5c8507128eca21420c1952034962d95c2d7eee8dab8dae778885e80f12",
+    "quality": {
+      "checked_at": "2026-11-19T09:36:39.223138+00:00",
+      "claims_sha256": "281df5991c26d8d656aaf0e5149a312649fbbc399434d7f3139050b71a8e61a4",
+      "qa_sha256": "92892eb4cbbd8b976875b15444b1abddf436b05fde98ac55643140e8f5e81976",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "India vs China: Real Interest Rates Worldwide",
+    "uploaded_at": "2026-11-19T10:34:11+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/0F7T8mqha7s",
+    "youtube_video_id": "0F7T8mqha7s"
+  },
+  "atlas207": {
+    "due_at": "2026-11-21T16:00:00-05:00",
+    "id": "atlas207",
+    "look": "map_reveal",
+    "media_sha256": "0f64d663426ff42fe5a45a5fb060eb53609739611933e7832af954aa9aef873c",
+    "quality": {
+      "checked_at": "2026-11-19T09:49:26.975978+00:00",
+      "claims_sha256": "8fdf9a9004ae94c7cee8f72752fe0649c25c74c3007ab290a137964d34f9802e",
+      "qa_sha256": "2694ca7ae12fa5ca4e342b65f40f75abb85e1fbca5944c136394b11a02f4b4cc",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Women in the Labor Force",
+    "uploaded_at": "2026-11-19T10:34:20+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/xR7HNaWDObg",
+    "youtube_video_id": "xR7HNaWDObg"
   }
 }

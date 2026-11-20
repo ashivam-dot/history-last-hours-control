@@ -3031,6 +3031,13 @@
     "youtube_video_id": "YTze4M7Y6BE"
   },
   "atlas197": {
+    "delivery": {
+      "checked_at": "2026-11-20T21:53:45.969833+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "uqv9f6IfTk4",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-20T12:00:00-05:00",
     "id": "atlas197",
     "look": "map_reveal",
@@ -3043,13 +3050,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by University Gender Parity",
     "uploaded_at": "2026-11-17T03:01:47+00:00",
     "youtube_url": "https://www.youtube.com/shorts/uqv9f6IfTk4",
     "youtube_video_id": "uqv9f6IfTk4"
   },
   "atlas203": {
+    "delivery": {
+      "checked_at": "2026-11-20T21:53:46.031628+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "KO7__alNzzE",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-20T16:00:00-05:00",
     "id": "atlas203",
     "look": "spotlight",
@@ -3062,7 +3076,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "How Does the USA Compare on Daily Poverty?",
     "uploaded_at": "2026-11-19T10:33:58+00:00",
     "youtube_url": "https://www.youtube.com/shorts/KO7__alNzzE",

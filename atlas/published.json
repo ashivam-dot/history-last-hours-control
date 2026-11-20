@@ -2979,6 +2979,13 @@
     "youtube_video_id": "0LY95lAVAWA"
   },
   "atlas194": {
+    "delivery": {
+      "checked_at": "2026-11-20T03:37:08.455681+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "aQZjetWr5K8",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-19T16:00:00-05:00",
     "id": "atlas194",
     "look": "versus",
@@ -2991,13 +2998,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "USA vs Nigeria: The Doctoral Degree Gap",
     "uploaded_at": "2026-11-17T03:01:37+00:00",
     "youtube_url": "https://www.youtube.com/shorts/aQZjetWr5K8",
     "youtube_video_id": "aQZjetWr5K8"
   },
   "atlas196": {
+    "delivery": {
+      "checked_at": "2026-11-20T03:37:08.567696+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "YTze4M7Y6BE",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-19T19:00:00-05:00",
     "id": "atlas196",
     "look": "rank_ladder",
@@ -3010,7 +3024,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Global Trade Share of GDP",
     "uploaded_at": "2026-11-17T03:01:42+00:00",
     "youtube_url": "https://www.youtube.com/shorts/YTze4M7Y6BE",

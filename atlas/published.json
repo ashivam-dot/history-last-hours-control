@@ -3083,6 +3083,13 @@
     "youtube_video_id": "KO7__alNzzE"
   },
   "atlas205": {
+    "delivery": {
+      "checked_at": "2026-11-21T03:19:32.622554+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "xSnBJRQ1QV8",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-20T19:00:00-05:00",
     "id": "atlas205",
     "look": "rank_ladder",
@@ -3095,7 +3102,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Middle School Starting Age",
     "uploaded_at": "2026-11-19T10:34:04+00:00",
     "youtube_url": "https://www.youtube.com/shorts/xSnBJRQ1QV8",

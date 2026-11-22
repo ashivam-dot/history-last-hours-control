@@ -3187,6 +3187,13 @@
     "youtube_video_id": "3oLAv8QpVJ0"
   },
   "atlas209": {
+    "delivery": {
+      "checked_at": "2026-11-22T20:46:33.069934+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "LTrq1n-z2gg",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-22T12:00:00-05:00",
     "id": "atlas209",
     "look": "spotlight",
@@ -3199,7 +3206,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "How Does the USA Compare on Poorest Bank Accounts?",
     "uploaded_at": "2026-11-20T13:21:30+00:00",
     "youtube_url": "https://www.youtube.com/shorts/LTrq1n-z2gg",
@@ -3318,5 +3325,81 @@
     "uploaded_at": "2026-11-21T20:37:17+00:00",
     "youtube_url": "https://www.youtube.com/shorts/PR0DVblhHZI",
     "youtube_video_id": "PR0DVblhHZI"
+  },
+  "atlas222": {
+    "due_at": "2026-11-24T19:00:00-05:00",
+    "id": "atlas222",
+    "look": "map_reveal",
+    "media_sha256": "c2c9007948e45a1e7aa0ea005357aa54d83325e7f8ab55be44a8f38550e8d613",
+    "quality": {
+      "checked_at": "2026-11-22T01:20:57.350123+00:00",
+      "claims_sha256": "83ad4f915a074ee7b24fa54b2ab387846f5c828f9860ad11fd2ac9f4085e3313",
+      "qa_sha256": "5822da0e019824b32c5ff55fdd8f6b6f52bd3ade6673515a10f5001c3aeb3174",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Places Run on Clean Energy?",
+    "uploaded_at": "2026-11-22T20:46:46+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/nQt2FkzUY94",
+    "youtube_video_id": "nQt2FkzUY94"
+  },
+  "atlas223": {
+    "due_at": "2026-11-25T12:00:00-05:00",
+    "id": "atlas223",
+    "look": "versus",
+    "media_sha256": "b61957f959f06f3370b0f1aaa0f85f2048db3f0563819242a04607558589bab9",
+    "quality": {
+      "checked_at": "2026-11-22T01:31:02.140309+00:00",
+      "claims_sha256": "d44264152ab53b4b8b54b2c0413cbaad92693da9df98b5257d77d1d4a3de1bdd",
+      "qa_sha256": "dcfafdb2506b5669412af59bbb0b05777598ca166a151be8d2dcaf8a6182ff28",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "USA vs Saudi Arabia: Social Spending Compared",
+    "uploaded_at": "2026-11-22T20:46:51+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/IXFNbfaJddY",
+    "youtube_video_id": "IXFNbfaJddY"
+  },
+  "atlas224": {
+    "due_at": "2026-11-25T16:00:00-05:00",
+    "id": "atlas224",
+    "look": "rank_ladder",
+    "media_sha256": "657bcd1f768b96248cef1a2fd28921a32d31efc76b5eb713be2f3cf7ad6dcfc1",
+    "quality": {
+      "checked_at": "2026-11-22T01:48:48.618860+00:00",
+      "claims_sha256": "198327ca440bad8c90edda7924998abb2f6e4bf56cd31322cdb7ba2a5c1a3045",
+      "qa_sha256": "46cd37f713b25cc8f74d8812d5b7f5f28fe4e780904768a1dc2c175344dccbb1",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Government Salary Spending",
+    "uploaded_at": "2026-11-22T20:46:56+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/wrB_6uG-umU",
+    "youtube_video_id": "wrB_6uG-umU"
+  },
+  "atlas225": {
+    "due_at": "2026-11-24T16:00:00-05:00",
+    "id": "atlas225",
+    "look": "odd_one_out",
+    "media_sha256": "a282bc4db632633ea8dccb89ee7f447c11c8112fac6dfcf5d579589d5637a5b2",
+    "quality": {
+      "checked_at": "2026-11-22T09:23:45.631128+00:00",
+      "claims_sha256": "62de40ea9d5253a174453d17780995603b4141c2150053a9131086846c6b41bb",
+      "qa_sha256": "93073e822b5c142b791ccc15fcd4dea36b5cfd899776ee62065682dbeb90381d",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Major Country Lags in Urban Clean Cooking?",
+    "uploaded_at": "2026-11-22T20:46:41+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/3-YepWvWw3g",
+    "youtube_video_id": "3-YepWvWw3g"
   }
 }

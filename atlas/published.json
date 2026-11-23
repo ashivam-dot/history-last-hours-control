@@ -3213,6 +3213,13 @@
     "youtube_video_id": "LTrq1n-z2gg"
   },
   "atlas211": {
+    "delivery": {
+      "checked_at": "2026-11-23T02:56:07.750459+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "YIXiyZcse4s",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-22T16:00:00-05:00",
     "id": "atlas211",
     "look": "rank_ladder",
@@ -3225,13 +3232,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Severe Hunger",
     "uploaded_at": "2026-11-20T13:21:36+00:00",
     "youtube_url": "https://www.youtube.com/shorts/YIXiyZcse4s",
     "youtube_video_id": "YIXiyZcse4s"
   },
   "atlas212": {
+    "delivery": {
+      "checked_at": "2026-11-23T02:56:07.814469+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "SHQc5AAiVlk",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-22T19:00:00-05:00",
     "id": "atlas212",
     "look": "map_reveal",
@@ -3244,7 +3258,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Primary School Enrollment: Where 100% Is Just the Start",
     "uploaded_at": "2026-11-20T13:21:40+00:00",
     "youtube_url": "https://www.youtube.com/shorts/SHQc5AAiVlk",

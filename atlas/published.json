@@ -3265,6 +3265,13 @@
     "youtube_video_id": "SHQc5AAiVlk"
   },
   "atlas214": {
+    "delivery": {
+      "checked_at": "2026-11-24T02:58:47.343079+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "wqr5HGSJkwg",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-23T12:00:00-05:00",
     "id": "atlas214",
     "look": "odd_one_out",
@@ -3277,13 +3284,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "The Global Gap in Urban Sanitation",
     "uploaded_at": "2026-11-21T20:37:03+00:00",
     "youtube_url": "https://www.youtube.com/shorts/wqr5HGSJkwg",
     "youtube_video_id": "wqr5HGSJkwg"
   },
   "atlas215": {
+    "delivery": {
+      "checked_at": "2026-11-24T02:58:47.418010+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "fx2tsjKqBag",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-23T16:00:00-05:00",
     "id": "atlas215",
     "look": "versus",
@@ -3296,7 +3310,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Russia vs India: Higher Education Divide",
     "uploaded_at": "2026-11-21T20:37:07+00:00",
     "youtube_url": "https://www.youtube.com/shorts/fx2tsjKqBag",
@@ -3322,6 +3336,13 @@
     "youtube_video_id": "YTtnj1UEfO0"
   },
   "atlas221": {
+    "delivery": {
+      "checked_at": "2026-11-24T02:58:47.494421+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "PR0DVblhHZI",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-23T19:00:00-05:00",
     "id": "atlas221",
     "look": "spotlight",
@@ -3334,7 +3355,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Is INDIA Near the Top for Debt Interest?",
     "uploaded_at": "2026-11-21T20:37:17+00:00",
     "youtube_url": "https://www.youtube.com/shorts/PR0DVblhHZI",
@@ -3415,5 +3436,81 @@
     "uploaded_at": "2026-11-22T20:46:41+00:00",
     "youtube_url": "https://www.youtube.com/shorts/3-YepWvWw3g",
     "youtube_video_id": "3-YepWvWw3g"
+  },
+  "atlas227": {
+    "due_at": "2026-11-26T19:00:00-05:00",
+    "id": "atlas227",
+    "look": "map_reveal",
+    "media_sha256": "6bfff996caf4f80d17c3e56626e99fc23356deff38aea1e68a96d781f4c94511",
+    "quality": {
+      "checked_at": "2026-11-23T01:38:09.318232+00:00",
+      "claims_sha256": "b632661e820df8143edc1f735c296f85aa13201701864a129c08f0d2a893ca0c",
+      "qa_sha256": "e1877142af7ef3bfd5033feba823d05558ac61fd5e383f0345191fe80e0ba789",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Places Spend the Most on Education?",
+    "uploaded_at": "2026-11-24T02:59:13+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/gOc-XN8IGmQ",
+    "youtube_video_id": "gOc-XN8IGmQ"
+  },
+  "atlas229": {
+    "due_at": "2026-11-25T19:00:00-05:00",
+    "id": "atlas229",
+    "look": "spotlight",
+    "media_sha256": "8f5644d345114714c0b92df06a45ad228fc6e8d81e619c4074dcd8147cc56187",
+    "quality": {
+      "checked_at": "2026-11-23T09:25:38.064787+00:00",
+      "claims_sha256": "6098e10166ef5002c0d72742e49a4431f3c0039d9e1db2b62cf3674c0e6ef3fa",
+      "qa_sha256": "da2d8a494b32dc5a164b89fe6787d45688ed288c2627976aedd9c9d03b849209",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Is INDIA Near the Top for Coal Rents?",
+    "uploaded_at": "2026-11-24T02:58:58+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/O3AwfPVZgxs",
+    "youtube_video_id": "O3AwfPVZgxs"
+  },
+  "atlas230": {
+    "due_at": "2026-11-26T12:00:00-05:00",
+    "id": "atlas230",
+    "look": "versus",
+    "media_sha256": "0ec24cefbcd1ba4791742ad6acebb0acdb409a5e60c7e532c14abf9850b6b754",
+    "quality": {
+      "checked_at": "2026-11-23T09:32:59.542708+00:00",
+      "claims_sha256": "a408134385f4704aafe16fca5704518befde16568851feba052b363c24396b8a",
+      "qa_sha256": "ceaba72e2792c0546b6c73e1af9fc46ea81b37cbfa7b9d069bfaf5ec1a425eb1",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "China vs Sudan: The Childhood Vaccine Gap",
+    "uploaded_at": "2026-11-24T02:59:05+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/yDLOke_0_RQ",
+    "youtube_video_id": "yDLOke_0_RQ"
+  },
+  "atlas231": {
+    "due_at": "2026-11-26T16:00:00-05:00",
+    "id": "atlas231",
+    "look": "map_reveal",
+    "media_sha256": "2b8d06ad7f4012f774803f0b4b7d893b8a5d88a3192a64bbe029fb73fb3fc824",
+    "quality": {
+      "checked_at": "2026-11-23T09:45:29.526170+00:00",
+      "claims_sha256": "dabafd7b2a60bfff30a90c33601f4c2696eb73a9bdfdd4967ce52c2fe72056d5",
+      "qa_sha256": "663ad441773411029eb1beaeda3f8c0459185358cd20fa16725dcd5c0a1e22bd",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Where Young Women Make Up the Biggest Share of Females",
+    "uploaded_at": "2026-11-24T02:59:09+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/DMR9wNBcYIY",
+    "youtube_video_id": "DMR9wNBcYIY"
   }
 }

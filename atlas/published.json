@@ -3317,6 +3317,13 @@
     "youtube_video_id": "fx2tsjKqBag"
   },
   "atlas220": {
+    "delivery": {
+      "checked_at": "2026-11-25T00:57:21.262888+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "YTtnj1UEfO0",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-24T12:00:00-05:00",
     "id": "atlas220",
     "look": "rank_ladder",
@@ -3329,7 +3336,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Youth Labor Force Participation",
     "uploaded_at": "2026-11-21T20:37:27+00:00",
     "youtube_url": "https://www.youtube.com/shorts/YTtnj1UEfO0",
@@ -3362,6 +3369,13 @@
     "youtube_video_id": "PR0DVblhHZI"
   },
   "atlas222": {
+    "delivery": {
+      "checked_at": "2026-11-25T00:57:21.353297+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "nQt2FkzUY94",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-24T19:00:00-05:00",
     "id": "atlas222",
     "look": "map_reveal",
@@ -3374,7 +3388,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Places Run on Clean Energy?",
     "uploaded_at": "2026-11-22T20:46:46+00:00",
     "youtube_url": "https://www.youtube.com/shorts/nQt2FkzUY94",
@@ -3419,6 +3433,13 @@
     "youtube_video_id": "wrB_6uG-umU"
   },
   "atlas225": {
+    "delivery": {
+      "checked_at": "2026-11-25T00:57:21.464121+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "3-YepWvWw3g",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-24T16:00:00-05:00",
     "id": "atlas225",
     "look": "odd_one_out",
@@ -3431,7 +3452,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Major Country Lags in Urban Clean Cooking?",
     "uploaded_at": "2026-11-22T20:46:41+00:00",
     "youtube_url": "https://www.youtube.com/shorts/3-YepWvWw3g",

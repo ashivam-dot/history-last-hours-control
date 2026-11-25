@@ -3395,6 +3395,13 @@
     "youtube_video_id": "nQt2FkzUY94"
   },
   "atlas223": {
+    "delivery": {
+      "checked_at": "2026-11-25T21:52:42.317216+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "IXFNbfaJddY",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-25T12:00:00-05:00",
     "id": "atlas223",
     "look": "versus",
@@ -3407,13 +3414,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "USA vs Saudi Arabia: Social Spending Compared",
     "uploaded_at": "2026-11-22T20:46:51+00:00",
     "youtube_url": "https://www.youtube.com/shorts/IXFNbfaJddY",
     "youtube_video_id": "IXFNbfaJddY"
   },
   "atlas224": {
+    "delivery": {
+      "checked_at": "2026-11-25T21:52:42.389924+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "wrB_6uG-umU",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-25T16:00:00-05:00",
     "id": "atlas224",
     "look": "rank_ladder",
@@ -3426,7 +3440,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Government Salary Spending",
     "uploaded_at": "2026-11-22T20:46:56+00:00",
     "youtube_url": "https://www.youtube.com/shorts/wrB_6uG-umU",

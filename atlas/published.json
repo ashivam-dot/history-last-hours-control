@@ -3630,5 +3630,62 @@
     "uploaded_at": "2026-11-25T11:31:58+00:00",
     "youtube_url": "https://www.youtube.com/shorts/CYxQbRxNU_k",
     "youtube_video_id": "CYxQbRxNU_k"
+  },
+  "atlas238": {
+    "due_at": "2026-11-28T16:00:00-05:00",
+    "id": "atlas238",
+    "look": "map_reveal",
+    "media_sha256": "f4d934ecfb270a50d1d26fdd7c6e930ac9b82a0a0748984fd5a5aedeb99180b6",
+    "quality": {
+      "checked_at": "2026-11-25T17:55:48.862579+00:00",
+      "claims_sha256": "fa117028645c3d2a758fac9c6cfe34a9c9cfc343bb7905de7411c7455e6c516c",
+      "qa_sha256": "3d8dd103f1c4224ba51e2cd74618c4bb41e95e56a9f2fc30c636a07085afc60d",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Where Men Use Formal Banking",
+    "uploaded_at": "2026-11-26T14:08:12+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/ScG0opNGOuQ",
+    "youtube_video_id": "ScG0opNGOuQ"
+  },
+  "atlas239": {
+    "due_at": "2026-11-28T19:00:00-05:00",
+    "id": "atlas239",
+    "look": "versus",
+    "media_sha256": "9bef06de8b77fc387726bd85439b91a75e342d5be4adcb77f4203073b0de2e0f",
+    "quality": {
+      "checked_at": "2026-11-25T18:18:24.671588+00:00",
+      "claims_sha256": "274cee026888e52a42016d0a13aac98d511777d7d676df02a442cb4c7bae809b",
+      "qa_sha256": "ea6e24d7dea948fe9396a8ef5a6b4df55ab077c8a9d9cdb3fe1c6134105173f3",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "India vs Somalia: Protection Against Newborn Tetanus",
+    "uploaded_at": "2026-11-26T14:08:17+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/sg65scTy0Q0",
+    "youtube_video_id": "sg65scTy0Q0"
+  },
+  "atlas243": {
+    "due_at": "2026-11-29T12:00:00-05:00",
+    "id": "atlas243",
+    "look": "odd_one_out",
+    "media_sha256": "2d471f16f756d3ba0a717b7cd88b886e0ede99e5bab030ff2bd673b5f4eed2d1",
+    "quality": {
+      "checked_at": "2026-11-26T09:36:57.020440+00:00",
+      "claims_sha256": "8055b3357fa90ac03f37b57c27af6d185e05bbaea80915c595c510e108487e6f",
+      "qa_sha256": "ec88f07ee66757f40ecfcbb71e7ea8efa4fbb12442a6fd42ccca79ad4bc8a3a2",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Which Country Has the MOST Service Employment?",
+    "uploaded_at": "2026-11-26T14:08:25+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/i38hMCBk-is",
+    "youtube_video_id": "i38hMCBk-is"
   }
 }

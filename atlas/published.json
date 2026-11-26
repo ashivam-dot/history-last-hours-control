@@ -3492,6 +3492,13 @@
     "youtube_video_id": "gOc-XN8IGmQ"
   },
   "atlas229": {
+    "delivery": {
+      "checked_at": "2026-11-26T04:14:29.270514+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "O3AwfPVZgxs",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-25T19:00:00-05:00",
     "id": "atlas229",
     "look": "spotlight",
@@ -3504,7 +3511,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Is INDIA Near the Top for Coal Rents?",
     "uploaded_at": "2026-11-24T02:58:58+00:00",
     "youtube_url": "https://www.youtube.com/shorts/O3AwfPVZgxs",

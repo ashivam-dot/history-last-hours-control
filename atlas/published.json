@@ -3518,6 +3518,13 @@
     "youtube_video_id": "O3AwfPVZgxs"
   },
   "atlas230": {
+    "delivery": {
+      "checked_at": "2026-11-26T23:08:27.830012+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "yDLOke_0_RQ",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-26T12:00:00-05:00",
     "id": "atlas230",
     "look": "versus",
@@ -3530,13 +3537,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "China vs Sudan: The Childhood Vaccine Gap",
     "uploaded_at": "2026-11-24T02:59:05+00:00",
     "youtube_url": "https://www.youtube.com/shorts/yDLOke_0_RQ",
     "youtube_video_id": "yDLOke_0_RQ"
   },
   "atlas231": {
+    "delivery": {
+      "checked_at": "2026-11-26T23:08:27.907599+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "DMR9wNBcYIY",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-26T16:00:00-05:00",
     "id": "atlas231",
     "look": "map_reveal",
@@ -3549,7 +3563,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Where Young Women Make Up the Biggest Share of Females",
     "uploaded_at": "2026-11-24T02:59:09+00:00",
     "youtube_url": "https://www.youtube.com/shorts/DMR9wNBcYIY",
@@ -3687,5 +3701,24 @@
     "uploaded_at": "2026-11-26T14:08:25+00:00",
     "youtube_url": "https://www.youtube.com/shorts/i38hMCBk-is",
     "youtube_video_id": "i38hMCBk-is"
+  },
+  "atlas244": {
+    "due_at": "2026-11-29T16:00:00-05:00",
+    "id": "atlas244",
+    "look": "spotlight",
+    "media_sha256": "2d22377cf80bc6058ac336435733dc9f75b82d9e8f6c4d3f0ce9eaecabac77df",
+    "quality": {
+      "checked_at": "2026-11-26T17:37:18.678017+00:00",
+      "claims_sha256": "225535db7a06fc057c4ce3877a979ecfa58e43d3b576101d8aced2449a54e66a",
+      "qa_sha256": "e4df1b9bc24b7c66fdff67963219f4ffccd51500675bda5800257e0c1dcd4b97",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "How Does the USA Compare on Young Boys?",
+    "uploaded_at": "2026-11-26T23:08:52+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/QQj2YXUt8fc",
+    "youtube_video_id": "QQj2YXUt8fc"
   }
 }

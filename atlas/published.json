@@ -3577,6 +3577,13 @@
     "youtube_video_id": "DMR9wNBcYIY"
   },
   "atlas232": {
+    "delivery": {
+      "checked_at": "2026-11-27T19:33:40.606217+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "buMFMr9X6Pw",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-27T12:00:00-05:00",
     "id": "atlas232",
     "look": "rank_ladder",
@@ -3589,7 +3596,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Places Ranked by Women's FINANCIAL Inclusion",
     "uploaded_at": "2026-11-25T11:31:44+00:00",
     "youtube_url": "https://www.youtube.com/shorts/buMFMr9X6Pw",
@@ -3727,5 +3734,62 @@
     "uploaded_at": "2026-11-26T23:08:52+00:00",
     "youtube_url": "https://www.youtube.com/shorts/QQj2YXUt8fc",
     "youtube_video_id": "QQj2YXUt8fc"
+  },
+  "atlas245": {
+    "due_at": "2026-11-29T19:00:00-05:00",
+    "id": "atlas245",
+    "look": "map_reveal",
+    "media_sha256": "e77683304d7e64b3e14535e3870bb437265c7836a783356e2505098857c7125c",
+    "quality": {
+      "checked_at": "2026-11-26T17:44:33.344450+00:00",
+      "claims_sha256": "0212bf84a92db55d0c6a6ea865002a577c71042138afa6f4cc83a17c7b1f0f53",
+      "qa_sha256": "a74fba6a8d22b9373683aa668677851dd5f6b73fd4715b9ac67df94a125a0c9b",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Who Gets the Second Slice of National Income?",
+    "uploaded_at": "2026-11-27T19:33:49+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/fqVw8D5D0VM",
+    "youtube_video_id": "fqVw8D5D0VM"
+  },
+  "atlas246": {
+    "due_at": "2026-11-30T12:00:00-05:00",
+    "id": "atlas246",
+    "look": "rank_ladder",
+    "media_sha256": "898e3d42e9222264358de77d3f336a6151e25fbb07fb106adeef219a6e00f548",
+    "quality": {
+      "checked_at": "2026-11-27T01:49:13.145095+00:00",
+      "claims_sha256": "7e57e4392ec3c23127edb5214cc11973eca8de88cc9df35fe80965d37b549ce0",
+      "qa_sha256": "ba85af36d3f5a8e9678fedeaaa4c930a39c3409c5b8f9fcc3113776eb93c2474",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Women Affected by Anemia",
+    "uploaded_at": "2026-11-27T19:33:52+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/EcOAB7xDABM",
+    "youtube_video_id": "EcOAB7xDABM"
+  },
+  "atlas249": {
+    "due_at": "2026-11-30T16:00:00-05:00",
+    "id": "atlas249",
+    "look": "map_reveal",
+    "media_sha256": "e8a7799780c6b01de1d316ce79de4977ec3a305fc3bd50b7f4fe9e1193810b04",
+    "quality": {
+      "checked_at": "2026-11-27T02:09:41.480986+00:00",
+      "claims_sha256": "a871edde41b652b24aeb6e97408df8090223e77c84c97c3e19825086d2af532d",
+      "qa_sha256": "d504c048f2e596f6a808afd59d59d7c13b3f7fd8f14c6143c3b0adac3490b2ef",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Female Self-Employment",
+    "uploaded_at": "2026-11-27T19:33:56+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/fhskaxasCHY",
+    "youtube_video_id": "fhskaxasCHY"
   }
 }

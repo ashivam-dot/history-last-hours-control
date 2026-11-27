@@ -3473,6 +3473,13 @@
     "youtube_video_id": "3-YepWvWw3g"
   },
   "atlas227": {
+    "delivery": {
+      "checked_at": "2026-11-27T08:53:01.230091+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "gOc-XN8IGmQ",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-26T19:00:00-05:00",
     "id": "atlas227",
     "look": "map_reveal",
@@ -3485,7 +3492,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Places Spend the Most on Education?",
     "uploaded_at": "2026-11-24T02:59:13+00:00",
     "youtube_url": "https://www.youtube.com/shorts/gOc-XN8IGmQ",

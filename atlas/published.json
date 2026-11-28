@@ -3603,6 +3603,13 @@
     "youtube_video_id": "buMFMr9X6Pw"
   },
   "atlas233": {
+    "delivery": {
+      "checked_at": "2026-11-28T02:51:25.913696+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "nFEQs9B5Mvg",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-27T16:00:00-05:00",
     "id": "atlas233",
     "look": "odd_one_out",
@@ -3615,13 +3622,20 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "Which Country Has the MOST Young Girls?",
     "uploaded_at": "2026-11-25T11:31:48+00:00",
     "youtube_url": "https://www.youtube.com/shorts/nFEQs9B5Mvg",
     "youtube_video_id": "nFEQs9B5Mvg"
   },
   "atlas234": {
+    "delivery": {
+      "checked_at": "2026-11-28T02:51:25.996619+00:00",
+      "confirmed": true,
+      "method": "official-oembed",
+      "video_id": "MlJ2syH-SoM",
+      "visibility": "public-or-unlisted; authenticated API needed to distinguish"
+    },
     "due_at": "2026-11-27T19:00:00-05:00",
     "id": "atlas234",
     "look": "spotlight",
@@ -3634,7 +3648,7 @@
       "version": 1
     },
     "route": "youtube",
-    "status": "scheduled",
+    "status": "sent",
     "title": "How Does the USA Compare on Health Spending?",
     "uploaded_at": "2026-11-25T11:31:53+00:00",
     "youtube_url": "https://www.youtube.com/shorts/MlJ2syH-SoM",
@@ -3791,5 +3805,24 @@
     "uploaded_at": "2026-11-27T19:33:56+00:00",
     "youtube_url": "https://www.youtube.com/shorts/fhskaxasCHY",
     "youtube_video_id": "fhskaxasCHY"
+  },
+  "atlas252": {
+    "due_at": "2026-11-30T19:00:00-05:00",
+    "id": "atlas252",
+    "look": "rank_ladder",
+    "media_sha256": "4a4c99eafb464dbb1b9814297f5f5efb860fcd99964a56649bc49b3fa0460d0a",
+    "quality": {
+      "checked_at": "2026-11-28T01:28:25.114282+00:00",
+      "claims_sha256": "cee8ba80b0283a05713adc45530b98daaf6e0fd18c7aed2d1caeecd7d313a9f0",
+      "qa_sha256": "defb27359bed3232fd252b087d0d284afffcac4a415f59fbf5b7eb48e39cd722",
+      "quality_module_sha256": "db7be8ac57c839f39a10676f1a70580a83ea346f59c27f19868d09c272def14c",
+      "version": 1
+    },
+    "route": "youtube",
+    "status": "scheduled",
+    "title": "Places Ranked by Hepatitis B Vaccination Rates",
+    "uploaded_at": "2026-11-28T02:51:42+00:00",
+    "youtube_url": "https://www.youtube.com/shorts/EH0yWdswKts",
+    "youtube_video_id": "EH0yWdswKts"
   }
 }
